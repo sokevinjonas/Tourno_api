@@ -48,14 +48,29 @@
 
 # ✨ Fonctionnalités principales
 
+## 🎮 Compétitions
+
 * ⚔️ **Tournois à élimination directe (K.O.)** : Brackets automatiques (8, 16, 32 joueurs)
 * 🏆 **Ligues (Round Robin)** : Classement par points
+* 🏅 **Divisions automatiques** : Ligue 1, Ligue 2, Bundesliga... (hiérarchie compétitive)
+* 🆓 **Tournois gratuits ou payants** : L'organisateur choisit
+
+## 💰 Économie & Wallet
+
+* 💳 **Système de solde (MLM Coins)** : 10 coins = 100 FCFA
+* 💵 **Recharge de solde** : Paiement mobile money / carte bancaire
+* 🏆 **Gains automatiques** : Le vainqueur reçoit ses gains dans son solde
+* 💸 **Retrait de fonds** : Transfert vers compte mobile money
+* 📊 **Répartition personnalisable** : L'organisateur définit les gains (1er, 2ème, 3ème...)
+
+## ⚽ Gameplay
+
 * 📸 **Validation automatique des scores**
 * ⚖️ **Système de litiges** avec arbitrage
-* 📊 **MLM Rank (ELO)**
-* 💬 **Chat intégré**
-* 🔔 **Notifications push**
-* 👤 **Profils joueurs & statistiques**
+* 📊 **MLM Rank (ELO)** : Classement global des joueurs
+* 💬 **Chat intégré** par tournoi
+* 🔔 **Notifications push** en temps réel
+* 👤 **Profils joueurs & statistiques** complètes
 
 ---
 
@@ -184,6 +199,8 @@ Toutes les contributions sont les bienvenues !
 
 # 🗺️ Roadmap
 
+### Phase 1 : Core Features
+
 * [x] Architecture Laravel
 * [ ] Modèles & migrations
 * [ ] Auth Sanctum
@@ -192,11 +209,36 @@ Toutes les contributions sont les bienvenues !
 * [ ] Validation automatique des scores
 * [ ] Gestion des litiges
 * [ ] Calcul du MLM Rank
-* [ ] Notifications
+
+### Phase 2 : Économie
+
+* [ ] Système de Wallet (MLM Coins)
+* [ ] Recharge de solde (API paiement)
+* [ ] Tournois payants avec frais d'inscription
+* [ ] Répartition automatique des gains
+* [ ] Retrait de fonds
+* [ ] Historique des transactions
+
+### Phase 3 : Divisions Automatiques
+
+* [ ] Système de divisions (Ligue 1, 2, 3...)
+* [ ] Promotion/Relégation automatique
+* [ ] Frais d'accès par division
+* [ ] Tournois récurrents par division
+
+### Phase 4 : Social & Communication
+
+* [ ] Notifications push
 * [ ] Chat intégré
+* [ ] Système de réputation
+* [ ] Partage sur réseaux sociaux
+
+### Phase 5 : Production
+
 * [ ] Tests (80%+)
 * [ ] Documentation API
 * [ ] CI/CD
+* [ ] Monitoring & Analytics
 
 ---
 
