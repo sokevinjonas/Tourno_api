@@ -59,15 +59,15 @@ Mobile League Manager (MLM) est une plateforme permettant l'organisation et la g
 └─────────────────┬───────────────────────┘
                   │ HTTP/REST + WebSockets
 ┌─────────────────▼───────────────────────┐
-│   LOGIQUE MÉTIER (Laravel API)          │
+│   LOGIQUE MÉTIER (Spring Boot API)     │
 │   - Générateur de Bracket               │
 │   - Moteur de Validation                │
 │   - Calculateur ELO                     │
 │   - Gestionnaire de Notifications       │
 └─────────────────┬───────────────────────┘
-                  │ Eloquent ORM
+                  │ JPA / Hibernate ORM
 ┌─────────────────▼───────────────────────┐
-│   COUCHE DONNÉES (MySQL/PostgreSQL)     │
+│   COUCHE DONNÉES (PostgreSQL)           │
 │   - Persistance                         │
 │   - Intégrité référentielle             │
 │   - Historique                          │
@@ -77,18 +77,22 @@ Mobile League Manager (MLM) est une plateforme permettant l'organisation et la g
 ### 2.2 Stack Technique
 
 **Backend**
-- Framework : Laravel 11.x
-- Langage : PHP 8.2+
-- API : RESTful
-- Authentification : Laravel Sanctum (token-based)
-- Temps réel : Laravel Broadcasting (Pusher/Socket.io)
-- Queue : Redis + Laravel Queue
-- Cache : Redis
+- Framework : Spring Boot 3.x
+- Langage : Java 17+ (LTS)
+- API : RESTful (Spring Web)
+- Authentification : Spring Security + JWT (JSON Web Tokens)
+- Temps réel : Spring WebSocket (STOMP protocol)
+- Queue : RabbitMQ (messages asynchrones)
+- Cache : Redis (Spring Data Redis)
+- ORM : JPA / Hibernate
+- Validation : Bean Validation (JSR-380)
+- Documentation API : SpringDoc OpenAPI (Swagger)
 
 **Base de Données**
-- Primaire : MySQL 8.0+ / PostgreSQL 14+
-- Schema migrations : Laravel Migrations
-- Seeders : Faker pour données de test
+- Primaire : PostgreSQL 14+
+- Schema migrations : Flyway / Liquibase
+- Seeders : Java Faker pour données de test
+- Connection Pool : HikariCP
 
 **Frontend** (hors scope de cette API)
 - Framework : Ionic + Angular/React
@@ -2134,10 +2138,10 @@ function relegatePlayer(DivisionMembership $membership, Division $newDivision) {
 - [ ] Spécifications API complètes (Swagger)
 
 ### Phase 3 : Développement (Après validation)
-- [ ] Migrations Laravel
-- [ ] Modèles Eloquent + Relations
-- [ ] Seeders et Factories
-- [ ] Controllers et Routes
+- [ ] Migrations Flyway/Liquibase
+- [ ] Entités JPA + Relations (Hibernate)
+- [ ] Seeders et Data Initialization
+- [ ] Controllers REST et Endpoints
 - [ ] Logic Services (BracketGenerator, EloCalculator, etc.)
 - [ ] Tests unitaires
 - [ ] Tests d'intégration

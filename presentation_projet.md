@@ -1,8 +1,95 @@
-# 🎮 Mobile League Manager (MLM)
-## La Plateforme de Tournois Mobiles pour l'Afrique
+# 🎮 MOBILE LEAGUE MANAGER (MLM)
 
-**Document de Présentation - Version 1.0**
+## La Plateforme Web de Tournois et Compétitions de Jeux Mobiles pour l'Afrique
+
+---
+
+**Document de Présentation du Projet**
+
+**Version 1.0**
+
 **Décembre 2024**
+
+---
+
+### 📄 Informations du Document
+
+| Élément | Détail |
+|---------|--------|
+| **Titre du Projet** | Mobile League Manager (MLM) |
+| **Type de Plateforme** | Application Web (Desktop & Mobile Responsive) |
+| **Secteur d'Activité** | E-sports & Gaming Compétitif Mobile |
+| **Marché Cible** | Afrique Francophone (Phase 1) |
+| **Date de Création** | Décembre 2024 |
+| **Statut** | Phase de Conception |
+
+---
+
+### 👥 Équipe du Projet
+
+#### **Direction & Développement**
+
+| Rôle | Nom | Responsabilités |
+|------|-----|-----------------|
+| **Chef de Projet & Développeur Lead** | Jonas (Vous) | Architecture technique, développement backend/frontend, vision produit |
+| **Collaborateur Technique** | [À définir] | Développement frontend, intégration API |
+| **Designer UI/UX** | [À définir] | Design de l'interface, expérience utilisateur |
+
+#### **Partenaires & Conseillers**
+
+| Rôle | Nom/Organisation | Domaine |
+|------|------------------|---------|
+| **Partenaire Financier** | [À définir] | Financement initial, stratégie économique |
+| **Partenaire Mobile Money** | Orange Money / MTN Mobile Money / Moov Money | Intégration paiements mobiles |
+| **Conseiller E-sports** | [À définir] | Validation du modèle compétitif |
+| **Conseiller Juridique** | [À définir] | Conformité réglementaire, CGU/CGV |
+
+#### **Équipe Opérationnelle (à recruter)**
+
+| Rôle | Nombre | Missions |
+|------|--------|----------|
+| **Administrateurs** | 2-3 | Gestion globale de la plateforme, supervision |
+| **Modérateurs** | 5-8 | Modération, gestion des plaintes, validation organisateurs |
+| **Arbitres** | 10-15 | Résolution des litiges, validation des résultats |
+| **Community Managers** | 2-3 | Animation communauté, support utilisateurs |
+
+---
+
+### 📋 TABLE DES MATIÈRES
+
+1. [Résumé Exécutif](#-résumé-exécutif)
+2. [Le Marché : L'Afrique, le Continent Oublié du Gaming](#-le-marché--lafrique-le-continent-oublié-du-gaming)
+   - 2.1 [Les Chiffres Qui Parlent](#-les-chiffres-qui-parlent)
+   - 2.2 [Le Public Cible](#-le-public-cible--qui-sont-ces-joueurs-)
+3. [Le Concept MLM : Comment Ça Marche ?](#-le-concept-mlm--comment-ça-marche-)
+   - 3.1 [Vue d'Ensemble](#vue-densemble)
+   - 3.2 [Cas d'Usage Concret](#-cas-dusage-concret--le-tournoi-damadou)
+4. [Les Fonctionnalités Uniques de MLM](#-les-fonctionnalités-uniques-de-mlm)
+   - 4.1 [Divisions Automatiques](#1-divisions-automatiques-système-de-saisons-compétitives)
+   - 4.2 [MLM Rank](#2-mlm-rank-le-classement-elo)
+   - 4.3 [Système d'Équipes et Bannissement](#-système-déquipes-pseudos-de-jeu)
+5. [Plateforme Web & Interactions](#-plateforme-web--interactions)
+   - 5.1 [Architecture Technique](#architecture-technique)
+   - 5.2 [Système de Communication](#système-de-communication)
+   - 5.3 [Gestion des Preuves](#gestion-des-preuves-screenshots)
+6. [Rôles et Gouvernance](#-rôles-et-gouvernance-sur-la-plateforme)
+   - 6.1 [Administrateurs](#1-administrateurs-admin)
+   - 6.2 [Arbitres](#2-arbitres)
+   - 6.3 [Modérateurs](#3-modérateurs)
+   - 6.4 [Utilisateurs](#4-utilisateurs)
+7. [Système d'Organisation de Compétitions](#-système-dorganisation-de-compétitions)
+   - 7.1 [Types de Compétitions](#types-de-compétitions)
+   - 7.2 [Certification des Organisateurs](#certification-des-organisateurs-système-de-badges)
+   - 7.3 [Conditions et Privilèges](#conditions-et-privilèges-par-niveau)
+8. [Modèle Économique](#-le-modèle-économique)
+   - 8.1 [Système de Monnaie MLM Coins](#système-de-monnaie-mlm-coins)
+   - 8.2 [Revenus de la Plateforme](#revenus-de-la-plateforme)
+9. [Avantages Compétitifs](#-pourquoi-mlm-va-gagner)
+10. [Roadmap & Prochaines Étapes](#-roadmap--2025-2026)
+
+---
+
+<div style="page-break-after: always;"></div>
 
 ---
 
@@ -240,93 +327,252 @@ Karim perd en demi-finale mais reçoit 2 coins (3-4ème place) dans son solde.
 
 ### 1. **Divisions Automatiques** (Système de Saisons Compétitives)
 
-MLM crée un **système de divisions saisonnières** avec promotion et relégation, exactement comme les ligues de football professionnelles :
+MLM crée un **système de divisions saisonnières** avec qualification et réinitialisation à chaque saison, inspiré des ligues de football professionnelles :
 
-#### **🏁 Saison 1 : Le Lancement**
+#### **🏁 Système d'Accès aux Divisions par Saison**
 
-**Format inaugural** :
-- ✅ **Seulement Division 1 (D1)** disponible
-- 💰 **Frais d'entrée** : 40 coins (2,000 FCFA) par saison
-- 👥 **Format** : Groupes de 6 équipes (poules)
-- ⏱️ **Durée** : 3 mois
+**⚙️ Principe de base** : Chaque saison utilise le **MÊME processus** de qualification et répartition.
 
-**Comment ça marche ?**
-1. Les joueurs s'inscrivent à la Saison 1 - D1
-2. Formation automatique de groupes de 6 joueurs
-3. Chaque joueur joue contre les 5 autres de son groupe
-4. Classement basé sur les points (victoire = 3pts, nul = 1pt, défaite = 0pt)
+**📋 Processus d'Inscription avec Liste d'Attente**
 
-**Répartition en divisions pour la Saison 2** :
+MLM utilise un système intelligent pour gérer les inscriptions :
+
+**Étape 1 : Inscriptions ouvertes**
 ```
-🥇 1er du groupe → Monte en Division 4 (D4) - Elite
-🥈 2ème du groupe → Monte en Division 3 (D3) - Excellence
-🥉 3ème du groupe → Monte en Division 2 (D2) - Confirmé
-⚪ 4ème, 5ème, 6ème → Restent en Division 1 (D1) - Standard
+Objectif : 80 équipes minimum (20 par division × 4)
+Maximum : 120 équipes (20 groupes de qualification)
+
+Phase d'inscription :
+├─ 0-79 inscrits : Inscriptions ouvertes
+├─ 80 inscrits atteints : Blocage temporaire des inscriptions
+└─ Nouveaux intéressés → Liste d'attente
 ```
 
-#### **🔄 Saison 2 et suivantes : Les 4 Divisions**
-
-À partir de la Saison 2, le système complet à 4 divisions est activé :
-
+**Étape 2 : Gestion de la liste d'attente**
 ```
-🏆 Division 4 (D4) - Elite
-   - Frais : 100 coins (50,000 FCFA) par saison
-   - Format : Groupes de 6
-   - Prize Pool : Le plus élevé
-   - Prestige : Top joueurs MLM
+Si liste d'attente = 20 à 40 personnes :
+→ Prolongation des inscriptions jusqu'à 120 équipes max
 
-💎 Division 3 (D3) - Excellence
-   - Frais : 60 coins (30,000 FCFA) par saison
-   - Format : Groupes de 6
-   - Prize Pool : Élevé
-   - Niveau : Joueurs expérimentés
-
-🥈 Division 2 (D2) - Confirmé
-   - Frais : 40 coins (20,000 FCFA) par saison
-   - Format : Groupes de 6
-   - Prize Pool : Moyen
-   - Niveau : Joueurs réguliers
-
-⚽ Division 1 (D1) - Standard
-   - Frais : 40 coins (2,000 FCFA) par saison
-   - Format : Groupes de 6 + Qualifications
-   - Prize Pool : Base
-   - Niveau : Nouveaux joueurs et relégués
+Si liste d'attente > 40 personnes :
+→ Blocage définitif à 120 équipes
+→ Les autres reçoivent priorité pour la Saison suivante
 ```
 
-#### **📊 Système de Promotion/Relégation**
-
-**À la fin de chaque saison** :
-
-**Pour D4, D3, D2** :
-- ⬇️ Les **3 derniers** de chaque groupe sont **relégués** à la division inférieure
-- ⬆️ Les **3 premiers** restent ou montent
-
-**Pour D1 (Division d'Entrée)** :
-- ⬆️ Les **3 premiers** de chaque groupe montent en D2
-- 🆕 **16 nouvelles places** se libèrent chaque saison pour les nouveaux entrants
-
-#### **🎯 Phase de Qualification D1**
-
-Chaque saison, pour compenser les joueurs montés en D2 et maintenir l'équilibre, **une phase de qualification** est organisée :
-
-**Qui participe ?**
-- Nouveaux joueurs n'ayant jamais participé
-- Joueurs relégués de D2
-- Joueurs souhaitant revenir après une pause
-
-**Format** :
-- Tournois de qualification de 16 joueurs
-- Les **16 meilleurs** obtiennent leur place en D1 pour la nouvelle saison
-- Frais de qualification : 10 coins (5,000 FCFA)
-
-**Calendrier** :
+**Étape 3 : Lancement de la saison**
 ```
-📅 Semaine 1-12 : Saison en cours (matchs de groupes)
-📅 Semaine 13 : Fin de saison, calcul des classements
-📅 Semaine 14 : Phase de qualification D1
-📅 Semaine 15 : Début nouvelle saison
+Cas A : < 80 inscrits
+→ Formation directe en 4 divisions (pas de qualification)
+→ Répartition équitable entre D1, D2, D3, D4
+
+Cas B : 80 à 120 inscrits
+→ Phase de qualification obligatoire
+→ Formation de 14 à 20 groupes de 6 équipes
 ```
+
+**💡 Pourquoi ce système ?**
+- ✅ **Flexibilité** : Accepter plus de joueurs si forte demande
+- ✅ **Équité** : Liste d'attente avec priorité pour saison suivante
+- ✅ **Gestion optimale** : Maximum 120 équipes = 20 groupes (facile à gérer)
+
+---
+
+#### **🎯 Phase de Qualification (si ≥80 inscrits)**
+
+**Format** : Groupes de 6 équipes
+
+**Déroulement** :
+```
+Semaines 1-2 : Phase de qualification (2 semaines)
+├─ Chaque équipe affronte les 5 autres de son groupe
+├─ 5 matchs au total par équipe
+└─ Classement basé sur points (Victoire = 3pts, Nul = 1pt, Défaite = 0pt)
+
+Semaines 3-12 : Saison régulière (10 semaines)
+├─ Les qualifiés jouent dans leur division respective
+└─ Compétition pour les titres de champion
+
+Semaine 13 : Finales et Récompenses
+```
+
+**🏆 Répartition après qualification (Groupes de 6)** :
+```
+🥇 1er du groupe → Division 4 (D4) - Elite
+🥈 2ème du groupe → Division 3 (D3) - Excellence
+🥉 3ème du groupe → Division 2 (D2) - Confirmé
+⚪ 4ème du groupe → Division 1 (D1) - Standard
+❌ 5ème du groupe → ÉLIMINÉ (remboursé 75%)
+❌ 6ème du groupe → ÉLIMINÉ (remboursé 75%)
+```
+
+**💡 Exemple concret : 120 équipes inscrites**
+```
+120 équipes ÷ 6 = 20 groupes de qualification
+
+Phase de qualification (2 semaines) :
+├─ Groupe 1 : 6 équipes jouent 5 matchs chacune
+├─ Groupe 2 : 6 équipes jouent 5 matchs chacune
+├─ ...
+└─ Groupe 20 : 6 équipes jouent 5 matchs chacune
+
+Résultats après qualification :
+├─ 20 équipes → D4 (les 1ers de chaque groupe)
+├─ 20 équipes → D3 (les 2èmes de chaque groupe)
+├─ 20 équipes → D2 (les 3èmes de chaque groupe)
+├─ 20 équipes → D1 (les 4èmes de chaque groupe)
+└─ 40 équipes → Éliminées et remboursées à 75%
+
+Saison régulière (10 semaines) :
+├─ D4 : 20 équipes (4 groupes de 5)
+├─ D3 : 20 équipes (4 groupes de 5)
+├─ D2 : 20 équipes (4 groupes de 5)
+└─ D1 : 20 équipes (4 groupes de 5)
+```
+
+---
+
+#### **💰 Frais d'Inscription Progressifs**
+
+Les frais augmentent chaque saison pour créer de l'exclusivité :
+
+```
+Saison 1 : 4 MLC = 2,000 FCFA
+Saison 2 : 6 MLC = 3,000 FCFA
+Saison 3 : 8 MLC = 4,000 FCFA
+Saison 4 : 10 MLC = 5,000 FCFA
+Saison 5+ : Paramétrable (peut continuer à augmenter)
+```
+
+**Pourquoi cette progression ?**
+- 🎯 **Accessibilité S1** : Prix bas pour attirer les premiers joueurs
+- 📈 **Valeur croissante** : Plus la plateforme grandit, plus elle a de valeur
+- 💎 **Exclusivité** : Les prix élevés filtrent les joueurs occasionnels
+- 🏆 **Récompense la fidélité** : Les anciens joueurs ont profité des prix bas
+
+---
+
+#### **💵 Répartition des Revenus**
+
+**Modèle économique par saison** :
+
+```
+Revenus totaux = Nombre d'inscrits × Frais d'inscription
+
+Distribution :
+├─ 60% → Prize Pools (récompenses)
+├─ 30% → Plateforme MLM (fonctionnement)
+└─ 10% → Fonds de réserve (support, imprévus)
+```
+
+**Exemple Saison 1 : 100 équipes inscrites**
+```
+100 équipes × 4 MLC = 400 MLC (200,000 FCFA)
+
+Distribution :
+├─ 240 MLC (60%) → Prize Pools
+├─ 120 MLC (30%) → Plateforme
+└─ 40 MLC (10%) → Fonds de réserve
+```
+
+---
+
+#### **🏆 Distribution des Prize Pools par Division**
+
+**Système pyramide** (recommandé) :
+
+Les 60% de récompenses sont répartis de manière pyramidale pour créer de l'aspiration :
+
+```
+Prize Pools (sur 240 MLC exemple) :
+
+🏆 Division 4 (D4) - Elite : 100 MLC (42%)
+   → Champion : 40 MLC
+   → Vice-champion : 25 MLC
+   → 3ème : 15 MLC
+   → 4ème-10ème : 20 MLC à partager
+
+💎 Division 3 (D3) - Excellence : 70 MLC (29%)
+   → Champion : 28 MLC
+   → Vice-champion : 18 MLC
+   → 3ème : 10 MLC
+   → 4ème-10ème : 14 MLC à partager
+
+🥈 Division 2 (D2) - Confirmé : 45 MLC (19%)
+   → Champion : 18 MLC
+   → Vice-champion : 12 MLC
+   → 3ème : 7 MLC
+   → 4ème-10ème : 8 MLC à partager
+
+⚽ Division 1 (D1) - Standard : 25 MLC (10%)
+   → Champion : 10 MLC
+   → Vice-champion : 7 MLC
+   → 3ème : 4 MLC
+   → 4ème-10ème : 4 MLC à partager
+```
+
+**💡 Pourquoi la pyramide ?**
+- 🎯 **Aspiration** : "Je veux être en D4 pour gagner beaucoup plus"
+- 🏆 **Récompense l'excellence** : Les meilleurs gagnent davantage
+- ⚖️ **Équité maintenue** : Tout le monde a une chance lors de la qualification
+- 💪 **Motivation** : Objectif clair de progresser vers D4
+
+---
+
+#### **🔄 Réinitialisation à Chaque Saison**
+
+**IMPORTANT** : Pas de système de relégation/promotion entre saisons.
+
+**Fin de Saison N** :
+```
+1. 📊 Calcul des classements finaux dans chaque division
+2. 🏆 Distribution des prize pools aux champions
+3. 📜 Enregistrement dans l'historique MLM (Hall of Fame)
+4. 🔄 RÉINITIALISATION COMPLÈTE
+```
+
+**Début de Saison N+1** :
+```
+1. 🆕 Nouvelles inscriptions ouvertes à TOUS
+   └─ Même les champions doivent se réinscrire
+
+2. 📋 MÊME processus d'inscription :
+   ├─ Objectif : 80 équipes (liste d'attente si dépassé)
+   └─ Maximum : 120 équipes
+
+3. 🎯 MÊME phase de qualification :
+   ├─ Groupes de 6 équipes
+   ├─ 5 matchs par équipe
+   └─ Répartition : 1er→D4, 2ème→D3, 3ème→D2, 4ème→D1
+
+4. 🏁 Saison régulière lance dans les 4 divisions
+```
+
+**💡 Exemple concret** :
+```
+Saison 1 (Juillet-Septembre 2024) - 4 MLC
+├─ Karim termine Champion D4 → 🏆 40 MLC de récompense
+├─ Amadou termine 3ème D2 → 🥉 7 MLC
+└─ Sarah termine 5ème D3
+
+FIN DE SAISON → RÉINITIALISATION COMPLÈTE
+
+Saison 2 (Octobre-Décembre 2024) - 6 MLC
+├─ Karim doit SE RÉINSCRIRE et payer 6 MLC
+├─ Amadou doit SE RÉINSCRIRE et payer 6 MLC
+├─ Sarah doit SE RÉINSCRIRE et payer 6 MLC
+├─ Tous passent par la phase de qualification
+├─ Nouvelle répartition en divisions selon performances
+└─ PAS de privilège pour Karim (ancien champion)
+   → Son titre S1 reste dans l'historique à vie
+```
+
+**Pourquoi cette réinitialisation ?**
+- ✅ **Équité totale** : Tout le monde repart à zéro
+- ✅ **Pas de stagnation** : Aucun joueur n'est "installé" en D4
+- ✅ **Motivation** : Il faut se prouver à chaque saison
+- ✅ **Accessibilité** : Nouveaux joueurs ont leur chance dès S2
+- ✅ **Compétition fraîche** : Chaque saison = nouveau défi
+
+---
 
 #### **📅 Calendrier de Saison Détaillé**
 
@@ -407,6 +653,62 @@ Si "KarimTheKing" rate aussi 18 journées :
 
 **Message clair** : **Joue sérieusement ou ne participe pas.** MLM n'est pas fait pour les joueurs fantômes.
 
+#### **📜 Historique des Saisons et Palmarès**
+
+**Conservation des données** :
+
+Chaque saison, MLM conserve **l'historique complet** des performances et des champions :
+
+**Ce qui est enregistré** :
+- 🏆 **Vainqueurs de chaque division** (D1, D2, D3, D4)
+- 📊 **Classements finaux** de tous les groupes
+- 🎯 **Statistiques individuelles** :
+  - Nombre de victoires, défaites, nuls
+  - Buts marqués et encaissés
+  - Points totaux de la saison
+- 🏅 **Meilleurs buteurs** par division
+- 📈 **Évolution des équipes** : Promotions et relégations
+
+**Pourquoi c'est important ?**
+- 📜 **Mémoire du jeu** : Voir l'évolution depuis la Saison 1
+- 🏆 **Hall of Fame** : Les champions de chaque saison sont immortalisés
+- 📊 **Statistiques complètes** : Consulter l'historique de n'importe quelle équipe
+- 💪 **Motivation** : Devenir champion d'une saison pour rester dans l'histoire
+
+**Exemple d'historique** :
+```
+Saison 1 - Juillet à Septembre 2024
+├─ D1 (Standard)
+│   ├─ Champion : "KarimFCPro" - 45 points
+│   ├─ Vice-Champion : "AmadouElite" - 42 points
+│   └─ Meilleur buteur : "Moussa_24" - 38 buts
+
+Saison 2 - Octobre à Décembre 2024
+├─ D4 (Elite)
+│   ├─ Champion : "SarahPro" - 48 points
+│   └─ Meilleur buteur : "SarahPro" - 41 buts
+├─ D3 (Excellence)
+│   ├─ Champion : "KarimFCPro" - 46 points (Promu de D2)
+│   └─ Meilleur buteur : "AmadouMobile" - 35 buts
+├─ D2 (Confirmé)
+│   ├─ Champion : "BrahimaLion" - 44 points
+│   └─ Meilleur buteur : "BrahimaLion" - 32 buts
+└─ D1 (Standard)
+    ├─ Champion : "Youssef_Pro" - 43 points
+    └─ Meilleur buteur : "Ibrahim24" - 30 buts
+```
+
+**Consultation de l'historique** :
+- ✅ Accessible depuis ton profil MLM
+- ✅ Voir les classements de toutes les saisons passées
+- ✅ Comparer ton évolution saison après saison
+- ✅ Consulter le palmarès de n'importe quelle équipe
+
+**Réinitialisation saisonnière** :
+- 🔄 À chaque nouvelle saison, le processus de qualification et répartition recommence
+- 📊 MAIS l'historique des performances passées reste **permanent**
+- 🏆 Les titres de champion restent acquis à vie
+
 #### **Pourquoi c'est génial ?**
 - 🎯 **Progression claire** : Objectif de monter de division
 - 🏆 **Récompense du mérite** : Les meilleurs montent, les moins bons descendent
@@ -456,6 +758,578 @@ Après 50 tournois → Karim atteint 1250 points → Ligue 2
 - Tournoi payant pour pimenter → Il définit les frais et la répartition
 
 **Flexibilité totale.**
+
+---
+
+## 💻 Plateforme Web & Interactions
+
+### Architecture Technique
+
+**Type de Plateforme** : Application Web Progressive (PWA)
+
+```
+Plateforme MLM = Application Web Responsive
+├─ Desktop : Expérience complète (gestion tournois, administration)
+├─ Mobile : Interface adaptée (participation, notifications)
+└─ Tablette : Hybride (consultation + participation)
+```
+
+**Pourquoi Web et pas Mobile Native ?**
+- ✅ **Accessibilité** : Pas besoin de télécharger une app (économie de data)
+- ✅ **Mise à jour instantanée** : Pas besoin d'attendre les stores
+- ✅ **Compatibilité** : Fonctionne sur tous les appareils (Android, iOS, Windows, Mac)
+- ✅ **SEO** : Meilleure découvrabilité via Google
+- ✅ **Coût** : Développement unique pour toutes les plateformes
+
+**Technologies** :
+```
+Frontend : Vue.js 3 / React (responsive design)
+Backend : Java Spring Boot 3.x (API REST)
+Base de données : PostgreSQL
+Cache : Redis
+Messaging : RabbitMQ (queues asynchrones pour emails, notifications)
+Sécurité : Spring Security + JWT
+WebSocket : Spring WebSocket (chat temps réel)
+Notifications : Email (JavaMail) + SMS via API
+Paiements : API Mobile Money (Orange, MTN, Moov)
+Hébergement : Cloud scalable (AWS / DigitalOcean / Heroku)
+CI/CD : GitHub Actions / Jenkins
+```
+
+---
+
+### Système de Communication
+
+MLM intègre un **système de communication hybride** (chat + email) pour faciliter les échanges entre participants.
+
+#### **💬 Chat Intégré avec Notifications Email**
+
+**Comment ça fonctionne ?**
+
+```
+Scénario : Karim envoie un message à Amadou pour un match
+
+1. Karim écrit dans le chat MLM :
+   "Yo Amadou, on joue notre match ce soir à 20h ?"
+
+2. Le système envoie AUTOMATIQUEMENT :
+   ├─ Message dans le chat MLM (visible sur la plateforme)
+   └─ Email à Amadou avec le contenu du message
+       → Objet : "Nouveau message de Karim sur MLM"
+       → Contenu : "Yo Amadou, on joue notre match ce soir à 20h ?"
+       → Lien : Répondre sur MLM
+
+3. Amadou peut :
+   ├─ Répondre depuis la plateforme MLM
+   └─ Ou répondre directement par email
+       → Sa réponse apparaît automatiquement dans le chat MLM
+```
+
+**Avantages** :
+- ✅ **Zéro message manqué** : Notification email garantit que le destinataire voit le message
+- ✅ **Flexibilité** : Répond depuis la plateforme ou par email
+- ✅ **Historique centralisé** : Tous les échanges sont sauvegardés sur MLM
+- ✅ **Pas de WhatsApp requis** : Communication autonome
+
+#### **Types de conversations** :
+
+```
+1. Chat de match (1v1)
+   → Entre 2 joueurs d'un match spécifique
+   → Organiser l'heure, confirmer résultat
+
+2. Chat de tournoi (groupe)
+   → Tous les participants d'un tournoi
+   → Annonces de l'organisateur, discussions
+
+3. Chat avec support (modération)
+   → Utilisateur ↔ Modérateur/Arbitre
+   → Signalement de problèmes, litiges
+```
+
+---
+
+### Gestion des Preuves (Screenshots)
+
+Pour éviter les litiges et garantir la transparence, MLM intègre un **système de soumission de captures d'écran**.
+
+#### **📸 Comment ça marche ?**
+
+**Scénario : Match entre Karim et Amadou**
+
+```
+1. Le match se joue sur E-football (sur console/mobile)
+
+2. Après le match :
+   ├─ Karim soumet le résultat : "J'ai gagné 3-2"
+   └─ Karim uploade une capture d'écran du score final
+
+3. Amadou reçoit une notification :
+   "Karim a déclaré le résultat : 3-2. Confirmez-vous ?"
+
+4. Amadou peut :
+   ├─ ✅ Confirmer → Résultat validé automatiquement
+   └─ ❌ Contester → Upload sa propre capture + demande d'arbitrage
+```
+
+#### **Types de captures acceptées** :
+
+```
+Captures Valides :
+├─ Screenshot du score final (dans le jeu)
+├─ Photo de l'écran (si screenshot impossible)
+└─ Vidéo courte (max 30 secondes) montrant le score
+
+Captures Refusées :
+├─ Images floues ou illisibles
+├─ Captures sans date/heure visible
+└─ Montages ou modifications
+```
+
+#### **Système de Vérification** :
+
+```
+Niveau 1 : Auto-validation (pas de litige)
+├─ Les 2 joueurs soumettent le même résultat
+└─ Résultat validé instantanément
+
+Niveau 2 : Arbitrage automatique (litige simple)
+├─ Un seul joueur a soumis une capture
+└─ L'autre n'a pas répondu sous 24h
+→ Résultat validé en faveur de celui qui a soumis
+
+Niveau 3 : Arbitrage humain (litige complexe)
+├─ Les 2 joueurs ont soumis des résultats différents
+├─ Les 2 ont des captures contradictoires
+└─ Un arbitre examine les preuves et tranche
+```
+
+**Délais** :
+- ⏱️ **24h** pour soumettre le résultat après un match
+- ⏱️ **24h** pour l'adversaire pour confirmer/contester
+- ⏱️ **48h** pour l'arbitre pour trancher
+
+**Sanctions** :
+```
+Si un joueur ne soumet jamais de preuve :
+├─ 1ère fois : Avertissement
+├─ 2ème fois : Perte du match par forfait
+└─ 3ème fois : Exclusion du tournoi + bannissement temporaire
+```
+
+---
+
+## 👮 Rôles et Gouvernance sur la Plateforme
+
+MLM fonctionne avec une structure de gouvernance claire pour garantir l'équité et la qualité.
+
+### 1. **Administrateurs (Admin)**
+
+**Nombre** : 2-3 personnes
+
+**Rôle** :
+- 🔧 **Gestion globale** de la plateforme (paramètres, configurations)
+- 👥 **Supervision** des modérateurs et arbitres
+- 💰 **Gestion financière** (reversements, commissions)
+- 📊 **Analyse des données** (statistiques, performance)
+- 🚨 **Décisions finales** sur les cas complexes
+
+**Pouvoirs** :
+```
+✅ Bannir définitivement un utilisateur
+✅ Modifier les paramètres de la plateforme
+✅ Accès à toutes les données
+✅ Révoquer des modérateurs/arbitres
+✅ Gérer les fonds de la plateforme
+```
+
+**Accès** : Compte admin avec authentification 2FA obligatoire
+
+---
+
+### 2. **Arbitres**
+
+**Nombre** : 10-15 personnes (évolutif selon volume)
+
+**Rôle** :
+- ⚖️ **Résoudre les litiges** entre joueurs sur les résultats de matchs
+- 🔍 **Examiner les preuves** (captures d'écran, vidéos)
+- ✅ **Valider ou invalider** les résultats contestés
+- 📝 **Documenter** les décisions pour historique
+
+**Quand interviennent-ils ?**
+
+```
+Un arbitre intervient UNIQUEMENT si :
+├─ L'organisateur du tournoi est CERTIFIÉ niveau 1+ (badge)
+└─ Un litige est signalé ET :
+    ├─ Les 2 joueurs ont soumis des résultats différents
+    ├─ Une preuve est douteuse ou contradictoire
+    └─ Un joueur accuse l'autre de triche
+
+⚠️ IMPORTANT : Les arbitres N'INTERVIENNENT PAS sur :
+└─ Tournois d'organisateurs non certifiés (niveau 0)
+    → Ces tournois sont "à leurs risques"
+```
+
+**Processus d'arbitrage** :
+
+```
+1. Litige signalé → Ticket créé
+2. Arbitre assigné automatiquement (disponibilité + charge)
+3. Arbitre examine les preuves (24-48h max)
+4. Arbitre prend une décision :
+   ├─ Valide le résultat d'un joueur
+   ├─ Déclare un match nul (si preuves insuffisantes)
+   └─ Sanctionne un joueur (si triche avérée)
+5. Décision finale + notification aux 2 joueurs
+```
+
+**Rémunération** :
+- 💰 **Fixe** : 20,000 FCFA/mois (si actif)
+- 💰 **Variable** : 500 FCFA par litige résolu (bonus)
+- 🎯 **Performance** : Prime mensuelle selon qualité des décisions
+
+**Qualifications requises** :
+- ✅ Joueur expérimenté des jeux concernés (E-football, FC Mobile)
+- ✅ Connaissance des règles MLM
+- ✅ Disponibilité 2-3h/jour
+- ✅ Impartialité et intégrité
+
+---
+
+### 3. **Modérateurs**
+
+**Nombre** : 5-8 personnes
+
+**Rôle** :
+- 🛡️ **Modérer** les chats, forums, commentaires (supprimer spam, insultes)
+- 📨 **Recueillir les plaintes** des utilisateurs
+- 🚫 **Gérer les bannissements temporaires** (spam, comportement toxique)
+- ✅ **Valider les inscriptions des organisateurs** (vérification identité, paiement)
+- 📊 **Suivre** les signalements et créer des rapports pour les admins
+
+**Processus de validation des organisateurs** :
+
+```
+Quand un utilisateur veut devenir organisateur certifié (niveau 1) :
+
+1. Demande de certification reçue
+2. Modérateur vérifie :
+   ├─ Paiement de 50,000 FCFA effectué ?
+   ├─ Identité vérifiée (carte d'identité, selfie) ?
+   ├─ Pas de bannissement dans l'historique ?
+   └─ Profil complété correctement ?
+
+3. Modérateur décide :
+   ├─ ✅ APPROUVÉ → Organisateur obtient badge niveau 1
+   └─ ❌ REFUSÉ → Demande rejetée avec raison (+ remboursement si applicable)
+
+4. Suivi post-certification :
+   └─ Modérateur surveille les premiers tournois de l'organisateur
+```
+
+**Gestion des bannissements** :
+
+```
+Modérateurs peuvent bannir temporairement pour :
+├─ Spam dans les chats (24h-7j)
+├─ Insultes, harcèlement (7j-30j)
+├─ Tentative de triche signalée (en attente d'arbitrage)
+└─ Non-respect des règles (variable)
+
+Admins peuvent bannir définitivement pour :
+├─ Triche avérée et répétée
+├─ Fraude financière
+├─ Compte multi-comptes pour manipulation
+└─ Violations graves des CGU
+```
+
+**Rémunération** :
+- 💰 **Fixe** : 15,000 FCFA/mois (si actif)
+- 💰 **Variable** : 200 FCFA par validation d'organisateur
+
+---
+
+### 4. **Utilisateurs**
+
+Les utilisateurs ont différents niveaux de privilèges :
+
+```
+📊 Hiérarchie des Utilisateurs :
+
+1. Joueur Standard (tout le monde)
+   ├─ Participer aux tournois
+   ├─ Chatter avec autres joueurs
+   └─ Consulter classements
+
+2. Organisateur Non-Certifié (gratuit, niveau 0)
+   ├─ Créer des tournois GRATUITS uniquement
+   ├─ Maximum 100 participants par tournoi
+   └─ Pas d'intervention d'arbitres
+
+3. Organisateur Certifié Niveau 1 (50,000 FCFA)
+   ├─ Créer des tournois PAYANTS
+   ├─ Maximum 200 participants
+   ├─ Arbitres disponibles pour litiges
+   └─ Commission de 50% sur les frais d'inscription
+
+4. Organisateur Certifié Niveau 2 (1 tournoi réussi)
+   ├─ Badge "Organisateur Confirmé"
+   ├─ Maximum 500 participants
+   ├─ Priorité sur l'assistance support
+   └─ Visibilité augmentée sur la plateforme
+
+5. Organisateur Certifié Niveau 3 (5 tournois réussis)
+   ├─ Badge "Organisateur Elite"
+   ├─ Participants illimités
+   ├─ Support dédié 24/7
+   ├─ Mise en avant sur page d'accueil
+   └─ Commission augmentée à 55%
+```
+
+---
+
+## 🏆 Système d'Organisation de Compétitions
+
+### Types de Compétitions
+
+Sur MLM, les organisateurs peuvent créer différents types de compétitions :
+
+#### **1. Compétitions par Accessibilité**
+
+```
+🌐 OUVERTES (Public)
+├─ Tout le monde peut s'inscrire
+├─ Visibles sur la page d'accueil
+├─ Recherchables par tous les utilisateurs
+└─ Idéal pour : Tournois communautaires, événements publics
+
+🔒 PRIVÉES (Invitation uniquement)
+├─ Accessible uniquement avec un code d'invitation
+├─ Invisible dans les recherches publiques
+├─ Organisateur partage le code aux joueurs autorisés
+└─ Idéal pour : Tournois entre amis, ligues privées, clans
+```
+
+**Exemple Compétition Privée** :
+```
+Amadou crée un tournoi pour son clan "DakarGamingCrew"
+
+1. Amadou configure :
+   ├─ Nom : "DGC Championship"
+   ├─ Type : PRIVÉ
+   └─ Code d'invitation : "DGC2024"
+
+2. Amadou partage le code sur WhatsApp :
+   "Yo les gars ! Tournoi MLM ce weekend.
+    Code : DGC2024
+    Lien : mlm.africa/join/DGC2024"
+
+3. Seuls ceux qui ont le code peuvent s'inscrire
+```
+
+---
+
+#### **2. Compétitions par Modèle Économique**
+
+```
+🆓 GRATUITES (Free)
+├─ Aucun frais d'inscription
+├─ Pas de prize pool monétaire
+├─ Récompenses symboliques (badges, titres, points XP)
+├─ Organisable par : Tous (même niveau 0)
+└─ Idéal pour : S'amuser, tester, construire une communauté
+
+💰 PAYANTES (Cash Prize)
+├─ Frais d'inscription définis par l'organisateur
+├─ Prize pool monétaire (60% des frais collectés)
+├─ Commission organisateur (30%) + plateforme (10%)
+├─ Organisable par : Organisateurs certifiés niveau 1+ uniquement
+└─ Idéal pour : Compétitions sérieuses, gagner de l'argent
+```
+
+---
+
+### Certification des Organisateurs : Système de Badges
+
+Pour garantir la qualité et éviter les arnaques, MLM utilise un **système de certification par badges** pour les organisateurs.
+
+#### **Badge Niveau 0 : Organisateur Non-Certifié** 🆓
+
+**Conditions** :
+- ✅ Inscription gratuite (0 FCFA)
+- ✅ Aucune vérification requise
+
+**Privilèges** :
+```
+✅ Créer des tournois GRATUITS uniquement
+✅ Maximum 100 participants par tournoi
+✅ Accès au chat et communication basique
+✅ Statistiques de base
+
+❌ PAS de tournois payants
+❌ PAS d'intervention d'arbitres
+❌ PAS de priorité support
+❌ PAS de badge visible sur profil
+```
+
+**Cas d'usage** :
+- Tester la plateforme
+- Organiser des mini-tournois entre amis
+- Construire une réputation avant de passer certifié
+
+---
+
+#### **Badge Niveau 1 : Organisateur Certifié** 🏅
+
+**Conditions** :
+- 💰 **Payer 50,000 FCFA** (frais de certification unique)
+- ✅ **Vérification d'identité** (carte d'identité + selfie)
+- ✅ **Validation par un modérateur** (48h max)
+
+**Processus de certification** :
+```
+1. Utilisateur demande la certification niveau 1
+2. Paiement de 50,000 FCFA via Mobile Money
+3. Upload documents :
+   ├─ Carte d'identité (CNI/passeport)
+   ├─ Selfie avec la carte
+   └─ Preuve de paiement
+
+4. Modérateur examine (24-48h)
+5. Décision :
+   ├─ ✅ APPROUVÉ → Badge niveau 1 attribué
+   └─ ❌ REFUSÉ → Remboursement + raison du refus
+```
+
+**Privilèges** :
+```
+✅ Créer des tournois PAYANTS
+✅ Maximum 200 participants par tournoi
+✅ Commission de 50% sur frais d'inscription
+✅ Arbitres disponibles pour résoudre litiges
+✅ Badge "Certifié" visible sur profil
+✅ Support standard (72h de réponse)
+✅ Tournois privés ET publics
+```
+
+**Obligations** :
+```
+📋 Respecter les règles MLM
+📋 Distribuer les prize pools dans les 48h après tournoi
+📋 Répondre aux participants sous 24h
+📋 Soumettre les résultats finaux correctement
+```
+
+---
+
+#### **Badge Niveau 2 : Organisateur Confirmé** 🥈
+
+**Conditions** :
+- ✅ **Avoir un badge niveau 1**
+- ✅ **Organiser 1 tournoi payant avec succès**
+  - Minimum 16 participants
+  - Aucun litige non résolu
+  - Tous les prize pools distribués à temps
+  - Note de satisfaction ≥ 4/5 par les participants
+
+**Progression automatique** :
+```
+Dès qu'un organisateur niveau 1 termine son 1er tournoi :
+└─ Système vérifie automatiquement les critères
+    ├─ ✅ Tous les critères OK → Badge niveau 2 attribué
+    └─ ❌ Critères non respectés → Reste niveau 1
+```
+
+**Privilèges supplémentaires** :
+```
+✅ Maximum 500 participants par tournoi
+✅ Badge "Confirmé" visible (🥈)
+✅ Priorité dans les résultats de recherche
+✅ Support prioritaire (48h de réponse)
+✅ Statistiques avancées (taux de participation, satisfaction)
+✅ Peut créer des tournois sur plusieurs jeux simultanément
+```
+
+---
+
+#### **Badge Niveau 3 : Organisateur Elite** 🥇
+
+**Conditions** :
+- ✅ **Avoir un badge niveau 2**
+- ✅ **Organiser 5 tournois payants avec succès**
+  - Chaque tournoi : minimum 32 participants
+  - Note moyenne ≥ 4.5/5
+  - Aucun bannissement ou sanction
+  - Taux de litiges < 5%
+
+**Privilèges supplémentaires** :
+```
+✅ Participants ILLIMITÉS par tournoi
+✅ Badge "Elite" visible (🥇)
+✅ Mise en avant sur page d'accueil MLM
+✅ Support dédié 24/7 (12h de réponse max)
+✅ Commission augmentée à 55% (au lieu de 50%)
+✅ Accès aux statistiques de la plateforme
+✅ Peut organiser des ligues multi-saisons
+✅ Peut demander des partenariats avec marques
+✅ Profil vérifié avec badge officiel
+```
+
+**Avantages économiques** :
+```
+Exemple : Tournoi de 100 joueurs × 4 MLC = 400 MLC collectés
+
+Organisateur Niveau 1 (50%) :
+└─ 200 MLC = 100,000 FCFA
+
+Organisateur Niveau 3 (55%) :
+└─ 220 MLC = 110,000 FCFA
+
+Différence : +20 MLC = +10,000 FCFA par tournoi
+```
+
+---
+
+### Conditions et Privilèges par Niveau
+
+**Tableau Récapitulatif** :
+
+| Critère | Niveau 0 | Niveau 1 | Niveau 2 | Niveau 3 |
+|---------|----------|----------|----------|----------|
+| **Frais certification** | Gratuit | 50,000 FCFA | Auto | Auto |
+| **Tournois payants** | ❌ | ✅ | ✅ | ✅ |
+| **Max participants** | 100 | 200 | 500 | Illimité |
+| **Arbitres** | ❌ | ✅ | ✅ | ✅ |
+| **Commission** | 0% | 50% | 50% | 55% |
+| **Support** | 7j | 72h | 48h | 24h (dédié) |
+| **Badge visible** | ❌ | 🏅 Certifié | 🥈 Confirmé | 🥇 Elite |
+| **Mise en avant** | ❌ | ❌ | Priorité recherche | Page d'accueil |
+| **Multi-jeux** | ❌ | ❌ | ✅ | ✅ |
+| **Ligues saisons** | ❌ | ❌ | ❌ | ✅ |
+
+---
+
+### Pourquoi ce Système de Badges ?
+
+**Avantages pour MLM** :
+- 🛡️ **Qualité garantie** : Seuls les organisateurs sérieux peuvent créer des tournois payants
+- 💰 **Revenus** : 50,000 FCFA par certification niveau 1
+- ⚖️ **Arbitrage efficace** : Réservé aux tournois certifiés = moins de litiges
+- 📈 **Progression** : Encourage les organisateurs à améliorer leur qualité
+
+**Avantages pour les Joueurs** :
+- ✅ **Confiance** : Badge visible = organisateur fiable
+- 💰 **Sécurité** : Prize pools garantis (organisateurs certifiés)
+- ⚖️ **Support** : Arbitres disponibles si problème
+- 🏆 **Qualité** : Tournois mieux organisés
+
+**Avantages pour les Organisateurs** :
+- 📈 **Crédibilité** : Badge = confiance = plus de participants
+- 💰 **Revenus** : Commission attractive (50-55%)
+- 🚀 **Visibilité** : Mise en avant selon niveau
+- 🎯 **Évolution** : Objectifs clairs pour progresser
 
 ---
 
