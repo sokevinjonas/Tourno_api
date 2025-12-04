@@ -120,6 +120,10 @@ users
 ├── win_rate (calculé)
 ├── current_division_id (FK -> divisions.id, nullable)
 ├── is_verified (boolean, pour retraits)
+├── is_banned (boolean, défaut: false)
+├── ban_reason (text, nullable)
+├── banned_at (timestamp, nullable)
+├── device_fingerprint (string, nullable: identifiant unique de l'appareil)
 ├── created_at
 └── updated_at
 ```
@@ -131,6 +135,8 @@ users
 - `win_rate` : Calculé automatiquement (total_wins / total_tournaments_played)
 - `phone_number` : Requis pour effectuer des retraits (format international)
 - `is_verified` : True après vérification d'identité (pour limiter fraudes)
+- `is_banned` : True si le compte est banni définitivement
+- `device_fingerprint` : Hash unique généré à partir des caractéristiques de l'appareil (pour empêcher les réinscriptions)
 
 ---
 
@@ -153,7 +159,48 @@ games
 
 ---
 
-#### 3.1.3 Tournaments (Tournois)
+#### 3.1.3 Team_Accounts (Comptes d'Équipes/Pseudos de Jeu)
+
+```
+team_accounts
+├── id (PK)
+├── user_id (FK -> users.id)
+├── game_id (FK -> games.id)
+├── team_name (string: pseudo/nom d'équipe sur le jeu)
+├── is_primary (boolean: équipe principale ou secondaire)
+├── is_banned (boolean, défaut: false)
+├── ban_reason (text, nullable)
+├── banned_at (timestamp, nullable)
+├── total_matches_played (integer)
+├── total_matches_missed (integer)
+├── created_at
+└── updated_at
+
+UNIQUE(user_id, game_id, team_name)
+```
+
+**Règles de gestion** :
+- Chaque utilisateur peut avoir **maximum 2 équipes par jeu**
+- `team_name` : Le pseudo/nom d'équipe utilisé dans le jeu (E-football, FC Mobile, Dream League Soccer)
+- `is_primary` : True pour la première équipe créée, false pour la seconde
+- `is_banned` : True si l'équipe a raté 18/38 journées (la moitié de la saison)
+- Si les **2 équipes** d'un utilisateur sont bannies → Le compte utilisateur (`users.is_banned`) est banni définitivement
+- Un utilisateur banni ne peut pas se réinscrire (blocage par `device_fingerprint`)
+
+**Exemple** :
+```
+User: Karim
+  ├─ E-football
+  │   ├─ Équipe 1: "KarimFCPro" (is_primary: true)
+  │   └─ Équipe 2: "KarimTheKing" (is_primary: false)
+  ├─ FC Mobile
+  │   ├─ Équipe 1: "Karim_24" (is_primary: true)
+  │   └─ Équipe 2: "KarimMobile" (is_primary: false)
+```
+
+---
+
+#### 3.1.4 Tournaments (Tournois)
 
 ```
 tournaments
@@ -429,42 +476,62 @@ wallet_transactions
 divisions
 ├── id (PK)
 ├── game_id (FK -> games.id)
-├── name (ex: "Ligue 1", "Ligue 2", "Bundesliga")
-├── slug (ex: "ligue-1")
-├── level (integer: 1 = plus haut niveau, 2, 3...)
+├── name (ex: "Division 1 (D1)", "Division 2 (D2)", "Division 3 (D3)", "Division 4 (D4)")
+├── slug (ex: "d1", "d2", "d3", "d4")
+├── level (integer: 1 = D1 (Standard), 2 = D2, 3 = D3, 4 = D4 (Elite))
 ├── description
 ├── icon_url
-├── entry_fee (décimal 10,2: frais pour rejoindre)
-├── min_mlm_rank (integer: MLM Rank minimum requis)
-├── max_mlm_rank (integer: MLM Rank maximum autorisé)
+├── entry_fee (décimal 10,2: frais pour rejoindre la saison)
+├── min_mlm_rank (integer: MLM Rank minimum requis, nullable)
+├── max_mlm_rank (integer: MLM Rank maximum autorisé, nullable)
 ├── max_members (integer: nombre max de joueurs)
 ├── current_members_count (integer)
-├── tournament_frequency (enum: 'daily', 'weekly', 'monthly')
-├── tournament_format (enum: 'knockout', 'league')
-├── tournament_size (integer: 8, 16, 32)
+├── match_days_per_week (integer: 3 par défaut)
+├── match_day_schedule (JSON: ex: ["wednesday", "friday", "saturday"])
+├── total_match_days_per_season (integer: 38 par défaut)
+├── season_duration_months (integer: 3 par défaut)
+├── season_months (JSON: ex: ["july", "august", "september"])
+├── absence_ban_threshold (integer: 18 par défaut, moitié de total_match_days)
+├── tournament_format (enum: 'league' pour divisions)
+├── group_size (integer: 6 joueurs par groupe)
 ├── prizes (JSON: définition des prix)
 ├── promotion_count (integer: nombre de joueurs promus par saison)
-├── relegation_count (integer: nombre de joueurs relégués par saison)
+├── relegation_count (integer: 3 derniers par groupe)
 ├── is_active (boolean)
 ├── created_at
 └── updated_at
 ```
 
 **Règles de gestion** :
-- Hiérarchie des divisions par `level` (1 = élite, 2 = intermédiaire, etc.)
-- `entry_fee` : Frais uniques pour accéder à la division
-- Filtrage par `min_mlm_rank` et `max_mlm_rank` pour équilibrer les divisions
-- `tournament_frequency` : Définit la fréquence des tournois automatiques
-- `prizes` : JSON ex: {"1": {"coins": 100, "rank": 50}, "2": {"coins": 50, "rank": 30}}
-- Promotion/Relégation automatique en fin de saison
+- Hiérarchie des divisions par `level` (1 = D1 Standard, 2 = D2, 3 = D3, 4 = D4 Elite)
+- `entry_fee` : Frais pour rejoindre la division pour toute la saison
+- Format de jeu : **Groupes de 6 équipes** (poules)
+- Chaque équipe joue contre les 5 autres de son groupe
 
-**Exemple de hiérarchie** :
+**Calendrier de Saison** :
+- **Durée** : 3 mois (Juillet, Août, Septembre)
+- **Fréquence** : 3 journées par semaine
+- **Exemple de planning** : Mercredi, Vendredi, Samedi
+- **Total journées** : ~38 journées par saison
+- **Journées manquées autorisées** : Maximum 17/38 (au-delà = bannissement de l'équipe)
+
+**Système de Bannissement** :
+- Si une équipe rate **18 journées ou plus** (la moitié) → L'équipe est **bannie définitivement**
+- Si un utilisateur a **2 équipes bannies** → Le compte utilisateur est **banni définitivement**
+- Utilisateur banni ne peut pas se réinscrire (blocage par `device_fingerprint`)
+
+**Hiérarchie des Divisions** :
 ```
-Ligue 1 (Elite)     : MLM Rank 1500+, Entry 50 coins
-Ligue 2             : MLM Rank 1200-1499, Entry 30 coins
-Ligue 3             : MLM Rank 1000-1199, Entry 20 coins
-Bundesliga (Débutant): MLM Rank 800-999, Entry 10 coins
+Division 4 (D4) - Elite      : Entry 100 coins (50,000 FCFA)
+Division 3 (D3) - Excellence : Entry 60 coins (30,000 FCFA)
+Division 2 (D2) - Confirmé   : Entry 40 coins (20,000 FCFA)
+Division 1 (D1) - Standard   : Entry 40 coins (2,000 FCFA) + Qualifications
 ```
+
+**Promotion/Relégation** :
+- **D4, D3, D2** : Les 3 derniers de chaque groupe descendent à la division inférieure
+- **D1** : Les 3 premiers de chaque groupe montent en D2
+- **Phase de qualification D1** : 16 nouveaux qualifiés par saison (10 coins = 5,000 FCFA)
 
 ---
 
@@ -474,26 +541,42 @@ Bundesliga (Débutant): MLM Rank 800-999, Entry 10 coins
 division_memberships
 ├── id (PK)
 ├── user_id (FK -> users.id)
+├── team_account_id (FK -> team_accounts.id)
 ├── division_id (FK -> divisions.id)
-├── status (enum: 'active', 'inactive', 'suspended')
+├── status (enum: 'active', 'inactive', 'suspended', 'banned')
 ├── season_points (integer: points accumulés cette saison)
 ├── season_wins (integer)
 ├── season_losses (integer)
+├── season_draws (integer)
+├── match_days_played (integer: journées jouées)
+├── match_days_missed (integer: journées ratées)
 ├── rank_in_division (integer: classement dans la division)
+├── group_number (integer: numéro du groupe dans la division)
 ├── joined_at
 ├── left_at (nullable)
-├── last_tournament_at (nullable)
+├── last_match_day_at (nullable)
 └── updated_at
 
-UNIQUE(user_id, division_id) WHERE status = 'active'
+UNIQUE(team_account_id, division_id) WHERE status = 'active'
 ```
 
 **Règles de gestion** :
-- Un joueur ne peut être actif que dans une seule division à la fois
+- Une équipe ne peut être active que dans une seule division à la fois
+- `team_account_id` : L'équipe (pseudo de jeu) utilisée pour cette division
 - `season_points` : Réinitialisé à chaque nouvelle saison
-- `rank_in_division` : Mis à jour après chaque tournoi
-- Promotion : Top X joueurs de la saison passent à la division supérieure
-- Relégation : Bottom X joueurs descendent à la division inférieure
+- `match_days_played` + `match_days_missed` = total des journées écoulées
+- `rank_in_division` : Mis à jour après chaque journée
+- `group_number` : Groupe de 6 équipes dans la division
+
+**Système de Suivi des Absences** :
+- À chaque journée programmée, si l'équipe ne joue pas → `match_days_missed` s'incrémente
+- Si `match_days_missed` ≥ 18 (la moitié de 38 journées) → L'équipe (`team_account.is_banned`) est bannie
+- Si un utilisateur a ses 2 équipes bannies → Le compte (`users.is_banned`) est banni définitivement
+
+**Promotion/Relégation** :
+- **Promotion** : Top 3 de chaque groupe montent à la division supérieure
+- **Relégation** : Les 3 derniers de chaque groupe descendent à la division inférieure
+- **D1 spécial** : Les 3 premiers montent en D2, libérant des places pour les nouveaux qualifiés
 
 ---
 
