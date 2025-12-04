@@ -32,6 +32,8 @@ Mobile League Manager (MLM) est une plateforme permettant l'organisation et la g
 - **Automatisation** : Minimiser l'intervention manuelle de l'organisateur
 - **Fair-Play** : Système robuste de validation et de litiges
 - **Scalabilité** : Support de petits tournois entre amis jusqu'aux grandes compétitions
+- **Économie Intégrée** : Système de wallet, tournois payants, gains automatiques
+- **Compétition Progressive** : Divisions hiérarchiques avec promotion/relégation
 
 ### 1.3 Acteurs du Système
 
@@ -106,12 +108,18 @@ users
 ├── username (unique)
 ├── email (unique)
 ├── password_hash
+├── phone_number (pour mobile money, nullable)
 ├── avatar_url
 ├── mlm_rank (points ELO global)
+├── wallet_balance (solde en MLM Coins, décimal 10,2)
+├── total_earned (total des gains, décimal 10,2)
+├── total_spent (total des dépenses, décimal 10,2)
 ├── total_tournaments_played
 ├── total_wins
 ├── total_losses
 ├── win_rate (calculé)
+├── current_division_id (FK -> divisions.id, nullable)
+├── is_verified (boolean, pour retraits)
 ├── created_at
 └── updated_at
 ```
@@ -119,7 +127,10 @@ users
 **Règles de gestion** :
 - `username` : 3-20 caractères, alphanumérique + underscore
 - `mlm_rank` : Initialisation à 1000 points pour tout nouveau joueur
+- `wallet_balance` : Initialisation à 0 coins, pas de solde négatif
 - `win_rate` : Calculé automatiquement (total_wins / total_tournaments_played)
+- `phone_number` : Requis pour effectuer des retraits (format international)
+- `is_verified` : True après vérification d'identité (pour limiter fraudes)
 
 ---
 
@@ -149,6 +160,7 @@ tournaments
 ├── id (PK)
 ├── organizer_id (FK -> users.id)
 ├── game_id (FK -> games.id)
+├── division_id (FK -> divisions.id, nullable pour tournois custom)
 ├── name
 ├── description
 ├── type (enum: 'knockout', 'league')
@@ -159,8 +171,15 @@ tournaments
 ├── registration_deadline
 ├── match_deadline_hours (délai pour déclarer un score)
 ├── rules (JSON: règles spécifiques)
-├── prize_description
+├── is_paid (boolean: gratuit ou payant)
+├── entry_fee (décimal 10,2: frais d'inscription en MLM Coins)
+├── prize_pool (décimal 10,2: cagnotte totale)
+├── prize_distribution (JSON: répartition des gains)
+├── platform_fee_percentage (décimal 5,2: commission plateforme, ex: 10%)
+├── organizer_fee_percentage (décimal 5,2: commission organisateur, ex: 5%)
+├── prize_description (texte libre pour description des prix)
 ├── is_public (boolean)
+├── is_division_tournament (boolean: tournoi de division auto)
 ├── invitation_code (nullable, pour tournois privés)
 ├── started_at
 ├── completed_at
@@ -182,6 +201,11 @@ tournaments
 - `format` : Uniquement puissances de 2 (8, 16, 32) pour type 'knockout'
 - `match_deadline_hours` : Par défaut 24h (configurable par organisateur)
 - `rules` : JSON permettant de stocker des règles custom (ex: {"max_team_rating": 85, "banned_teams": ["PSG", "Real Madrid"]})
+- `is_paid` : Si true, entry_fee doit être > 0
+- `prize_distribution` : JSON définissant la répartition, ex: {"1": 50, "2": 30, "3-4": 10} (en %)
+- `prize_pool` : Calculé automatiquement = entry_fee × max_players × (1 - platform_fee% - organizer_fee%)
+- `platform_fee_percentage` : Défaut 10% (commission pour la plateforme MLM)
+- `organizer_fee_percentage` : Défaut 5% pour tournois custom, 0% pour tournois de division
 
 ---
 
@@ -365,6 +389,147 @@ notifications
 
 ---
 
+#### 3.1.11 Wallet_Transactions (Transactions du Wallet)
+
+```
+wallet_transactions
+├── id (PK)
+├── user_id (FK -> users.id)
+├── type (enum: 'deposit', 'withdrawal', 'tournament_entry', 'tournament_win', 'refund', 'fee')
+├── amount (décimal 10,2: montant en MLM Coins)
+├── balance_before (décimal 10,2)
+├── balance_after (décimal 10,2)
+├── status (enum: 'pending', 'completed', 'failed', 'cancelled')
+├── tournament_id (FK -> tournaments.id, nullable)
+├── payment_method (enum: 'mobile_money', 'card', 'system', nullable)
+├── payment_reference (string, nullable: référence du paiement externe)
+├── description (text)
+├── metadata (JSON: données supplémentaires)
+├── created_at
+└── updated_at
+```
+
+**Règles de gestion** :
+- Toutes les opérations financières passent par cette table
+- `balance_before` et `balance_after` : Snapshot pour audit
+- `status` : Permet de gérer les transactions en attente de confirmation
+- `type` détails :
+  - `deposit` : Recharge de solde
+  - `withdrawal` : Retrait de fonds
+  - `tournament_entry` : Paiement frais d'inscription
+  - `tournament_win` : Gain d'un tournoi
+  - `refund` : Remboursement (tournoi annulé)
+  - `fee` : Commission plateforme/organisateur
+
+---
+
+#### 3.1.12 Divisions (Divisions/Ligues Compétitives)
+
+```
+divisions
+├── id (PK)
+├── game_id (FK -> games.id)
+├── name (ex: "Ligue 1", "Ligue 2", "Bundesliga")
+├── slug (ex: "ligue-1")
+├── level (integer: 1 = plus haut niveau, 2, 3...)
+├── description
+├── icon_url
+├── entry_fee (décimal 10,2: frais pour rejoindre)
+├── min_mlm_rank (integer: MLM Rank minimum requis)
+├── max_mlm_rank (integer: MLM Rank maximum autorisé)
+├── max_members (integer: nombre max de joueurs)
+├── current_members_count (integer)
+├── tournament_frequency (enum: 'daily', 'weekly', 'monthly')
+├── tournament_format (enum: 'knockout', 'league')
+├── tournament_size (integer: 8, 16, 32)
+├── prizes (JSON: définition des prix)
+├── promotion_count (integer: nombre de joueurs promus par saison)
+├── relegation_count (integer: nombre de joueurs relégués par saison)
+├── is_active (boolean)
+├── created_at
+└── updated_at
+```
+
+**Règles de gestion** :
+- Hiérarchie des divisions par `level` (1 = élite, 2 = intermédiaire, etc.)
+- `entry_fee` : Frais uniques pour accéder à la division
+- Filtrage par `min_mlm_rank` et `max_mlm_rank` pour équilibrer les divisions
+- `tournament_frequency` : Définit la fréquence des tournois automatiques
+- `prizes` : JSON ex: {"1": {"coins": 100, "rank": 50}, "2": {"coins": 50, "rank": 30}}
+- Promotion/Relégation automatique en fin de saison
+
+**Exemple de hiérarchie** :
+```
+Ligue 1 (Elite)     : MLM Rank 1500+, Entry 50 coins
+Ligue 2             : MLM Rank 1200-1499, Entry 30 coins
+Ligue 3             : MLM Rank 1000-1199, Entry 20 coins
+Bundesliga (Débutant): MLM Rank 800-999, Entry 10 coins
+```
+
+---
+
+#### 3.1.13 Division_Memberships (Adhésion aux Divisions)
+
+```
+division_memberships
+├── id (PK)
+├── user_id (FK -> users.id)
+├── division_id (FK -> divisions.id)
+├── status (enum: 'active', 'inactive', 'suspended')
+├── season_points (integer: points accumulés cette saison)
+├── season_wins (integer)
+├── season_losses (integer)
+├── rank_in_division (integer: classement dans la division)
+├── joined_at
+├── left_at (nullable)
+├── last_tournament_at (nullable)
+└── updated_at
+
+UNIQUE(user_id, division_id) WHERE status = 'active'
+```
+
+**Règles de gestion** :
+- Un joueur ne peut être actif que dans une seule division à la fois
+- `season_points` : Réinitialisé à chaque nouvelle saison
+- `rank_in_division` : Mis à jour après chaque tournoi
+- Promotion : Top X joueurs de la saison passent à la division supérieure
+- Relégation : Bottom X joueurs descendent à la division inférieure
+
+---
+
+#### 3.1.14 Withdrawal_Requests (Demandes de Retrait)
+
+```
+withdrawal_requests
+├── id (PK)
+├── user_id (FK -> users.id)
+├── amount (décimal 10,2: montant en MLM Coins)
+├── amount_fcfa (décimal 10,2: équivalent en FCFA = amount × 10)
+├── phone_number (string: numéro mobile money)
+├── payment_method (enum: 'orange_money', 'mtn_money', 'moov_money', 'bank_transfer')
+├── status (enum: 'pending', 'processing', 'completed', 'rejected', 'cancelled')
+├── transaction_id (FK -> wallet_transactions.id, nullable)
+├── admin_notes (text, nullable)
+├── rejection_reason (text, nullable)
+├── processed_at (nullable)
+├── processed_by (FK -> users.id, nullable: admin qui traite)
+├── created_at
+└── updated_at
+```
+
+**Règles de gestion** :
+- Montant minimum : 10 coins (100 FCFA)
+- Montant maximum par jour : 1000 coins (10,000 FCFA)
+- `status` workflow :
+  - `pending` : En attente de traitement par admin
+  - `processing` : En cours de traitement (paiement mobile money en cours)
+  - `completed` : Retrait effectué avec succès
+  - `rejected` : Refusé (solde insuffisant, infraction, etc.)
+  - `cancelled` : Annulé par l'utilisateur
+- Le solde est débité immédiatement (transaction `pending`), remboursé si `rejected`
+
+---
+
 ### 3.2 Relations entre Entités
 
 ```
@@ -374,20 +539,31 @@ Users (1) ──────< Matches (player1_id, player2_id, winner_id)
 Users (1) ──────< Score_Declarations
 Users (1) ──────< Tournament_Messages
 Users (1) ──────< Notifications
+Users (1) ──────< Wallet_Transactions
+Users (1) ──────< Withdrawal_Requests
+Users (1) ──────< Division_Memberships
+Users (N) ─────── Divisions (current_division_id)
 
 Games (1) ──────< Tournaments
+Games (1) ──────< Divisions
+
+Divisions (1) ──────< Tournaments
+Divisions (1) ──────< Division_Memberships
 
 Tournaments (1) ──────< Tournament_Participants
 Tournaments (1) ──────< Rounds
 Tournaments (1) ──────< Matches
 Tournaments (1) ──────< Disputes
 Tournaments (1) ──────< Tournament_Messages
+Tournaments (1) ──────< Wallet_Transactions
 
 Rounds (1) ──────< Matches
 
 Matches (1) ──────< Score_Declarations
 Matches (1) ──────< Disputes
 Matches (1) ──────< Matches (next_match_id, auto-référence)
+
+Withdrawal_Requests (1) ─────── Wallet_Transactions
 ```
 
 ---
@@ -1006,6 +1182,570 @@ function getLeagueStandings(Tournament $tournament) {
     });
 
     return $standings;
+}
+```
+
+---
+
+### 4.4 Système de Wallet (Porte-monnaie)
+
+#### 4.4.1 Recharge de Solde
+
+**Workflow** :
+
+1. **Joueur demande une recharge**
+   - Montant souhaité en coins (ex: 100 coins = 1000 FCFA)
+   - Choix de la méthode de paiement (Orange Money, MTN Money, carte bancaire)
+
+2. **Initialisation du paiement**
+   ```php
+   function initiateDeposit(User $user, float $amount, string $paymentMethod) {
+       // Créer une transaction en attente
+       $transaction = WalletTransaction::create([
+           'user_id' => $user->id,
+           'type' => 'deposit',
+           'amount' => $amount,
+           'balance_before' => $user->wallet_balance,
+           'balance_after' => $user->wallet_balance, // Pas encore crédité
+           'status' => 'pending',
+           'payment_method' => $paymentMethod,
+           'description' => "Recharge de $amount coins"
+       ]);
+
+       // Appeler l'API de paiement externe (ex: CinetPay, Fedapay)
+       $paymentGateway = PaymentGateway::init($paymentMethod);
+       $paymentResponse = $paymentGateway->initiate([
+           'amount' => $amount * 10, // Convertir en FCFA
+           'currency' => 'XOF',
+           'transaction_id' => $transaction->id,
+           'callback_url' => route('payment.callback')
+       ]);
+
+       $transaction->update([
+           'payment_reference' => $paymentResponse['reference']
+       ]);
+
+       return $paymentResponse['payment_url'];
+   }
+   ```
+
+3. **Callback de paiement** (webhook du gateway)
+   ```php
+   function handlePaymentCallback(Request $request) {
+       $reference = $request->input('reference');
+       $status = $request->input('status'); // 'success' ou 'failed'
+
+       $transaction = WalletTransaction::where('payment_reference', $reference)->first();
+
+       if ($status === 'success') {
+           // Créditer le solde
+           $user = $transaction->user;
+           $user->wallet_balance += $transaction->amount;
+           $user->total_earned += $transaction->amount;
+           $user->save();
+
+           $transaction->update([
+               'status' => 'completed',
+               'balance_after' => $user->wallet_balance
+           ]);
+
+           // Notification
+           $user->notify(new DepositSuccessNotification($transaction));
+       } else {
+           $transaction->update(['status' => 'failed']);
+           $user->notify(new DepositFailedNotification($transaction));
+       }
+   }
+   ```
+
+---
+
+#### 4.4.2 Retrait de Fonds
+
+**Workflow** :
+
+1. **Joueur demande un retrait**
+   - Montant à retirer (min 10 coins = 100 FCFA, max 1000 coins/jour)
+   - Numéro de mobile money
+   - Validation : solde suffisant, compte vérifié
+
+2. **Création de la demande**
+   ```php
+   function requestWithdrawal(User $user, float $amount, string $phoneNumber, string $paymentMethod) {
+       // Validations
+       if ($amount < 10) {
+           throw new ValidationException('Montant minimum : 10 coins');
+       }
+
+       if ($user->wallet_balance < $amount) {
+           throw new ValidationException('Solde insuffisant');
+       }
+
+       if (!$user->is_verified) {
+           throw new ValidationException('Compte non vérifié');
+       }
+
+       // Débiter immédiatement (en attente de traitement)
+       $transaction = WalletTransaction::create([
+           'user_id' => $user->id,
+           'type' => 'withdrawal',
+           'amount' => -$amount,
+           'balance_before' => $user->wallet_balance,
+           'balance_after' => $user->wallet_balance - $amount,
+           'status' => 'pending',
+           'payment_method' => $paymentMethod,
+           'description' => "Retrait de $amount coins vers $phoneNumber"
+       ]);
+
+       $user->wallet_balance -= $amount;
+       $user->save();
+
+       // Créer la demande de retrait
+       $withdrawalRequest = WithdrawalRequest::create([
+           'user_id' => $user->id,
+           'amount' => $amount,
+           'amount_fcfa' => $amount * 10,
+           'phone_number' => $phoneNumber,
+           'payment_method' => $paymentMethod,
+           'status' => 'pending',
+           'transaction_id' => $transaction->id
+       ]);
+
+       // Notifier les admins
+       Admin::notifyAll(new WithdrawalRequestNotification($withdrawalRequest));
+
+       return $withdrawalRequest;
+   }
+   ```
+
+3. **Traitement par l'admin**
+   ```php
+   function processWithdrawal(WithdrawalRequest $request, User $admin) {
+       $request->update([
+           'status' => 'processing',
+           'processed_by' => $admin->id
+       ]);
+
+       // Effectuer le paiement mobile money
+       $paymentGateway = PaymentGateway::init($request->payment_method);
+       $result = $paymentGateway->sendMoney([
+           'amount' => $request->amount_fcfa,
+           'phone_number' => $request->phone_number,
+           'description' => "Retrait MLM - {$request->user->username}"
+       ]);
+
+       if ($result['success']) {
+           $request->update([
+               'status' => 'completed',
+               'processed_at' => now()
+           ]);
+
+           $request->transaction->update(['status' => 'completed']);
+
+           $request->user->notify(new WithdrawalCompletedNotification($request));
+       } else {
+           // Échec : rembourser le joueur
+           $request->update([
+               'status' => 'rejected',
+               'rejection_reason' => $result['error']
+           ]);
+
+           $user = $request->user;
+           $user->wallet_balance += $request->amount; // Rembourser
+           $user->save();
+
+           $request->transaction->update(['status' => 'failed']);
+
+           $user->notify(new WithdrawalRejectedNotification($request));
+       }
+   }
+   ```
+
+---
+
+### 4.5 Tournois Payants
+
+#### 4.5.1 Création d'un Tournoi Payant
+
+**Workflow Organisateur** :
+
+```php
+function createPaidTournament(User $organizer, array $data) {
+    $tournament = Tournament::create([
+        'organizer_id' => $organizer->id,
+        'name' => $data['name'],
+        'game_id' => $data['game_id'],
+        'type' => $data['type'],
+        'format' => $data['format'],
+        'max_players' => $data['max_players'],
+        'is_paid' => true,
+        'entry_fee' => $data['entry_fee'], // ex: 20 coins
+        'platform_fee_percentage' => 10, // 10% pour MLM
+        'organizer_fee_percentage' => 5,  // 5% pour l'organisateur
+        'prize_distribution' => $data['prize_distribution'] // ex: {"1": 50, "2": 30, "3-4": 10}
+    ]);
+
+    // Calculer la cagnotte
+    $totalCollected = $tournament->entry_fee * $tournament->max_players;
+    $platformFee = $totalCollected * ($tournament->platform_fee_percentage / 100);
+    $organizerFee = $totalCollected * ($tournament->organizer_fee_percentage / 100);
+    $prizePool = $totalCollected - $platformFee - $organizerFee;
+
+    $tournament->update(['prize_pool' => $prizePool]);
+
+    return $tournament;
+}
+```
+
+**Exemple de calcul** :
+- Entry fee : 20 coins
+- 8 joueurs
+- Total collecté : 160 coins
+- Frais plateforme (10%) : 16 coins
+- Frais organisateur (5%) : 8 coins
+- Cagnotte : 136 coins
+
+Répartition (50% / 30% / 20%) :
+- 1er : 68 coins
+- 2ème : 40.8 coins
+- 3-4ème : 13.6 coins chacun
+
+---
+
+#### 4.5.2 Inscription à un Tournoi Payant
+
+**Workflow** :
+
+```php
+function joinPaidTournament(User $user, Tournament $tournament) {
+    // Vérifier le solde
+    if ($user->wallet_balance < $tournament->entry_fee) {
+        throw new InsufficientBalanceException(
+            "Solde insuffisant. Requis : {$tournament->entry_fee} coins, Disponible : {$user->wallet_balance} coins"
+        );
+    }
+
+    // Débiter les frais d'inscription
+    $transaction = WalletTransaction::create([
+        'user_id' => $user->id,
+        'type' => 'tournament_entry',
+        'amount' => -$tournament->entry_fee,
+        'balance_before' => $user->wallet_balance,
+        'balance_after' => $user->wallet_balance - $tournament->entry_fee,
+        'status' => 'completed',
+        'tournament_id' => $tournament->id,
+        'description' => "Inscription au tournoi : {$tournament->name}"
+    ]);
+
+    $user->wallet_balance -= $tournament->entry_fee;
+    $user->total_spent += $tournament->entry_fee;
+    $user->save();
+
+    // Créer le participant
+    $participant = TournamentParticipant::create([
+        'tournament_id' => $tournament->id,
+        'user_id' => $user->id,
+        'elo_before' => $user->mlm_rank
+    ]);
+
+    $tournament->increment('current_players_count');
+
+    return $participant;
+}
+```
+
+---
+
+#### 4.5.3 Distribution des Gains
+
+**Workflow (en fin de tournoi)** :
+
+```php
+function distributePrizes(Tournament $tournament) {
+    if (!$tournament->is_paid) {
+        return; // Tournoi gratuit
+    }
+
+    $prizeDistribution = $tournament->prize_distribution;
+    $participants = $tournament->participants;
+
+    foreach ($prizeDistribution as $position => $percentage) {
+        $prizeAmount = ($tournament->prize_pool * $percentage) / 100;
+
+        if (str_contains($position, '-')) {
+            // Ex: "3-4" = 10% chacun
+            [$start, $end] = explode('-', $position);
+            $winners = $participants->whereBetween('final_position', [$start, $end]);
+            $prizePerWinner = $prizeAmount / $winners->count();
+
+            foreach ($winners as $winner) {
+                creditWinner($winner->user, $prizePerWinner, $tournament);
+            }
+        } else {
+            // Ex: "1" = 50%
+            $winner = $participants->where('final_position', $position)->first();
+            if ($winner) {
+                creditWinner($winner->user, $prizeAmount, $tournament);
+            }
+        }
+    }
+
+    // Créditer l'organisateur
+    $organizerEarnings = ($tournament->entry_fee * $tournament->max_players * $tournament->organizer_fee_percentage) / 100;
+    if ($organizerEarnings > 0) {
+        creditOrganizer($tournament->organizer, $organizerEarnings, $tournament);
+    }
+}
+
+function creditWinner(User $user, float $amount, Tournament $tournament) {
+    $transaction = WalletTransaction::create([
+        'user_id' => $user->id,
+        'type' => 'tournament_win',
+        'amount' => $amount,
+        'balance_before' => $user->wallet_balance,
+        'balance_after' => $user->wallet_balance + $amount,
+        'status' => 'completed',
+        'tournament_id' => $tournament->id,
+        'description' => "Gain du tournoi : {$tournament->name}"
+    ]);
+
+    $user->wallet_balance += $amount;
+    $user->total_earned += $amount;
+    $user->save();
+
+    $user->notify(new PrizeWonNotification($tournament, $amount));
+}
+```
+
+---
+
+#### 4.5.4 Remboursement (Tournoi Annulé)
+
+```php
+function refundTournament(Tournament $tournament) {
+    $tournament->update(['status' => 'cancelled']);
+
+    $participants = $tournament->participants;
+
+    foreach ($participants as $participant) {
+        // Rembourser les frais d'inscription
+        $transaction = WalletTransaction::create([
+            'user_id' => $participant->user_id,
+            'type' => 'refund',
+            'amount' => $tournament->entry_fee,
+            'balance_before' => $participant->user->wallet_balance,
+            'balance_after' => $participant->user->wallet_balance + $tournament->entry_fee,
+            'status' => 'completed',
+            'tournament_id' => $tournament->id,
+            'description' => "Remboursement : {$tournament->name} (annulé)"
+        ]);
+
+        $participant->user->wallet_balance += $tournament->entry_fee;
+        $participant->user->save();
+
+        $participant->user->notify(new TournamentRefundedNotification($tournament));
+    }
+}
+```
+
+---
+
+### 4.6 Système de Divisions Automatiques
+
+#### 4.6.1 Rejoindre une Division
+
+**Workflow** :
+
+```php
+function joinDivision(User $user, Division $division) {
+    // Vérifications
+    if ($user->mlm_rank < $division->min_mlm_rank || $user->mlm_rank > $division->max_mlm_rank) {
+        throw new ValidationException("Votre MLM Rank ({$user->mlm_rank}) ne correspond pas à cette division.");
+    }
+
+    if ($division->current_members_count >= $division->max_members) {
+        throw new ValidationException("Cette division est complète.");
+    }
+
+    if ($user->wallet_balance < $division->entry_fee) {
+        throw new InsufficientBalanceException("Solde insuffisant pour rejoindre cette division.");
+    }
+
+    // Débiter les frais
+    $transaction = WalletTransaction::create([
+        'user_id' => $user->id,
+        'type' => 'tournament_entry',
+        'amount' => -$division->entry_fee,
+        'balance_before' => $user->wallet_balance,
+        'balance_after' => $user->wallet_balance - $division->entry_fee,
+        'status' => 'completed',
+        'description' => "Accès à la division : {$division->name}"
+    ]);
+
+    $user->wallet_balance -= $division->entry_fee;
+    $user->current_division_id = $division->id;
+    $user->save();
+
+    // Créer l'adhésion
+    $membership = DivisionMembership::create([
+        'user_id' => $user->id,
+        'division_id' => $division->id,
+        'status' => 'active',
+        'season_points' => 0
+    ]);
+
+    $division->increment('current_members_count');
+
+    return $membership;
+}
+```
+
+---
+
+#### 4.6.2 Génération Automatique des Tournois de Division
+
+**Workflow (Cron Job)** :
+
+```php
+// Exécuté selon la fréquence définie (daily, weekly, monthly)
+function generateDivisionTournaments() {
+    $divisions = Division::where('is_active', true)->get();
+
+    foreach ($divisions as $division) {
+        $shouldGenerate = false;
+
+        switch ($division->tournament_frequency) {
+            case 'daily':
+                $shouldGenerate = true; // Tous les jours à minuit
+                break;
+            case 'weekly':
+                $shouldGenerate = now()->dayOfWeek === 1; // Tous les lundis
+                break;
+            case 'monthly':
+                $shouldGenerate = now()->day === 1; // Premier du mois
+                break;
+        }
+
+        if ($shouldGenerate) {
+            createDivisionTournament($division);
+        }
+    }
+}
+
+function createDivisionTournament(Division $division) {
+    // Récupérer les membres actifs
+    $members = $division->memberships()
+        ->where('status', 'active')
+        ->limit($division->tournament_size)
+        ->orderBy('rank_in_division')
+        ->get();
+
+    if ($members->count() < $division->tournament_size) {
+        return; // Pas assez de joueurs
+    }
+
+    // Créer le tournoi
+    $tournament = Tournament::create([
+        'organizer_id' => 1, // Système
+        'game_id' => $division->game_id,
+        'division_id' => $division->id,
+        'name' => "{$division->name} - " . now()->format('d/m/Y'),
+        'type' => $division->tournament_format,
+        'format' => $division->tournament_size,
+        'max_players' => $division->tournament_size,
+        'is_paid' => false, // Gratuit (frais déjà payés à l'adhésion)
+        'is_division_tournament' => true,
+        'is_public' => false
+    ]);
+
+    // Inscrire les joueurs automatiquement
+    foreach ($members as $member) {
+        TournamentParticipant::create([
+            'tournament_id' => $tournament->id,
+            'user_id' => $member->user_id,
+            'elo_before' => $member->user->mlm_rank
+        ]);
+
+        $tournament->increment('current_players_count');
+    }
+
+    // Démarrer automatiquement
+    $tournament->update(['status' => 'ready']);
+
+    // Notifier tous les participants
+    foreach ($members as $member) {
+        $member->user->notify(new DivisionTournamentStartedNotification($tournament));
+    }
+}
+```
+
+---
+
+#### 4.6.3 Promotion et Relégation
+
+**Workflow (Fin de Saison)** :
+
+```php
+function processSeasonEnd(Division $division) {
+    $memberships = $division->memberships()
+        ->where('status', 'active')
+        ->orderBy('season_points', 'desc')
+        ->get();
+
+    // Promotion (top X joueurs)
+    $promotedMembers = $memberships->take($division->promotion_count);
+    $upperDivision = Division::where('level', $division->level - 1)->first();
+
+    if ($upperDivision) {
+        foreach ($promotedMembers as $member) {
+            promotePlayer($member, $upperDivision);
+        }
+    }
+
+    // Relégation (bottom X joueurs)
+    $relegatedMembers = $memberships->slice(-$division->relegation_count);
+    $lowerDivision = Division::where('level', $division->level + 1)->first();
+
+    if ($lowerDivision) {
+        foreach ($relegatedMembers as $member) {
+            relegatePlayer($member, $lowerDivision);
+        }
+    }
+
+    // Réinitialiser les points de saison
+    $division->memberships()->update([
+        'season_points' => 0,
+        'season_wins' => 0,
+        'season_losses' => 0
+    ]);
+}
+
+function promotePlayer(DivisionMembership $membership, Division $newDivision) {
+    $membership->update(['status' => 'inactive', 'left_at' => now()]);
+
+    DivisionMembership::create([
+        'user_id' => $membership->user_id,
+        'division_id' => $newDivision->id,
+        'status' => 'active',
+        'season_points' => 0
+    ]);
+
+    $membership->user->update(['current_division_id' => $newDivision->id]);
+    $membership->user->notify(new PromotedNotification($newDivision));
+}
+
+function relegatePlayer(DivisionMembership $membership, Division $newDivision) {
+    $membership->update(['status' => 'inactive', 'left_at' => now()]);
+
+    DivisionMembership::create([
+        'user_id' => $membership->user_id,
+        'division_id' => $newDivision->id,
+        'status' => 'active',
+        'season_points' => 0
+    ]);
+
+    $membership->user->update(['current_division_id' => $newDivision->id]);
+    $membership->user->notify(new RelegatedNotification($newDivision));
 }
 ```
 
