@@ -459,28 +459,49 @@ Les frais augmentent chaque édition pour créer de l'exclusivité :
 ```
 Revenus totaux = Nombre d'inscrits × Frais d'inscription
 
-Prize Pools (montants fixes) :
-├─ 1er D1 : 100 MLC
-├─ 1er D2 : 60 MLC
-├─ 1er D3 : 40 MLC
-└─ 1er D4 : 20 MLC
-Total récompenses : 220 MLC
+Distribution :
+├─ 55% → Prize Pools (récompenses pour les 4 champions)
+└─ 45% → Plateforme MLM (fonctionnement, support, imprévus)
 
-Le reste des revenus revient à la plateforme
+Répartition du Prize Pool entre les champions :
+├─ 1er D4 (Elite) : 45.5% du prize pool
+├─ 1er D3 (Excellence) : 27.3% du prize pool
+├─ 1er D2 (Confirmé) : 18.2% du prize pool
+└─ 1er D1 (Standard) : 9.0% du prize pool
+Total : 100% du prize pool
 ```
 
-**Exemple Édition 1 : 100 équipes inscrites**
+**Exemple Édition 1 : 100 équipes × 4 MLC**
 ```
-100 équipes × 4 MLC = 400 MLC (200,000 FCFA)
+Revenus totaux : 100 × 4 MLC = 400 MLC (200,000 FCFA)
 
 Distribution :
-├─ 220 MLC (55%) → Prize Pools (4 champions uniquement)
-│   ├─ 1er D1 : 100 MLC (50,000 FCFA)
-│   ├─ 1er D2 : 60 MLC (30,000 FCFA)
-│   ├─ 1er D3 : 40 MLC (20,000 FCFA)
-│   └─ 1er D4 : 20 MLC (10,000 FCFA)
-└─ 180 MLC (45%) → Plateforme MLM (fonctionnement, support, imprévus)
+├─ 220 MLC (55%) → Prize Pools
+│   ├─ 1er D4 : 220 × 45.5% = 100 MLC (50,000 FCFA)
+│   ├─ 1er D3 : 220 × 27.3% = 60 MLC (30,000 FCFA)
+│   ├─ 1er D2 : 220 × 18.2% = 40 MLC (20,000 FCFA)
+│   └─ 1er D1 : 220 × 9.0% = 20 MLC (10,000 FCFA)
+└─ 180 MLC (45%) → Plateforme MLM
 ```
+
+**Exemple Édition 2 : 100 équipes × 6 MLC**
+```
+Revenus totaux : 100 × 6 MLC = 600 MLC (300,000 FCFA)
+
+Distribution :
+├─ 330 MLC (55%) → Prize Pools
+│   ├─ 1er D4 : 330 × 45.5% = 150 MLC (75,000 FCFA)
+│   ├─ 1er D3 : 330 × 27.3% = 90 MLC (45,000 FCFA)
+│   ├─ 1er D2 : 330 × 18.2% = 60 MLC (30,000 FCFA)
+│   └─ 1er D1 : 330 × 9.0% = 30 MLC (15,000 FCFA)
+└─ 270 MLC (45%) → Plateforme MLM
+```
+
+**💡 Avantage du système en pourcentage** :
+- ✅ Les récompenses évoluent automatiquement avec les frais d'inscription
+- ✅ Plus il y a de participants, plus les gains augmentent
+- ✅ Transparence totale sur la répartition
+- ✅ Scalable sans modification du système
 
 ---
 
@@ -488,28 +509,38 @@ Distribution :
 
 **Système de récompense du champion uniquement** :
 
-Seuls les **1ers de chaque division** reçoivent des récompenses (montants fixes) :
+Seuls les **1ers de chaque division** reçoivent des récompenses, calculées en **pourcentage du prize pool total** :
 
 ```
-Prize Pools (montants fixes) :
+Répartition du Prize Pool (55% des revenus totaux) :
 
-🏆 Division 1 (D1) - Standard : 100 MLC (50,000 FCFA)
-   → Champion (1er place) : 100 MLC
+🏆 Division 4 (D4) - Elite : 45.5% du prize pool
+   → Champion (1er place) : Gagne le plus (meilleure division)
    → Autres positions : 0 MLC
 
-💎 Division 2 (D2) - Confirmé : 60 MLC (30,000 FCFA)
-   → Champion (1er place) : 60 MLC
+💎 Division 3 (D3) - Excellence : 27.3% du prize pool
+   → Champion (1er place) : Deuxième plus grosse récompense
    → Autres positions : 0 MLC
 
-🥈 Division 3 (D3) - Excellence : 40 MLC (20,000 FCFA)
-   → Champion (1er place) : 40 MLC
+🥈 Division 2 (D2) - Confirmé : 18.2% du prize pool
+   → Champion (1er place) : Troisième récompense
    → Autres positions : 0 MLC
 
-⚽ Division 4 (D4) - Elite : 20 MLC (10,000 FCFA)
-   → Champion (1er place) : 20 MLC
+⚽ Division 1 (D1) - Standard : 9.0% du prize pool
+   → Champion (1er place) : Plus petite récompense (division la plus basse)
    → Autres positions : 0 MLC
 
-TOTAL : 220 MLC distribués aux 4 champions
+TOTAL : 100% du prize pool réparti entre les 4 champions
+```
+
+**💡 Exemple concret Édition 1 (100 joueurs × 4 MLC = 400 MLC)** :
+```
+Prize Pool = 400 × 55% = 220 MLC
+
+├─ Champion D4 : 220 × 45.5% = 100 MLC (50,000 FCFA) 💰
+├─ Champion D3 : 220 × 27.3% = 60 MLC (30,000 FCFA) 💰
+├─ Champion D2 : 220 × 18.2% = 40 MLC (20,000 FCFA) 💰
+└─ Champion D1 : 220 × 9.0% = 20 MLC (10,000 FCFA) 💰
 ```
 
 **💡 Pourquoi seuls les champions ?**
@@ -517,6 +548,7 @@ TOTAL : 220 MLC distribués aux 4 champions
 - 🏆 **Récompense l'excellence** : Seule la victoire compte
 - ⚖️ **Simplicité** : Distribution claire et transparente
 - 💪 **Motivation** : Objectif unique et clair pour chaque division
+- 📈 **Scalable** : Les montants évoluent automatiquement avec les inscriptions
 
 ---
 
@@ -527,16 +559,17 @@ TOTAL : 220 MLC distribués aux 4 champions
 **🏆 Auto-qualification des Champions** :
 ```
 Les 1ers de chaque division (D1, D2, D3, D4) sont AUTOMATIQUEMENT qualifiés
-pour l'édition suivante et seront TOUS placés en Division 1 (D1) pour cette
-prochaine édition.
+pour l'édition suivante et seront TOUS placés en Division 4 (D4) - Elite
+pour cette prochaine édition.
 
 Exemple Édition 1 :
-├─ 1er D1 → Qualifié automatiquement pour Édition 2 en D1
-├─ 1er D2 → Qualifié automatiquement pour Édition 2 en D1
-├─ 1er D3 → Qualifié automatiquement pour Édition 2 en D1
-└─ 1er D4 → Qualifié automatiquement pour Édition 2 en D1
+├─ 1er D1 → Qualifié automatiquement pour Édition 2 en D4 (Elite)
+├─ 1er D2 → Qualifié automatiquement pour Édition 2 en D4 (Elite)
+├─ 1er D3 → Qualifié automatiquement pour Édition 2 en D4 (Elite)
+└─ 1er D4 → Qualifié automatiquement pour Édition 2 en D4 (Elite)
 
 Ces 4 champions ne paient PAS de frais d'inscription pour l'Édition 2.
+Ils jouent directement dans la division d'élite (D4).
 ```
 
 **❌ Élimination Temporaire des Derniers** :
@@ -556,7 +589,7 @@ Les derniers de D1, D2, D3, D4 de l'Édition 1 :
 ```
 1. 📊 Calcul des classements finaux dans chaque division
 2. 🏆 Distribution des prize pools aux 4 champions uniquement
-3. 🎫 Auto-qualification des champions pour Édition N+1 en D1
+3. 🎫 Auto-qualification des champions pour Édition N+1 en D4 (Elite)
 4. ❌ Élimination temporaire des derniers (skip Édition N+1)
 5. 📜 Enregistrement dans l'historique MLM (Hall of Fame)
 ```
@@ -564,7 +597,7 @@ Les derniers de D1, D2, D3, D4 de l'Édition 1 :
 **Début d'Édition N+1** :
 ```
 1. 🆕 Inscriptions ouvertes à TOUS (sauf derniers d'Édition N)
-   ├─ Champions Édition N : Qualifiés automatiquement en D1 (gratuit)
+   ├─ Champions Édition N : Qualifiés automatiquement en D4 (gratuit)
    └─ Autres joueurs : Doivent s'inscrire et payer les frais
 
 2. 📋 Processus d'inscription :
@@ -576,20 +609,23 @@ Les derniers de D1, D2, D3, D4 de l'Édition 1 :
    ├─ 5 matchs par équipe
    └─ Répartition : 1er→D4, 2ème→D3, 3ème→D2, 4ème→D1
 
-4. 🏁 Édition régulière lance avec 4 champions pré-qualifiés en D1
+4. 🏁 Édition régulière lance avec 4 champions pré-qualifiés en D4
 ```
 
 **💡 Exemple concret** :
 ```
 Édition 1 (Juillet-Septembre 2024) - 4 MLC
-├─ Karim termine 1er D1 → 🏆 100 MLC + Auto-qualifié Édition 2 en D1 (gratuit)
+├─ Karim termine 1er D1 → 🏆 Récompense + Auto-qualifié Édition 2 en D4 (gratuit)
 ├─ Amadou termine 5ème D2 → Rien
 ├─ Sarah termine DERNIER D3 → ❌ Éliminée pour Édition 2
-└─ Moussa termine 1er D4 → 🏆 20 MLC + Auto-qualifié Édition 2 en D1 (gratuit)
+├─ Moussa termine 1er D4 → 🏆 Récompense + Auto-qualifié Édition 2 en D4 (gratuit)
+└─ Ibrahim termine 1er D3 → 🏆 Récompense + Auto-qualifié Édition 2 en D4 (gratuit)
 
 Édition 2 (Octobre-Décembre 2024) - 6 MLC
-├─ Karim : Joue directement en D1 (auto-qualifié, pas de frais)
-├─ Moussa : Joue directement en D1 (auto-qualifié, pas de frais)
+├─ Karim : Joue directement en D4 (auto-qualifié, pas de frais)
+├─ Moussa : Joue directement en D4 (auto-qualifié, pas de frais)
+├─ Ibrahim : Joue directement en D4 (auto-qualifié, pas de frais)
+├─ + 1 autre champion : Joue directement en D4 (auto-qualifié, pas de frais)
 ├─ Amadou : Doit se réinscrire et payer 6 MLC + qualification
 ├─ Sarah : ❌ NE PEUT PAS jouer (éliminée temporairement)
 └─ Nouveaux joueurs : S'inscrivent et passent qualification
@@ -752,28 +788,38 @@ Chaque édition, MLM conserve **l'historique complet** des performances et des c
 **Exemple d'historique** :
 ```
 Édition 1 - Juillet à Septembre 2024 (Dream League Soccer)
-├─ D1 (Standard)
-│   ├─ Champion : "KarimFCPro" - 45 points - 🏆 100 MLC
-│   ├─ 2ème : "AmadouElite" - 42 points
-│   ├─ 3ème : "Moussa_24" - 38 points
-│   └─ Dernier : "Youssef_Pro" - 12 points (éliminé Édition 2)
-├─ D2 (Confirmé)
-│   └─ Champion : "SarahPro" - 48 points - 🏆 60 MLC
+100 joueurs × 4 MLC = Prize Pool de 220 MLC
+
+├─ D4 (Elite)
+│   └─ Champion : "AmadouMobile" - 44 points - 🏆 100 MLC (45.5%)
+│       → Auto-qualifié Édition 2 en D4 (gratuit)
 ├─ D3 (Excellence)
-│   └─ Champion : "BrahimaLion" - 46 points - 🏆 40 MLC
-└─ D4 (Elite)
-    └─ Champion : "AmadouMobile" - 44 points - 🏆 20 MLC
+│   └─ Champion : "BrahimaLion" - 46 points - 🏆 60 MLC (27.3%)
+│       → Auto-qualifié Édition 2 en D4 (gratuit)
+├─ D2 (Confirmé)
+│   └─ Champion : "SarahPro" - 48 points - 🏆 40 MLC (18.2%)
+│       → Auto-qualifié Édition 2 en D4 (gratuit)
+└─ D1 (Standard)
+    ├─ Champion : "KarimFCPro" - 45 points - 🏆 20 MLC (9.0%)
+    │   → Auto-qualifié Édition 2 en D4 (gratuit)
+    ├─ 2ème : "Moussa_24" - 38 points
+    └─ Dernier : "Youssef_Pro" - 12 points (éliminé Édition 2)
 
 Édition 2 - Octobre à Décembre 2024 (Dream League Soccer)
-├─ D1 (Standard)
-│   ├─ 4 champions Édition 1 auto-qualifiés
-│   └─ Champion : "KarimFCPro" - 50 points - 🏆 100 MLC
-├─ D2 (Confirmé)
-│   └─ Champion : "NewPlayer123" - 47 points - 🏆 60 MLC
+150 joueurs × 6 MLC = Prize Pool de 495 MLC
+
+├─ D4 (Elite) - Contient les 4 champions Édition 1
+│   └─ Champion : "KarimFCPro" - 50 points - 🏆 225 MLC (45.5%)
+│       → Auto-qualifié Édition 3 en D4 (gratuit)
 ├─ D3 (Excellence)
-│   └─ Champion : "Ibrahim24" - 45 points - 🏆 40 MLC
-└─ D4 (Elite)
-    └─ Champion : "TeamRocket" - 42 points - 🏆 20 MLC
+│   └─ Champion : "Ibrahim24" - 45 points - 🏆 135 MLC (27.3%)
+│       → Auto-qualifié Édition 3 en D4 (gratuit)
+├─ D2 (Confirmé)
+│   └─ Champion : "NewPlayer123" - 47 points - 🏆 90 MLC (18.2%)
+│       → Auto-qualifié Édition 3 en D4 (gratuit)
+└─ D1 (Standard)
+    └─ Champion : "TeamRocket" - 42 points - 🏆 45 MLC (9.0%)
+        → Auto-qualifié Édition 3 en D4 (gratuit)
 ```
 
 **Consultation de l'historique** :
@@ -1501,11 +1547,11 @@ Si **100 joueurs** s'inscrivent à l'Édition 1 (4 MLC chacun) :
 100 × 4 MLC = 400 MLC collectés
 
 Distribution :
-├─ 220 MLC → Prize Pools (4 champions)
-│   ├─ 1er D1 : 100 MLC
-│   ├─ 1er D2 : 60 MLC
-│   ├─ 1er D3 : 40 MLC
-│   └─ 1er D4 : 20 MLC
+├─ 220 MLC (55%) → Prize Pools (4 champions)
+│   ├─ Champion D4 : 220 × 45.5% = 100 MLC
+│   ├─ Champion D3 : 220 × 27.3% = 60 MLC
+│   ├─ Champion D2 : 220 × 18.2% = 40 MLC
+│   └─ Champion D1 : 220 × 9.0% = 20 MLC
 └─ 180 MLC (45%) → Plateforme MLM
 
 Revenus plateforme : 180 MLC = 90,000 FCFA par édition
@@ -1514,15 +1560,29 @@ Revenus plateforme : 180 MLC = 90,000 FCFA par édition
 **Projection annuelle (4 éditions/an)** :
 ```
 Si moyenne de 100 joueurs par édition :
+Revenus par édition : 100 × 4 MLC = 400 MLC
+Plateforme (45%) : 400 × 45% = 180 MLC par édition
 4 éditions × 180 MLC = 720 MLC/an
 = 360,000 FCFA/an (~550 EUR/an)
 
 Si moyenne de 500 joueurs par édition :
 Revenus par édition : 500 × 4 MLC = 2,000 MLC
-Plateforme : 2,000 - 220 = 1,780 MLC
-4 éditions × 1,780 MLC = 7,120 MLC/an
-= 3,560,000 FCFA/an (~5,400 EUR/an)
+Plateforme (45%) : 2,000 × 45% = 900 MLC par édition
+4 éditions × 900 MLC = 3,600 MLC/an
+= 1,800,000 FCFA/an (~2,740 EUR/an)
+
+Si moyenne de 500 joueurs ET frais augmentent (Édition 2 = 6 MLC) :
+Revenus par édition : 500 × 6 MLC = 3,000 MLC
+Plateforme (45%) : 3,000 × 45% = 1,350 MLC par édition
+4 éditions × 1,350 MLC = 5,400 MLC/an
+= 2,700,000 FCFA/an (~4,110 EUR/an)
 ```
+
+**💡 Avantage du système en %** :
+- Les revenus de la plateforme évoluent automatiquement avec :
+  - Le nombre de participants
+  - L'augmentation des frais d'inscription
+- Pas besoin de recalculer les montants manuellement
 
 ---
 
