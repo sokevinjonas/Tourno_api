@@ -8,7 +8,7 @@
 
 **Version 1.0**
 
-**Décembre 2024**
+**Décembre 2025**
 
 ---
 
@@ -65,7 +65,7 @@
    - 3.1 [Vue d'Ensemble](#vue-densemble)
    - 3.2 [Cas d'Usage Concret](#-cas-dusage-concret--le-tournoi-damadou)
 4. [Les Fonctionnalités Uniques de MLM](#-les-fonctionnalités-uniques-de-mlm)
-   - 4.1 [Divisions Automatiques](#1-divisions-automatiques-système-de-saisons-compétitives)
+   - 4.1 [Divisions Automatiques](#1-divisions-automatiques-système-déditions-compétitives)
    - 4.2 [MLM Rank](#2-mlm-rank-le-classement-elo)
    - 4.3 [Système d'Équipes et Bannissement](#-système-déquipes-pseudos-de-jeu)
 5. [Plateforme Web & Interactions](#-plateforme-web--interactions)
@@ -325,13 +325,13 @@ Karim perd en demi-finale mais reçoit 2 coins (3-4ème place) dans son solde.
 
 ## 🏅 Les Fonctionnalités Uniques de MLM
 
-### 1. **Divisions Automatiques** (Système de Saisons Compétitives)
+### 1. **Divisions Automatiques** (Système d'Éditions Compétitives)
 
-MLM crée un **système de divisions saisonnières** avec qualification et réinitialisation à chaque saison, inspiré des ligues de football professionnelles :
+MLM crée un **système de divisions par éditions** avec qualification et réinitialisation à chaque édition, inspiré des ligues de football professionnelles :
 
-#### **🏁 Système d'Accès aux Divisions par Saison**
+#### **🏁 Système d'Accès aux Divisions par Édition**
 
-**⚙️ Principe de base** : Chaque saison utilise le **MÊME processus** de qualification et répartition.
+**⚙️ Principe de base** : Chaque édition utilise le **MÊME processus** de qualification et répartition.
 
 **📋 Processus d'Inscription avec Liste d'Attente**
 
@@ -355,14 +355,14 @@ Si liste d'attente = 20 à 40 personnes :
 
 Si liste d'attente > 40 personnes :
 → Blocage définitif à 120 équipes
-→ Les autres reçoivent priorité pour la Saison suivante
+→ Les autres reçoivent priorité pour l'Édition suivante
 ```
 
-**Étape 3 : Lancement de la saison**
+**Étape 3 : Lancement de l'édition**
 ```
 Cas A : < 80 inscrits
 → Formation directe en 4 divisions (pas de qualification)
-→ Répartition équitable entre D1, D2, D3, D4
+→ Répartition équitable entre D4, D3, D2, D1
 
 Cas B : 80 à 120 inscrits
 → Phase de qualification obligatoire
@@ -371,7 +371,7 @@ Cas B : 80 à 120 inscrits
 
 **💡 Pourquoi ce système ?**
 - ✅ **Flexibilité** : Accepter plus de joueurs si forte demande
-- ✅ **Équité** : Liste d'attente avec priorité pour saison suivante
+- ✅ **Équité** : Liste d'attente avec priorité pour édition suivante
 - ✅ **Gestion optimale** : Maximum 120 équipes = 20 groupes (facile à gérer)
 
 ---
@@ -387,7 +387,7 @@ Semaines 1-2 : Phase de qualification (2 semaines)
 ├─ 5 matchs au total par équipe
 └─ Classement basé sur points (Victoire = 3pts, Nul = 1pt, Défaite = 0pt)
 
-Semaines 3-12 : Saison régulière (10 semaines)
+Semaines 3-12 : Édition régulière (10 semaines)
 ├─ Les qualifiés jouent dans leur division respective
 └─ Compétition pour les titres de champion
 
@@ -396,13 +396,15 @@ Semaine 13 : Finales et Récompenses
 
 **🏆 Répartition après qualification (Groupes de 6)** :
 ```
-🥇 1er du groupe → Division 4 (D4) - Elite
+🥇 1er du groupe → Division 4 (D4) - Elite (Meilleure division)
 🥈 2ème du groupe → Division 3 (D3) - Excellence
 🥉 3ème du groupe → Division 2 (D2) - Confirmé
-⚪ 4ème du groupe → Division 1 (D1) - Standard
+⚪ 4ème du groupe → Division 1 (D1) - Standard (Plus basse division)
 ❌ 5ème du groupe → ÉLIMINÉ (remboursé 75%)
 ❌ 6ème du groupe → ÉLIMINÉ (remboursé 75%)
 ```
+
+**Note importante** : L'ordre des divisions est **D4 > D3 > D2 > D1** (D4 étant la division d'élite, D1 la division standard).
 
 **💡 Exemple concret : 120 équipes inscrites**
 ```
@@ -421,7 +423,7 @@ Résultats après qualification :
 ├─ 20 équipes → D1 (les 4èmes de chaque groupe)
 └─ 40 équipes → Éliminées et remboursées à 75%
 
-Saison régulière (10 semaines) :
+Édition régulière (10 semaines) :
 ├─ D4 : 20 équipes (4 groupes de 5)
 ├─ D3 : 20 équipes (4 groupes de 5)
 ├─ D2 : 20 équipes (4 groupes de 5)
@@ -432,18 +434,18 @@ Saison régulière (10 semaines) :
 
 #### **💰 Frais d'Inscription Progressifs**
 
-Les frais augmentent chaque saison pour créer de l'exclusivité :
+Les frais augmentent chaque édition pour créer de l'exclusivité :
 
 ```
-Saison 1 : 4 MLC = 2,000 FCFA
-Saison 2 : 6 MLC = 3,000 FCFA
-Saison 3 : 8 MLC = 4,000 FCFA
-Saison 4 : 10 MLC = 5,000 FCFA
-Saison 5+ : Paramétrable (peut continuer à augmenter)
+Édition 1 : 4 MLC = 2,000 FCFA
+Édition 2 : 6 MLC = 3,000 FCFA
+Édition 3 : 8 MLC = 4,000 FCFA
+Édition 4 : 10 MLC = 5,000 FCFA
+Édition 5+ : Paramétrable (peut continuer à augmenter)
 ```
 
 **Pourquoi cette progression ?**
-- 🎯 **Accessibilité S1** : Prix bas pour attirer les premiers joueurs
+- 🎯 **Accessibilité Édition 1** : Prix bas pour attirer les premiers joueurs
 - 📈 **Valeur croissante** : Plus la plateforme grandit, plus elle a de valeur
 - 💎 **Exclusivité** : Les prix élevés filtrent les joueurs occasionnels
 - 🏆 **Récompense la fidélité** : Les anciens joueurs ont profité des prix bas
@@ -452,136 +454,167 @@ Saison 5+ : Paramétrable (peut continuer à augmenter)
 
 #### **💵 Répartition des Revenus**
 
-**Modèle économique par saison** :
+**Modèle économique par édition** :
 
 ```
 Revenus totaux = Nombre d'inscrits × Frais d'inscription
 
-Distribution :
-├─ 60% → Prize Pools (récompenses)
-├─ 30% → Plateforme MLM (fonctionnement)
-└─ 10% → Fonds de réserve (support, imprévus)
+Prize Pools (montants fixes) :
+├─ 1er D1 : 100 MLC
+├─ 1er D2 : 60 MLC
+├─ 1er D3 : 40 MLC
+└─ 1er D4 : 20 MLC
+Total récompenses : 220 MLC
+
+Le reste des revenus revient à la plateforme
 ```
 
-**Exemple Saison 1 : 100 équipes inscrites**
+**Exemple Édition 1 : 100 équipes inscrites**
 ```
 100 équipes × 4 MLC = 400 MLC (200,000 FCFA)
 
 Distribution :
-├─ 240 MLC (60%) → Prize Pools
-├─ 120 MLC (30%) → Plateforme
-└─ 40 MLC (10%) → Fonds de réserve
+├─ 220 MLC (55%) → Prize Pools (4 champions uniquement)
+│   ├─ 1er D1 : 100 MLC (50,000 FCFA)
+│   ├─ 1er D2 : 60 MLC (30,000 FCFA)
+│   ├─ 1er D3 : 40 MLC (20,000 FCFA)
+│   └─ 1er D4 : 20 MLC (10,000 FCFA)
+└─ 180 MLC (45%) → Plateforme MLM (fonctionnement, support, imprévus)
 ```
 
 ---
 
 #### **🏆 Distribution des Prize Pools par Division**
 
-**Système pyramide** (recommandé) :
+**Système de récompense du champion uniquement** :
 
-Les 60% de récompenses sont répartis de manière pyramidale pour créer de l'aspiration :
+Seuls les **1ers de chaque division** reçoivent des récompenses (montants fixes) :
 
 ```
-Prize Pools (sur 240 MLC exemple) :
+Prize Pools (montants fixes) :
 
-🏆 Division 4 (D4) - Elite : 100 MLC (42%)
-   → Champion : 40 MLC
-   → Vice-champion : 25 MLC
-   → 3ème : 15 MLC
-   → 4ème-10ème : 20 MLC à partager
+🏆 Division 1 (D1) - Standard : 100 MLC (50,000 FCFA)
+   → Champion (1er place) : 100 MLC
+   → Autres positions : 0 MLC
 
-💎 Division 3 (D3) - Excellence : 70 MLC (29%)
-   → Champion : 28 MLC
-   → Vice-champion : 18 MLC
-   → 3ème : 10 MLC
-   → 4ème-10ème : 14 MLC à partager
+💎 Division 2 (D2) - Confirmé : 60 MLC (30,000 FCFA)
+   → Champion (1er place) : 60 MLC
+   → Autres positions : 0 MLC
 
-🥈 Division 2 (D2) - Confirmé : 45 MLC (19%)
-   → Champion : 18 MLC
-   → Vice-champion : 12 MLC
-   → 3ème : 7 MLC
-   → 4ème-10ème : 8 MLC à partager
+🥈 Division 3 (D3) - Excellence : 40 MLC (20,000 FCFA)
+   → Champion (1er place) : 40 MLC
+   → Autres positions : 0 MLC
 
-⚽ Division 1 (D1) - Standard : 25 MLC (10%)
-   → Champion : 10 MLC
-   → Vice-champion : 7 MLC
-   → 3ème : 4 MLC
-   → 4ème-10ème : 4 MLC à partager
+⚽ Division 4 (D4) - Elite : 20 MLC (10,000 FCFA)
+   → Champion (1er place) : 20 MLC
+   → Autres positions : 0 MLC
+
+TOTAL : 220 MLC distribués aux 4 champions
 ```
 
-**💡 Pourquoi la pyramide ?**
-- 🎯 **Aspiration** : "Je veux être en D4 pour gagner beaucoup plus"
-- 🏆 **Récompense l'excellence** : Les meilleurs gagnent davantage
-- ⚖️ **Équité maintenue** : Tout le monde a une chance lors de la qualification
-- 💪 **Motivation** : Objectif clair de progresser vers D4
+**💡 Pourquoi seuls les champions ?**
+- 🎯 **Compétition intense** : Il faut être le meilleur pour gagner
+- 🏆 **Récompense l'excellence** : Seule la victoire compte
+- ⚖️ **Simplicité** : Distribution claire et transparente
+- 💪 **Motivation** : Objectif unique et clair pour chaque division
 
 ---
 
-#### **🔄 Réinitialisation à Chaque Saison**
+#### **🔄 Règles de Qualification et Élimination**
 
-**IMPORTANT** : Pas de système de relégation/promotion entre saisons.
+**Système d'auto-qualification et d'élimination temporaire** :
 
-**Fin de Saison N** :
+**🏆 Auto-qualification des Champions** :
+```
+Les 1ers de chaque division (D1, D2, D3, D4) sont AUTOMATIQUEMENT qualifiés
+pour l'édition suivante et seront TOUS placés en Division 1 (D1) pour cette
+prochaine édition.
+
+Exemple Édition 1 :
+├─ 1er D1 → Qualifié automatiquement pour Édition 2 en D1
+├─ 1er D2 → Qualifié automatiquement pour Édition 2 en D1
+├─ 1er D3 → Qualifié automatiquement pour Édition 2 en D1
+└─ 1er D4 → Qualifié automatiquement pour Édition 2 en D1
+
+Ces 4 champions ne paient PAS de frais d'inscription pour l'Édition 2.
+```
+
+**❌ Élimination Temporaire des Derniers** :
+```
+Les DERNIERS de chaque division (D1, D2, D3, D4) sont ÉLIMINÉS de l'édition
+suivante mais pourront jouer l'édition d'après.
+
+Exemple :
+Les derniers de D1, D2, D3, D4 de l'Édition 1 :
+├─ ❌ NE PEUVENT PAS jouer l'Édition 2
+└─ ✅ PEUVENT jouer l'Édition 3 (après avoir sauté une édition)
+
+Édition 1 → Dernier place → ❌ Édition 2 (éliminé) → ✅ Édition 3 (retour possible)
+```
+
+**Fin d'Édition N** :
 ```
 1. 📊 Calcul des classements finaux dans chaque division
-2. 🏆 Distribution des prize pools aux champions
-3. 📜 Enregistrement dans l'historique MLM (Hall of Fame)
-4. 🔄 RÉINITIALISATION COMPLÈTE
+2. 🏆 Distribution des prize pools aux 4 champions uniquement
+3. 🎫 Auto-qualification des champions pour Édition N+1 en D1
+4. ❌ Élimination temporaire des derniers (skip Édition N+1)
+5. 📜 Enregistrement dans l'historique MLM (Hall of Fame)
 ```
 
-**Début de Saison N+1** :
+**Début d'Édition N+1** :
 ```
-1. 🆕 Nouvelles inscriptions ouvertes à TOUS
-   └─ Même les champions doivent se réinscrire
+1. 🆕 Inscriptions ouvertes à TOUS (sauf derniers d'Édition N)
+   ├─ Champions Édition N : Qualifiés automatiquement en D1 (gratuit)
+   └─ Autres joueurs : Doivent s'inscrire et payer les frais
 
-2. 📋 MÊME processus d'inscription :
-   ├─ Objectif : 80 équipes (liste d'attente si dépassé)
+2. 📋 Processus d'inscription :
+   ├─ Objectif : 80 équipes minimum
    └─ Maximum : 120 équipes
 
-3. 🎯 MÊME phase de qualification :
+3. 🎯 Phase de qualification (si ≥80 inscrits) :
    ├─ Groupes de 6 équipes
    ├─ 5 matchs par équipe
    └─ Répartition : 1er→D4, 2ème→D3, 3ème→D2, 4ème→D1
 
-4. 🏁 Saison régulière lance dans les 4 divisions
+4. 🏁 Édition régulière lance avec 4 champions pré-qualifiés en D1
 ```
 
 **💡 Exemple concret** :
 ```
-Saison 1 (Juillet-Septembre 2024) - 4 MLC
-├─ Karim termine Champion D4 → 🏆 40 MLC de récompense
-├─ Amadou termine 3ème D2 → 🥉 7 MLC
-└─ Sarah termine 5ème D3
+Édition 1 (Juillet-Septembre 2024) - 4 MLC
+├─ Karim termine 1er D1 → 🏆 100 MLC + Auto-qualifié Édition 2 en D1 (gratuit)
+├─ Amadou termine 5ème D2 → Rien
+├─ Sarah termine DERNIER D3 → ❌ Éliminée pour Édition 2
+└─ Moussa termine 1er D4 → 🏆 20 MLC + Auto-qualifié Édition 2 en D1 (gratuit)
 
-FIN DE SAISON → RÉINITIALISATION COMPLÈTE
+Édition 2 (Octobre-Décembre 2024) - 6 MLC
+├─ Karim : Joue directement en D1 (auto-qualifié, pas de frais)
+├─ Moussa : Joue directement en D1 (auto-qualifié, pas de frais)
+├─ Amadou : Doit se réinscrire et payer 6 MLC + qualification
+├─ Sarah : ❌ NE PEUT PAS jouer (éliminée temporairement)
+└─ Nouveaux joueurs : S'inscrivent et passent qualification
 
-Saison 2 (Octobre-Décembre 2024) - 6 MLC
-├─ Karim doit SE RÉINSCRIRE et payer 6 MLC
-├─ Amadou doit SE RÉINSCRIRE et payer 6 MLC
-├─ Sarah doit SE RÉINSCRIRE et payer 6 MLC
-├─ Tous passent par la phase de qualification
-├─ Nouvelle répartition en divisions selon performances
-└─ PAS de privilège pour Karim (ancien champion)
-   → Son titre S1 reste dans l'historique à vie
+Édition 3 (Janvier-Mars 2025) - 8 MLC
+└─ Sarah : ✅ PEUT se réinscrire (élimination levée)
 ```
 
-**Pourquoi cette réinitialisation ?**
-- ✅ **Équité totale** : Tout le monde repart à zéro
-- ✅ **Pas de stagnation** : Aucun joueur n'est "installé" en D4
-- ✅ **Motivation** : Il faut se prouver à chaque saison
-- ✅ **Accessibilité** : Nouveaux joueurs ont leur chance dès S2
-- ✅ **Compétition fraîche** : Chaque saison = nouveau défi
+**Pourquoi ces règles ?**
+- ✅ **Récompense les champions** : Auto-qualification + gratuit
+- ✅ **Sanction les derniers** : Obligation de skip une édition
+- ✅ **Motivation** : Ne pas finir dernier
+- ✅ **Renouvellement** : Évite les joueurs inactifs/faibles
+- ✅ **Équité** : Élimination temporaire, pas permanente
 
 ---
 
-#### **📅 Calendrier de Saison Détaillé**
+#### **📅 Calendrier d'Édition Détaillé**
 
-**Durée de la saison** : 3 mois (Juillet, Août, Septembre)
+**Durée d'une édition** : 3 mois (exemple : Juillet, Août, Septembre)
 
 **Fréquence des journées** :
 - **3 journées par semaine**
 - **Exemple de planning** : Mercredi, Vendredi, Samedi
-- **Total** : ~38 journées par saison
+- **Total** : ~38 journées par édition
 
 **Comment ça fonctionne ?** :
 ```
@@ -594,6 +627,30 @@ Total : 12 semaines × 3 journées = 36-38 journées
 ```
 
 Chaque journée, ton équipe doit jouer son match programmé. Si tu rates une journée, elle est comptabilisée comme **absence**.
+
+#### **🎥 Déroulement des Matchs**
+
+**Deux options pour jouer les matchs** :
+
+```
+Option 1 : Stream en Direct (Recommandé)
+├─ Les joueurs lancent un stream sur la plateforme (Angular)
+├─ Le match est diffusé en temps réel
+├─ Enregistrement automatique pour vérification
+└─ Transparence totale
+
+Option 2 : Enregistrement + Soumission
+├─ Chaque joueur enregistre son match (vidéo)
+├─ Upload de la vidéo après le match
+├─ Soumission du score + preuve vidéo
+└─ Vérification manuelle si litige
+```
+
+**Pourquoi ces options ?**
+- ✅ **Transparence** : Preuves vidéo de tous les matchs
+- ✅ **Anti-triche** : Impossible de falsifier les résultats
+- ✅ **Flexibilité** : Stream live OU enregistrement selon préférence
+- ✅ **Engagement** : Les spectateurs peuvent regarder les matchs
 
 #### **👥 Système d'Équipes (Pseudos de Jeu)**
 
@@ -621,43 +678,60 @@ Amadou a :
 
 **MLM applique des règles strictes pour garantir la régularité** :
 
-**Règle 1 : Bannissement d'équipe**
-- Si ton équipe rate **18 journées ou plus** (la moitié de 38 journées) → ❌ **Équipe bannie définitivement**
-- Tu ne peux plus utiliser cette équipe pour les prochaines saisons
+**Règle 1 : Bannissement d'équipe (3 absences injustifiées)**
+- Si ton équipe fait **3 absences injustifiées** au cours d'une édition → ❌ **Équipe bannie**
+- L'équipe ne peut plus participer aux prochaines éditions de divisions
 - **Mais** : Tu peux continuer avec ton autre équipe (si tu en as une)
 
-**Règle 2 : Bannissement de compte**
-- Si tes **2 équipes** sont bannies → ❌ **Ton compte est banni définitivement**
+**Règle 2 : Bannissement de compte (2 équipes bannies pour un même jeu)**
+- Chaque utilisateur peut créer **2 équipes maximum par jeu** (Dream League, FC Mobile, E-football)
+- Si tes **2 équipes d'un même jeu** sont bannies → ❌ **Ton compte utilisateur est banni définitivement**
 - Tu ne peux plus jamais te réinscrire sur MLM
-- Le système bloque ton appareil pour empêcher toute nouvelle inscription
+- Le système bloque ton compte pour empêcher toute nouvelle inscription
 
 **Pourquoi ces règles ?**
 - 🎯 **Garantir l'engagement** : Seuls les joueurs sérieux restent
 - ⚖️ **Équité** : Pas de places perdues à cause de joueurs fantômes
 - 🏆 **Compétition de qualité** : Tous les matchs se jouent réellement
+- 💪 **Responsabilité** : 3 chances avant bannissement d'équipe
 
 **Exemple concret** :
 ```
-Karim a 2 équipes :
-  ├─ "KarimFCPro" → Rate 20 journées en Saison 1 → ❌ BANNIE
+Karim a 2 équipes pour Dream League Soccer :
+  ├─ "KarimFCPro" → 3 absences injustifiées Édition 1 → ❌ ÉQUIPE BANNIE
   └─ "KarimTheKing" → Continue normalement → ✅ OK
 
 Karim peut continuer avec "KarimTheKing" uniquement.
 
-Si "KarimTheKing" rate aussi 18 journées :
-  ├─ "KarimFCPro" → ❌ BANNIE
-  └─ "KarimTheKing" → ❌ BANNIE
+Si "KarimTheKing" fait aussi 3 absences injustifiées :
+  ├─ "KarimFCPro" → ❌ BANNIE (Dream League Soccer)
+  └─ "KarimTheKing" → ❌ BANNIE (Dream League Soccer)
 
-  → ❌ COMPTE KARIM BANNI DÉFINITIVEMENT
+  → ❌ COMPTE UTILISATEUR KARIM BANNI DÉFINITIVEMENT
+
+Note : Karim ne peut plus accéder à la plateforme MLM, même pour d'autres jeux.
+```
+
+**Absence justifiée vs injustifiée** :
+```
+✅ Absence justifiée (ne compte pas) :
+├─ Problème technique prouvé (coupure internet, panne)
+├─ Raison médicale avec justificatif
+└─ Force majeure validée par modérateur
+
+❌ Absence injustifiée (compte) :
+├─ Aucune raison donnée
+├─ "J'ai oublié"
+└─ Raison non acceptée par modérateur
 ```
 
 **Message clair** : **Joue sérieusement ou ne participe pas.** MLM n'est pas fait pour les joueurs fantômes.
 
-#### **📜 Historique des Saisons et Palmarès**
+#### **📜 Historique des Éditions et Palmarès**
 
 **Conservation des données** :
 
-Chaque saison, MLM conserve **l'historique complet** des performances et des champions :
+Chaque édition, MLM conserve **l'historique complet** des performances et des champions :
 
 **Ce qui est enregistré** :
 - 🏆 **Vainqueurs de chaque division** (D1, D2, D3, D4)
@@ -665,57 +739,63 @@ Chaque saison, MLM conserve **l'historique complet** des performances et des cha
 - 🎯 **Statistiques individuelles** :
   - Nombre de victoires, défaites, nuls
   - Buts marqués et encaissés
-  - Points totaux de la saison
+  - Points totaux de l'édition
 - 🏅 **Meilleurs buteurs** par division
-- 📈 **Évolution des équipes** : Promotions et relégations
+- 📈 **Évolution des équipes** : Auto-qualifications et éliminations
 
 **Pourquoi c'est important ?**
-- 📜 **Mémoire du jeu** : Voir l'évolution depuis la Saison 1
-- 🏆 **Hall of Fame** : Les champions de chaque saison sont immortalisés
+- 📜 **Mémoire du jeu** : Voir l'évolution depuis l'Édition 1
+- 🏆 **Hall of Fame** : Les champions de chaque édition sont immortalisés
 - 📊 **Statistiques complètes** : Consulter l'historique de n'importe quelle équipe
-- 💪 **Motivation** : Devenir champion d'une saison pour rester dans l'histoire
+- 💪 **Motivation** : Devenir champion d'une édition pour rester dans l'histoire
 
 **Exemple d'historique** :
 ```
-Saison 1 - Juillet à Septembre 2024
+Édition 1 - Juillet à Septembre 2024 (Dream League Soccer)
 ├─ D1 (Standard)
-│   ├─ Champion : "KarimFCPro" - 45 points
-│   ├─ Vice-Champion : "AmadouElite" - 42 points
-│   └─ Meilleur buteur : "Moussa_24" - 38 buts
-
-Saison 2 - Octobre à Décembre 2024
-├─ D4 (Elite)
-│   ├─ Champion : "SarahPro" - 48 points
-│   └─ Meilleur buteur : "SarahPro" - 41 buts
-├─ D3 (Excellence)
-│   ├─ Champion : "KarimFCPro" - 46 points (Promu de D2)
-│   └─ Meilleur buteur : "AmadouMobile" - 35 buts
+│   ├─ Champion : "KarimFCPro" - 45 points - 🏆 100 MLC
+│   ├─ 2ème : "AmadouElite" - 42 points
+│   ├─ 3ème : "Moussa_24" - 38 points
+│   └─ Dernier : "Youssef_Pro" - 12 points (éliminé Édition 2)
 ├─ D2 (Confirmé)
-│   ├─ Champion : "BrahimaLion" - 44 points
-│   └─ Meilleur buteur : "BrahimaLion" - 32 buts
-└─ D1 (Standard)
-    ├─ Champion : "Youssef_Pro" - 43 points
-    └─ Meilleur buteur : "Ibrahim24" - 30 buts
+│   └─ Champion : "SarahPro" - 48 points - 🏆 60 MLC
+├─ D3 (Excellence)
+│   └─ Champion : "BrahimaLion" - 46 points - 🏆 40 MLC
+└─ D4 (Elite)
+    └─ Champion : "AmadouMobile" - 44 points - 🏆 20 MLC
+
+Édition 2 - Octobre à Décembre 2024 (Dream League Soccer)
+├─ D1 (Standard)
+│   ├─ 4 champions Édition 1 auto-qualifiés
+│   └─ Champion : "KarimFCPro" - 50 points - 🏆 100 MLC
+├─ D2 (Confirmé)
+│   └─ Champion : "NewPlayer123" - 47 points - 🏆 60 MLC
+├─ D3 (Excellence)
+│   └─ Champion : "Ibrahim24" - 45 points - 🏆 40 MLC
+└─ D4 (Elite)
+    └─ Champion : "TeamRocket" - 42 points - 🏆 20 MLC
 ```
 
 **Consultation de l'historique** :
 - ✅ Accessible depuis ton profil MLM
-- ✅ Voir les classements de toutes les saisons passées
-- ✅ Comparer ton évolution saison après saison
+- ✅ Voir les classements de toutes les éditions passées
+- ✅ Comparer ton évolution édition après édition
 - ✅ Consulter le palmarès de n'importe quelle équipe
 
-**Réinitialisation saisonnière** :
-- 🔄 À chaque nouvelle saison, le processus de qualification et répartition recommence
+**Conservation permanente** :
+- 🔄 À chaque nouvelle édition, nouveau processus de qualification
 - 📊 MAIS l'historique des performances passées reste **permanent**
 - 🏆 Les titres de champion restent acquis à vie
 
 #### **Pourquoi c'est génial ?**
-- 🎯 **Progression claire** : Objectif de monter de division
-- 🏆 **Récompense du mérite** : Les meilleurs montent, les moins bons descendent
-- 💪 **Motivation constante** : Chaque match compte pour éviter la relégation
+- 🎯 **Progression claire** : Objectif de devenir champion de sa division
+- 🏆 **Récompense du mérite** : Seuls les champions gagnent des prix
+- 💪 **Motivation constante** : Chaque match compte pour ne pas finir dernier
 - 🤝 **Communauté par niveau** : Tu joues contre des joueurs de ton calibre
-- 📈 **Sentiment d'accomplissement** : Monter de D1 à D4 = fierté
-- ⚡ **Fair-play garanti** : Système de bannissement pour joueurs inactifs
+- 📈 **Sentiment d'accomplissement** : Devenir champion = fierté + récompense
+- ⚡ **Fair-play garanti** : Système de bannissement pour joueurs inactifs (3 absences)
+- 🎮 **Multi-jeux** : Éditions pour Dream League Soccer, FC Mobile, E-football
+- 🎥 **Transparence** : Matchs streamés en direct ou enregistrés
 
 ---
 
@@ -1272,7 +1352,7 @@ Dès qu'un organisateur niveau 1 termine son 1er tournoi :
 ✅ Support dédié 24/7 (12h de réponse max)
 ✅ Commission augmentée à 55% (au lieu de 50%)
 ✅ Accès aux statistiques de la plateforme
-✅ Peut organiser des ligues multi-saisons
+✅ Peut organiser des ligues multi-éditions
 ✅ Peut demander des partenariats avec marques
 ✅ Profil vérifié avec badge officiel
 ```
@@ -1307,7 +1387,7 @@ Différence : +20 MLC = +10,000 FCFA par tournoi
 | **Badge visible** | ❌ | 🏅 Certifié | 🥈 Confirmé | 🥇 Elite |
 | **Mise en avant** | ❌ | ❌ | Priorité recherche | Page d'accueil |
 | **Multi-jeux** | ❌ | ❌ | ✅ | ✅ |
-| **Ligues saisons** | ❌ | ❌ | ❌ | ✅ |
+| **Ligues éditions** | ❌ | ❌ | ❌ | ✅ |
 
 ---
 
@@ -1407,20 +1487,41 @@ TOTAL AN 2 : 590,000,000 FCFA/an (~899,000 EUR/an)
 
 ---
 
-#### 3. **Frais d'Accès aux Divisions** (Récurrent)
+#### 3. **Frais d'Accès aux Éditions de Divisions** (Récurrent)
 
-Pour rejoindre une division par saison (3 mois) :
-- Division 4 (D4) : **100 coins** (50,000 FCFA)
-- Division 3 (D3) : **60 coins** (30,000 FCFA)
-- Division 2 (D2) : **40 coins** (20,000 FCFA)
-- Division 1 (D1) : **40 coins** (2,000 FCFA)
-- Qualification D1 : **10 coins** (5,000 FCFA)
+Pour rejoindre une édition (3 mois) :
+- **Édition 1** : 4 MLC (2,000 FCFA)
+- **Édition 2** : 6 MLC (3,000 FCFA)
+- **Édition 3** : 8 MLC (4,000 FCFA)
+- **Édition 4+** : Progressif (paramétrable)
 
-Si **5,000 joueurs** rejoignent des divisions (moyenne 50 coins) :
+**Exemple de calcul Édition 1** :
+Si **100 joueurs** s'inscrivent à l'Édition 1 (4 MLC chacun) :
 ```
-5,000 × 50 coins = 250,000 coins/saison
-= 125,000,000 FCFA par saison (4 saisons/an)
-= 500,000,000 FCFA/an (~762,000 EUR/an)
+100 × 4 MLC = 400 MLC collectés
+
+Distribution :
+├─ 220 MLC → Prize Pools (4 champions)
+│   ├─ 1er D1 : 100 MLC
+│   ├─ 1er D2 : 60 MLC
+│   ├─ 1er D3 : 40 MLC
+│   └─ 1er D4 : 20 MLC
+└─ 180 MLC (45%) → Plateforme MLM
+
+Revenus plateforme : 180 MLC = 90,000 FCFA par édition
+```
+
+**Projection annuelle (4 éditions/an)** :
+```
+Si moyenne de 100 joueurs par édition :
+4 éditions × 180 MLC = 720 MLC/an
+= 360,000 FCFA/an (~550 EUR/an)
+
+Si moyenne de 500 joueurs par édition :
+Revenus par édition : 500 × 4 MLC = 2,000 MLC
+Plateforme : 2,000 - 220 = 1,780 MLC
+4 éditions × 1,780 MLC = 7,120 MLC/an
+= 3,560,000 FCFA/an (~5,400 EUR/an)
 ```
 
 ---
