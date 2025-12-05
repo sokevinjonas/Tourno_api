@@ -33,9 +33,9 @@
 └────────────────────────────┼─────────────────────────────────────────┘
                              │ HTTPS (REST API + WebSockets)
 ┌────────────────────────────▼─────────────────────────────────────────┐
-│                         API LAYER (Laravel)                          │
+│                    API LAYER (Spring Boot 3.x)                       │
 │  ┌─────────────────────────────────────────────────────────────┐    │
-│  │  API Gateway (Sanctum Auth + Rate Limiting)                 │    │
+│  │  API Gateway (Spring Security + JWT + Rate Limiting)        │    │
 │  └─────────────────────────────────────────────────────────────┘    │
 │                                                                      │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
@@ -43,38 +43,48 @@
 │  │  Service     │  │   Service    │  │  Service     │             │
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘             │
 │         │                  │                  │                      │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
+│  │  Organizer   │  │  Moderation  │  │  Arbitrage   │             │
+│  │  Service     │  │  Service     │  │  Service     │             │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘             │
+│         │                  │                  │                      │
 │  ┌──────▼──────────────────▼──────────────────▼───────┐            │
 │  │         Business Logic Layer                        │            │
 │  │  • BracketGenerator  • EloCalculator                │            │
 │  │  • ScoreValidator    • PaymentProcessor             │            │
-│  │  • DisputeManager    • PromotionManager             │            │
+│  │  • DisputeManager    • BadgeCertification           │            │
+│  │  • SeasonManager     • QualificationManager         │            │
 │  └─────────────────────────┬───────────────────────────┘            │
 │                            │                                         │
 └────────────────────────────┼─────────────────────────────────────────┘
-                             │ Eloquent ORM
+                             │ JPA / Hibernate ORM
 ┌────────────────────────────▼─────────────────────────────────────────┐
 │                      DATA LAYER                                      │
 │  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐        │
-│  │   MySQL/       │  │     Redis      │  │   File Storage │        │
-│  │   PostgreSQL   │  │   (Cache +     │  │   (S3/Local)   │        │
-│  │                │  │    Queue)      │  │                │        │
+│  │  PostgreSQL    │  │     Redis      │  │   RabbitMQ     │        │
+│  │  (Database)    │  │   (Cache)      │  │   (Queue)      │        │
 │  └────────────────┘  └────────────────┘  └────────────────┘        │
+│                                                                      │
+│  ┌────────────────┐                                                 │
+│  │ File Storage   │                                                 │
+│  │ (S3/Local)     │                                                 │
+│  └────────────────┘                                                 │
 └──────────────────────────────────────────────────────────────────────┘
                              │
-                             │ HTTPS (Webhooks)
+                             │ HTTPS (API Calls + Webhooks)
 ┌────────────────────────────▼─────────────────────────────────────────┐
 │                   EXTERNAL SERVICES                                  │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
-│  │  Payment     │  │  Firebase    │  │  Email/SMS   │             │
-│  │  Gateway     │  │  (FCM Push)  │  │  Provider    │             │
-│  │  (CinetPay)  │  │              │  │  (Twilio)    │             │
+│  │ Mobile Money │  │  Email/SMS   │  │ File Storage │             │
+│  │ Orange, MTN  │  │  Provider    │  │ (AWS S3)     │             │
+│  │ Moov Money   │  │  (JavaMail)  │  │              │             │
 │  └──────────────┘  └──────────────┘  └──────────────┘             │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-### 1.2 Architecture des Services
+### 1.2 Architecture des Services (Spring Boot)
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -85,10 +95,10 @@
 │  • refundParticipants()                                      │
 └────────────────┬─────────────────────────────────────────────┘
                  │
-                 ├──► BracketGenerator
-                 ├──► ScoreValidator
-                 ├──► DisputeManager
-                 └──► EloCalculator
+                 ├──► BracketGeneratorService
+                 ├──► ScoreValidatorService
+                 ├──► DisputeManagerService
+                 └──► EloCalculatorService
 
 ┌──────────────────────────────────────────────────────────────┐
 │                     WALLET SERVICE                           │
@@ -97,20 +107,62 @@
 │  • getTransactions()       • processWithdrawal()             │
 └────────────────┬─────────────────────────────────────────────┘
                  │
-                 ├──► PaymentGateway (CinetPay, FedaPay)
+                 ├──► MobileMoneyService (Orange, MTN, Moov)
                  ├──► TransactionLogger
-                 └──► BalanceManager
+                 └──► BalanceManagerService
 
 ┌──────────────────────────────────────────────────────────────┐
 │                    DIVISION SERVICE                          │
-│  • joinDivision()          • generateTournaments()           │
-│  • promotePlayer()         • relegatePlayer()                │
+│  • registerForSeason()     • processQualification()          │
 │  • processSeasonEnd()      • calculateStandings()            │
+│  • checkBannishment()      • resetSeason()                   │
 └────────────────┬─────────────────────────────────────────────┘
                  │
-                 ├──► PromotionManager
-                 ├──► SeasonManager
-                 └──► TournamentScheduler (Cron)
+                 ├──► SeasonService
+                 ├──► QualificationService
+                 └──► @Scheduled (Spring Scheduler)
+
+┌──────────────────────────────────────────────────────────────┐
+│                   ORGANIZER SERVICE                          │
+│  • requestCertification()  • validateOrganizer()             │
+│  • updateBadgeLevel()      • calculateRevenue()              │
+│  • checkTournamentQuota()                                    │
+└────────────────┬─────────────────────────────────────────────┘
+                 │
+                 ├──► BadgeCertificationService
+                 ├──► OrganizerValidationService
+                 └──► RevenueCalculatorService
+
+┌──────────────────────────────────────────────────────────────┐
+│                   MODERATION SERVICE                         │
+│  • processComplaint()      • validateCertification()         │
+│  • banUser()               • unbanUser()                     │
+│  • reviewOrganizer()                                         │
+└────────────────┬─────────────────────────────────────────────┘
+                 │
+                 ├──► ComplaintService
+                 ├──► BanService
+                 └──► CertificationValidationService
+
+┌──────────────────────────────────────────────────────────────┐
+│                    ARBITRAGE SERVICE                         │
+│  • assignDispute()         • reviewProofs()                  │
+│  • makeDecision()          • notifyPlayers()                 │
+└────────────────┬─────────────────────────────────────────────┘
+                 │
+                 ├──► DisputeResolutionService
+                 ├──► ProofValidationService
+                 └──► NotificationService
+
+┌──────────────────────────────────────────────────────────────┐
+│                 NOTIFICATION SERVICE                         │
+│  • sendEmail()             • sendSMS()                       │
+│  • sendInAppNotification() • queueNotification()             │
+└────────────────┬─────────────────────────────────────────────┘
+                 │
+                 ├──► EmailProducer (RabbitMQ)
+                 ├──► SmsProducer (RabbitMQ)
+                 └──► EmailConsumer / SmsConsumer
 ```
 
 ---
@@ -120,7 +172,7 @@
 ### 2.1 Inscription et Participation à un Tournoi Payant
 
 ```
-Joueur          App Mobile      API Laravel      Wallet Service    Tournament Service    Payment Gateway
+Joueur          App Angular     API Spring Boot  Wallet Service    Tournament Service    Mobile Money API
   │                 │                │                 │                   │                    │
   │─────Browse──────▶               │                 │                   │                    │
   │                 │──GET /tournaments───────────────▶                   │                    │
@@ -158,7 +210,7 @@ Joueur          App Mobile      API Laravel      Wallet Service    Tournament Se
 ### 2.2 Déclaration de Score et Validation Automatique
 
 ```
-Joueur A        Joueur B        API Laravel      ScoreValidator    Match Service    Notification Service
+Joueur A        Joueur B        API Spring Boot  ScoreValidator    Match Service    Notification Service
   │                 │                │                 │                 │                  │
   │──Déclare Score──────────────────▶               │                 │                  │
   │  (3-1 + proof) │                │                 │                 │                  │
@@ -190,7 +242,7 @@ Joueur A        Joueur B        API Laravel      ScoreValidator    Match Service
 ### 2.3 Recharge de Solde (Mobile Money)
 
 ```
-Joueur          App Mobile      API Laravel      Wallet Service    Payment Gateway    Mobile Money
+Joueur          App Angular     API Spring Boot  Wallet Service    Mobile Money API   Provider
   │                 │                │                 │                  │                 │
   │──Clique "Recharger"─────────────▶               │                  │                 │
   │  Montant: 100 coins              │                 │                  │                 │
@@ -227,7 +279,7 @@ Joueur          App Mobile      API Laravel      Wallet Service    Payment Gatew
 ### 2.4 Fin de Tournoi et Distribution des Gains
 
 ```
-System Cron     API Laravel    Tournament Service   Wallet Service   Notification Service
+@Scheduled      API Spring Boot    Tournament Service   Wallet Service   Notification Service
   │                 │                 │                  │                    │
   │──Check Tournaments──────────────▶                  │                    │
   │  (Finale completed?)              │                  │                    │
@@ -1127,48 +1179,116 @@ s3://mlm-storage/
 
 ### 7.1 Authentification
 
-- **Sanctum** : Token-based authentication
-- Token expiration : 30 jours (configurable)
+- **Spring Security + JWT** : Token-based authentication
+- Token expiration : 7 jours (configurable)
 - Refresh token : Non (stateless)
+- Algorithm : HS256 (HMAC with SHA-256)
 
 ### 7.2 Rate Limiting
 
 ```
-Public endpoints : 60 req/min
+Public endpoints : 60 req/min (Redis-based)
 Authenticated : 120 req/min
 Wallet operations : 10 req/min
+Admin operations : 200 req/min
 ```
 
 ### 7.3 Validation des Données
 
-- **Sanitization** : Strip tags, trim
-- **XSS Protection** : Escape output
-- **CSRF Protection** : Laravel built-in
-- **SQL Injection** : Eloquent ORM (prepared statements)
+- **Sanitization** : Strip tags, trim (Spring Validator)
+- **XSS Protection** : Content Security Policy headers
+- **CSRF Protection** : Disabled for stateless API (JWT)
+- **SQL Injection** : JPA/Hibernate (prepared statements)
+- **Bean Validation** : JSR-380 (@Valid, @NotNull, @Min, @Max, etc.)
 
 ---
 
 ## 8. Monitoring & Logging
 
-### 8.1 Logs
+### 8.1 Logs (Logback + SLF4J)
 
 ```
-storage/logs/
-  ├── laravel.log
+logs/
+  ├── application.log (logs généraux)
   ├── payment.log (transactions financières)
-  ├── dispute.log (litiges)
-  └── tournament.log (événements tournois)
+  ├── dispute.log (litiges et arbitrage)
+  ├── tournament.log (événements tournois)
+  ├── security.log (auth, rate limiting)
+  └── error.log (erreurs critiques)
+
+Format : JSON structuré pour parsing ELK Stack
 ```
 
-### 8.2 Metrics à Surveiller
+### 8.2 Metrics à Surveiller (Micrometer + Prometheus)
 
-- Temps de réponse API
+- Temps de réponse API (p50, p95, p99)
 - Taux de réussite des paiements
 - Nombre de litiges par tournoi
 - Transactions wallet par jour
 - Tournois actifs
+- Utilisateurs connectés simultanément
+- Taux d'erreur HTTP (4xx, 5xx)
+- Consommation mémoire JVM
+- Garbage Collection metrics
+- Pool de connexions database
+
+### 8.3 Alerting
+
+- Temps de réponse > 2s
+- Taux d'erreur > 5%
+- Database connection pool > 80%
+- Échec de paiement > 10% sur 1h
+- Memory usage > 85%
+
+---
+
+## 9. Stack Technique Complète
+
+### Backend (Spring Boot 3.x)
+```
+Framework : Spring Boot 3.2+
+Langage : Java 17 LTS
+Build : Maven / Gradle
+ORM : JPA / Hibernate 6
+Security : Spring Security 6 + JWT
+WebSocket : Spring WebSocket (STOMP)
+Validation : Bean Validation (JSR-380)
+API Doc : SpringDoc OpenAPI 3 (Swagger)
+Cache : Spring Data Redis
+Messaging : Spring AMQP (RabbitMQ)
+Scheduler : Spring @Scheduled
+Testing : JUnit 5 + Mockito + Spring Test
+```
+
+### Frontend (Angular 17+)
+```
+Framework : Angular 17+ (Standalone Components)
+Langage : TypeScript 5+
+State : NgRx (Redux pattern)
+UI : Angular Material
+WebSocket : Socket.io-client / STOMP
+Build : Angular CLI + Webpack
+PWA : @angular/pwa
+Testing : Jasmine + Karma
+```
+
+### Database & Infrastructure
+```
+Database : PostgreSQL 14+
+Cache : Redis 7+
+Queue : RabbitMQ 3.12+
+Migration : Flyway
+Hosting : DigitalOcean / AWS
+CDN : CloudFlare
+CI/CD : GitHub Actions
+Container : Docker + Docker Compose
+Monitoring : Prometheus + Grafana
+Logs : ELK Stack (Elasticsearch, Logstash, Kibana)
+```
 
 ---
 
 **Document vivant** : Cette architecture évoluera avec le projet.
+
+**Dernière mise à jour** : Décembre 2024 (Migration vers Spring Boot)
 
