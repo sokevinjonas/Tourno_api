@@ -17,13 +17,19 @@
 
 * [📘 Sommaire](#-sommaire)
 * [📌 À propos du projet](#-à-propos-du-projet)
-* [🎯 Objectifs](#-objectifs)
-* [✨ Fonctionnalités principales](#-fonctionnalités-principales)
+* [🎯 Objectifs du MVP](#-objectifs-du-mvp)
+* [✨ Fonctionnalités principales (MVP)](#-fonctionnalités-principales-mvp)
 * [🧰 Stack technique](#-stack-technique)
 * [⚙️ Installation](#️-installation)
 * [📚 Documentation](#-documentation)
 * [🤝 Contribution](#-contribution)
 * [🗺️ Roadmap](#️-roadmap)
+  * [Phase 1 : MVP](#-phase-1--mvp-minimum-viable-product)
+  * [Phase 2 : Économie Complète](#-phase-2--économie-complète)
+  * [Phase 3 : Fonctionnalités Avancées](#-phase-3--fonctionnalités-avancées)
+  * [Phase 4 : Social & Communication](#-phase-4--social--communication)
+  * [Phase 5 : Divisions Automatiques](#-phase-5--divisions-automatiques)
+  * [Phase 6 : Production & Qualité](#-phase-6--production--qualité)
 * [📄 Licence](#-licence)
 * [📬 Contact & Support](#-contact--support)
 * [🙏 Remerciements](#-remerciements)
@@ -36,41 +42,47 @@
 
 ---
 
-# 🎯 Objectifs
+# 🎯 Objectifs du MVP
 
-* **Simplicité** : Créer un tournoi en quelques clics
-* **Automatisation** : Génération automatique de brackets, validation des scores
-* **Temps réel** : Notifications push, mises à jour instantanées
-* **Fair-play** : Gestion des litiges intégrée
-* **Performance** : Classement ELO (MLM Rank)
+* **Simplicité** : Inscription et création de tournoi en quelques clics
+* **Automatisation** : Système Suisse avec appariements automatiques
+* **Validation** : Modération des profils avant participation
+* **Économie simple** : 10 pièces gratuites pour démarrer (1 pièce = 500 FCFA)
+* **Multi-jeux** : Support E-football, FC Mobile, Dream League Soccer
 
 ---
 
-# ✨ Fonctionnalités principales
+# ✨ Fonctionnalités principales (MVP)
 
-## 🎮 Compétitions
+## 👥 Gestion des utilisateurs & Rôles
 
-* ⚔️ **Tournois à élimination directe (K.O.)** : Brackets automatiques (8, 16, 32 joueurs)
-* 🏆 **Ligues (Round Robin)** : Classement par points
-* 🏅 **Divisions automatiques** : Ligue 1, Ligue 2, Bundesliga... (hiérarchie compétitive)
-* 🆓 **Tournois gratuits ou payants** : L'organisateur choisit
+* 🔐 **Authentification sécurisée** (Laravel Sanctum)
+* 👤 **4 rôles** : Admin, Modérateur, Organisateur, Joueur
+* 📝 **Profil joueur complet** :
+  * Informations personnelles (WhatsApp, Pays, Ville)
+  * Multi-sélection de jeux (E-football, FC Mobile, Dream League Soccer)
+  * Pour chaque jeu : Pseudo + Screenshot de l'équipe
+* ✅ **Validation de profil** : Les modérateurs valident les profils avant participation
+* 🎁 **10 pièces offertes** après validation du profil (1 pièce = 500 FCFA)
 
-## 💰 Économie & Wallet
+## 🎮 Tournois Format Suisse
 
-* 💳 **Système de solde (MLM Coins)** : 10 coins = 100 FCFA
-* 💵 **Recharge de solde** : Paiement mobile money / carte bancaire
-* 🏆 **Gains automatiques** : Le vainqueur reçoit ses gains dans son solde
-* 💸 **Retrait de fonds** : Transfert vers compte mobile money
-* 📊 **Répartition personnalisable** : L'organisateur définit les gains (1er, 2ème, 3ème...)
+* 🏆 **Création de tournois** par les Organisateurs
+* 💰 **Frais d'inscription en pièces** MLM
+* 📊 **Calcul automatique des tours** : N = ⌈log₂(P)⌉ où P = nombre de participants
+* 🎯 **Appariement intelligent** : Joueurs avec même score s'affrontent
+* ♻️ **Aucune élimination** : Tout le monde joue toutes les rondes
+* 🏅 **Classement final** basé sur les points accumulés
+* 📸 **Saisie des résultats** avec screenshots
+* 💸 **Distribution automatique des gains** aux gagnants
 
-## ⚽ Gameplay
+## 💰 Économie Simplifiée (MVP)
 
-* 📸 **Validation automatique des scores**
-* ⚖️ **Système de litiges** avec arbitrage
-* 📊 **MLM Rank (ELO)** : Classement global des joueurs
-* 💬 **Chat intégré** par tournoi
-* 🔔 **Notifications push** en temps réel
-* 👤 **Profils joueurs & statistiques** complètes
+* 💳 **Système de pièces MLM** : 1 pièce = 500 FCFA
+* 🎁 **10 pièces gratuites** à l'inscription (après validation du profil)
+* 🏆 **Gains automatiques** : Les gains vont dans le solde du joueur
+* 🎮 **Inscription aux tournois** : Déduction automatique des pièces
+* ⚠️ **Pas de recharge/retrait** dans le MVP (Phase 2)
 
 ---
 
@@ -199,45 +211,64 @@ Toutes les contributions sont les bienvenues !
 
 # 🗺️ Roadmap
 
-### Phase 1 : Core Features
+## 🎯 Phase 1 : MVP (Minimum Viable Product)
 
 * [x] Architecture Laravel
-* [ ] Modèles & migrations
-* [ ] Auth Sanctum
-* [ ] CRUD Tournois
-* [ ] Génération de brackets
-* [ ] Validation automatique des scores
-* [ ] Gestion des litiges
-* [ ] Calcul du MLM Rank
+* [ ] **Auth & Rôles**
+  * [ ] Authentification Laravel Sanctum
+  * [ ] Système de rôles (Admin, Modérateur, Organisateur, Joueur)
+  * [ ] Gestion des permissions
+* [ ] **Profil Joueur**
+  * [ ] Modèles & migrations (User, Profile, GameAccount)
+  * [ ] Multi-sélection de jeux (E-football, FC Mobile, DLS)
+  * [ ] Upload de screenshots par jeu
+  * [ ] Workflow de validation par modérateurs
+* [ ] **Wallet Simplifié**
+  * [ ] Système de pièces MLM (1 pièce = 500 FCFA)
+  * [ ] Attribution de 10 pièces après validation du profil
+  * [ ] Historique des transactions
+* [ ] **Tournois Format Suisse**
+  * [ ] CRUD Tournois (création par Organisateurs)
+  * [ ] Inscription aux tournois (déduction de pièces)
+  * [ ] Calcul automatique du nombre de tours : N = ⌈log₂(P)⌉
+  * [ ] Génération d'appariements (système Suisse)
+  * [ ] Gestion des rondes
+  * [ ] Saisie des résultats avec screenshots
+  * [ ] Classement du tournoi
+  * [ ] Distribution automatique des gains
 
-### Phase 2 : Économie
+## 🚀 Phase 2 : Économie Complète
 
-* [ ] Système de Wallet (MLM Coins)
-* [ ] Recharge de solde (API paiement)
-* [ ] Tournois payants avec frais d'inscription
-* [ ] Répartition automatique des gains
-* [ ] Retrait de fonds
-* [ ] Historique des transactions
+* [ ] Recharge de pièces (Mobile Money / Carte bancaire)
+* [ ] Retrait de fonds vers Mobile Money
+* [ ] Historique complet des transactions
+* [ ] Dashboard financier pour organisateurs
 
-### Phase 3 : Divisions Automatiques
+## 📊 Phase 3 : Fonctionnalités Avancées
 
-* [ ] Système de divisions (Ligue 1, 2, 3...)
-* [ ] Promotion/Relégation automatique
-* [ ] Frais d'accès par division
-* [ ] Tournois récurrents par division
+* [ ] Système de litiges avec arbitrage
+* [ ] MLM Rank (ELO) - Classement global
+* [ ] Statistiques joueur détaillées
+* [ ] Autres formats de tournois (K.O., Round Robin)
 
-### Phase 4 : Social & Communication
+## 💬 Phase 4 : Social & Communication
 
-* [ ] Notifications push
-* [ ] Chat intégré
+* [ ] Notifications push (Firebase)
+* [ ] Chat intégré par tournoi
 * [ ] Système de réputation
 * [ ] Partage sur réseaux sociaux
 
-### Phase 5 : Production
+## 🏆 Phase 5 : Divisions Automatiques
 
-* [ ] Tests (80%+)
-* [ ] Documentation API
-* [ ] CI/CD
+* [ ] Système de divisions (Ligue 1, 2, 3...)
+* [ ] Promotion/Relégation automatique
+* [ ] Tournois récurrents par division
+
+## 🔧 Phase 6 : Production & Qualité
+
+* [ ] Tests unitaires & intégration (80%+)
+* [ ] Documentation API (Swagger)
+* [ ] CI/CD Pipeline
 * [ ] Monitoring & Analytics
 
 ---
