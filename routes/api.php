@@ -3,7 +3,12 @@
 use App\Http\Controllers\Auth\MagicLinkController;
 use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\GameAccountController;
+use App\Http\Controllers\MatchController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoundController;
+use App\Http\Controllers\TournamentController;
+use App\Http\Controllers\TournamentRegistrationController;
+use App\Http\Controllers\WalletController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -67,4 +72,72 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::apiResource('game-accounts', GameAccountController::class);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Wallet & Transactions
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('wallet')->group(function () {
+        Route::get('/', [WalletController::class, 'show']);
+        Route::get('/balance', [WalletController::class, 'balance']);
+        Route::get('/transactions', [WalletController::class, 'transactions']);
+        Route::get('/statistics', [WalletController::class, 'statistics']);
+
+        // Admin only: Add funds to user wallet
+        Route::post('/add-funds', [WalletController::class, 'addFunds']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tournaments Management
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('tournaments')->group(function () {
+        // Public tournament queries
+        Route::get('/', [TournamentController::class, 'index']);
+        Route::get('/upcoming', [TournamentController::class, 'upcoming']);
+        Route::get('/registering', [TournamentController::class, 'registering']);
+        Route::get('/{id}', [TournamentController::class, 'show']);
+
+        // Organizer/Admin only
+        Route::post('/', [TournamentController::class, 'store']);
+        Route::get('/my/tournaments', [TournamentController::class, 'myTournaments']);
+        Route::put('/{id}', [TournamentController::class, 'update']);
+        Route::delete('/{id}', [TournamentController::class, 'destroy']);
+        Route::post('/{id}/status', [TournamentController::class, 'changeStatus']);
+
+        // Tournament registrations
+        Route::post('/{id}/register', [TournamentRegistrationController::class, 'register']);
+        Route::post('/{id}/withdraw', [TournamentRegistrationController::class, 'withdraw']);
+        Route::get('/{id}/participants', [TournamentRegistrationController::class, 'participants']);
+        Route::get('/{id}/leaderboard', [TournamentRegistrationController::class, 'leaderboard']);
+        Route::get('/{id}/check-registration', [TournamentRegistrationController::class, 'checkRegistration']);
+
+        // Tournament rounds management (Organizer/Admin only)
+        Route::post('/{id}/start', [RoundController::class, 'startTournament']);
+        Route::post('/{id}/next-round', [RoundController::class, 'generateNextRound']);
+        Route::get('/{id}/rounds', [RoundController::class, 'getRounds']);
+        Route::post('/{tournamentId}/rounds/{roundId}/complete', [RoundController::class, 'completeRound']);
+        Route::post('/{id}/complete', [RoundController::class, 'completeTournament']);
+    });
+
+    // User's tournament registrations
+    Route::get('/my/registrations', [TournamentRegistrationController::class, 'myRegistrations']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Matches & Results
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('matches')->group(function () {
+        Route::get('/{id}', [MatchController::class, 'show']);
+        Route::post('/{id}/submit-result', [MatchController::class, 'submitResult']);
+        Route::get('/my/matches', [MatchController::class, 'myMatches']);
+        Route::get('/my/pending', [MatchController::class, 'myPendingMatches']);
+
+        // Moderator only: disputed matches
+        Route::get('/disputed/all', [MatchController::class, 'disputed']);
+        Route::post('/{id}/validate', [MatchController::class, 'validateResult']);
+    });
 });

@@ -1,0 +1,153 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\MatchResult;
+use App\Models\TournamentMatch;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+
+class MatchResultService
+{
+    protected SwissFormatService $swissService;
+
+    public function __construct(SwissFormatService $swissService)
+    {
+        $this->swissService = $swissService;
+    }
+
+    /**
+     * Submit match result
+     */
+    public function submitMatchResult(TournamentMatch $match, User $user, array $data): MatchResult
+    {
+        // Verify user is a participant
+        if ($match->player1_id !== $user->id && $match->player2_id !== $user->id) {
+            throw new \Exception('You are not a participant of this match');
+        }
+
+        // Check if match is in correct status
+        if ($match->status === 'completed') {
+            throw new \Exception('Match is already completed');
+        }
+
+        // Handle screenshot upload
+        $screenshotPath = null;
+        if (isset($data['screenshot'])) {
+            $screenshotPath = $this->uploadScreenshot($data['screenshot'], $match->id, $user->id);
+        }
+
+        return DB::transaction(function () use ($match, $user, $data, $screenshotPath) {
+            // Create match result
+            $matchResult = MatchResult::create([
+                'match_id' => $match->id,
+                'submitted_by' => $user->id,
+                'own_score' => $data['own_score'],
+                'opponent_score' => $data['opponent_score'],
+                'screenshot_path' => $screenshotPath,
+                'comment' => $data['comment'] ?? null,
+                'status' => 'pending',
+            ]);
+
+            // Check if both players have submitted
+            $this->checkAndResolveMatch($match);
+
+            return $matchResult;
+        });
+    }
+
+    /**
+     * Check if both players submitted and auto-resolve if scores match
+     */
+    protected function checkAndResolveMatch(TournamentMatch $match): void
+    {
+        $results = MatchResult::where('match_id', $match->id)->get();
+
+        if ($results->count() === 2) {
+            $result1 = $results->first();
+            $result2 = $results->last();
+
+            // Determine actual scores (result1 is from player perspective)
+            $player1Id = $result1->submitted_by;
+            $player2Id = $result2->submitted_by;
+
+            if ($player1Id === $match->player1_id) {
+                $player1Score = $result1->own_score;
+                $player2ScoreFromPlayer1 = $result1->opponent_score;
+                $player2Score = $result2->own_score;
+                $player1ScoreFromPlayer2 = $result2->opponent_score;
+            } else {
+                $player1Score = $result2->own_score;
+                $player2ScoreFromPlayer2 = $result2->opponent_score;
+                $player2Score = $result1->own_score;
+                $player1ScoreFromPlayer1 = $result1->opponent_score;
+            }
+
+            // Check if scores match
+            if ($player1Score === $player1ScoreFromPlayer2 && $player2Score === $player2ScoreFromPlayer1) {
+                // Scores match: auto-validate and complete match
+                $result1->update(['status' => 'validated']);
+                $result2->update(['status' => 'validated']);
+
+                $this->swissService->updateMatchResult($match, $player1Score, $player2Score);
+            } else {
+                // Scores don't match: mark as disputed
+                $match->update(['status' => 'disputed']);
+                $result1->update(['status' => 'pending']);
+                $result2->update(['status' => 'pending']);
+            }
+        }
+    }
+
+    /**
+     * Moderator: Validate match result
+     */
+    public function validateMatchResult(TournamentMatch $match, User $moderator, int $player1Score, int $player2Score): TournamentMatch
+    {
+        if (!in_array($moderator->role, ['admin', 'moderator'])) {
+            throw new \Exception('Unauthorized: Only admins and moderators can validate match results');
+        }
+
+        return DB::transaction(function () use ($match, $player1Score, $player2Score) {
+            // Update all related match results
+            MatchResult::where('match_id', $match->id)
+                ->update(['status' => 'validated']);
+
+            // Update match with final scores
+            return $this->swissService->updateMatchResult($match, $player1Score, $player2Score);
+        });
+    }
+
+    /**
+     * Get match results for a match
+     */
+    public function getMatchResults(TournamentMatch $match)
+    {
+        return MatchResult::where('match_id', $match->id)
+            ->with('submitter:id,name')
+            ->get();
+    }
+
+    /**
+     * Get disputed matches
+     */
+    public function getDisputedMatches()
+    {
+        return TournamentMatch::disputed()
+            ->with(['tournament', 'player1', 'player2', 'matchResults'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Upload screenshot
+     */
+    protected function uploadScreenshot($file, int $matchId, int $userId): string
+    {
+        $filename = "match_{$matchId}_user_{$userId}_" . time() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('match_results', $filename, 'public');
+
+        return $path;
+    }
+}
