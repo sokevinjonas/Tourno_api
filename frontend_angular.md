@@ -153,31 +153,38 @@
 
 ### 2. **Page Connexion** (`/login`)
 
-**Formulaire** :
-- Email (input)
-- Mot de passe (input type="password")
-- [Se souvenir de moi] (checkbox)
-- [Mot de passe oublié ?] (lien)
-- Bouton : [Se connecter]
-- Lien : "Pas encore de compte ? [S'inscrire]"
+**Méthodes d'authentification** :
 
-**Variantes** :
-- Connexion via Google/Facebook (optionnel)
+#### **Option 1 : OAuth Social (Recommandé)**
+- Bouton : [🔵 Continuer avec Google]
+- Bouton : [⚫ Continuer avec Apple]
+- Bouton : [🔵 Continuer avec Facebook]
+
+#### **Option 2 : Magic Link (Email)**
+- Séparateur : "ou"
+- Champ : Email (input type="email")
+- Bouton : [📧 Recevoir un lien de connexion]
+- Message : "Nous vous enverrons un lien de connexion par email"
+
+**Après soumission (Magic Link)** :
+- Message de confirmation : "✉️ Email envoyé ! Vérifiez votre boîte de réception"
+- Instructions : "Cliquez sur le lien dans l'email pour vous connecter. Le lien expire dans 15 minutes."
+
+**Page de vérification** (`/auth/verify?token=XXXXX`)
+- Affichage d'un loader : "Vérification en cours..."
+- Si succès : Redirection automatique vers `/home` ou `/profile/complete`
+- Si échec : "❌ Lien invalide ou expiré. [Renvoyer un email]"
 
 ---
 
 ### 3. **Page Inscription** (`/register`)
 
-**Formulaire** :
-- Nom complet (input)
-- Email (input type="email")
-- Mot de passe (input type="password")
-- Confirmer mot de passe (input type="password")
-- Pays (select : Sénégal, Côte d'Ivoire, Bénin, etc.)
-- Numéro de téléphone (input)
-- [J'accepte les CGU] (checkbox)
-- Bouton : [Créer mon compte]
-- Lien : "Déjà un compte ? [Se connecter]"
+**Note MVP** : Pas de page d'inscription séparée. L'inscription se fait automatiquement via l'authentification OAuth ou Magic Link.
+
+**Workflow** :
+1. Utilisateur clique sur "Continuer avec Google" (ou autre)
+2. Si premier connexion → Compte créé automatiquement
+3. Redirection vers `/profile/complete` pour compléter le profil
 
 ---
 
