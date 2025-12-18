@@ -1,28 +1,29 @@
 # 🎨 FRONTEND ANGULAR - MOBILE LEAGUE MANAGER (MLM)
 
-## Spécifications de l'Interface Utilisateur
+## Spécifications de l'Interface Utilisateur - MVP
 
-**Version** : 1.0
+**Version** : 1.0 MVP
 **Date** : Décembre 2024
 **Framework** : Angular 17+ (Standalone Components)
 **Type** : Application Web Progressive (PWA) - Desktop & Mobile Responsive
 
+**Note** : Ce document décrit l'interface pour le MVP (Minimum Viable Product). Les fonctionnalités avancées (Divisions, ELO Rank, Chat, Arbitrage, etc.) sont reportées en Phase 2.
+
 ---
 
-## 📋 TABLE DES MATIÈRES
+## 📋 TABLE DES MATIÈRES (MVP)
 
 1. [Architecture de Navigation](#architecture-de-navigation)
 2. [Pages Publiques (Non Connecté)](#pages-publiques-non-connecté)
-3. [Pages Utilisateur Standard](#pages-utilisateur-standard)
+3. [Pages Joueur](#pages-joueur)
 4. [Pages Organisateur](#pages-organisateur)
 5. [Pages Modérateur](#pages-modérateur)
-6. [Pages Arbitre](#pages-arbitre)
-7. [Pages Administrateur](#pages-administrateur)
-8. [Formulaires Détaillés](#formulaires-détaillés)
-9. [Composants Réutilisables](#composants-réutilisables)
-10. [Modals & Popups](#modals--popups)
-11. [Notifications & Alertes](#notifications--alertes)
-12. [Responsive Design](#responsive-design)
+6. [Pages Administrateur](#pages-administrateur)
+7. [Formulaires Détaillés](#formulaires-détaillés)
+8. [Composants Réutilisables](#composants-réutilisables)
+9. [Modals & Popups](#modals--popups)
+10. [Responsive Design](#responsive-design)
+11. [Fonctionnalités Phase 2](#fonctionnalités-phase-2)
 
 ---
 
@@ -34,57 +35,53 @@
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│  [LOGO MLM]    Accueil   Divisions   Classements   Se connecter   S'inscrire │
+│  [LOGO MLM]    Accueil   Tournois   Se connecter   S'inscrire │
 └────────────────────────────────────────────────────────────┘
 ```
 
 **Menu Items** :
 - **Accueil** → `/` (Page d'accueil publique)
-- **Divisions** → `/divisions` (Explication du système de divisions)
-- **Classements** → `/rankings` (Top joueurs publics)
+- **Tournois** → `/tournaments` (Liste des tournois publics)
 - **Se connecter** → `/login` (Modal ou page de connexion)
 - **S'inscrire** → `/register` (Modal ou page d'inscription)
 
 ---
 
-#### **Pour Utilisateur Connecté (Standard)**
+#### **Pour Utilisateur Connecté (Joueur)**
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│  [LOGO MLM]  Accueil  Tournois  Divisions  Classements  [🔔] [Avatar ▼]     │
+│  [LOGO MLM]  Accueil  Tournois  Mes Matchs  [Solde: X pièces] [Avatar ▼]     │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 **Menu Items** :
-- **Accueil** → `/home` (Dashboard utilisateur)
+- **Accueil** → `/home` (Dashboard joueur)
 - **Tournois** → `/tournaments` (Liste des tournois disponibles)
-- **Divisions** → `/divisions` (Saisons, inscriptions)
-- **Classements** → `/rankings` (MLM Rank, Hall of Fame)
-- **🔔 Notifications** → Dropdown avec notifications non lues
+- **Mes Matchs** → `/my-matches` (Matchs à jouer et historique)
+- **Solde MLM** → Affichage du nombre de pièces disponibles
 - **Avatar Dropdown** :
   - Mon Profil → `/profile`
-  - Mes Équipes → `/my-teams`
+  - Mes Infos de Jeu → `/game-profiles` (Pseudos et screenshots par jeu)
   - Mon Historique → `/history`
-  - Mes Matchs → `/my-matches`
   - Devenir Organisateur → `/become-organizer`
   - Paramètres → `/settings`
   - Se déconnecter
 
 ---
 
-#### **Pour Organisateur (Niveau 0-3)**
+#### **Pour Organisateur**
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
-│  [LOGO MLM]  Accueil  Mes Tournois  Créer Tournoi  Stats  [🔔] [Badge] [Avatar ▼]  │
+│  [LOGO MLM]  Accueil  Mes Tournois  Créer Tournoi  [Solde: X pièces] [Avatar ▼]  │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 **Menu Items supplémentaires** :
 - **Mes Tournois** → `/organizer/tournaments` (Liste des tournois créés)
 - **Créer Tournoi** → `/organizer/create-tournament` (Formulaire création)
-- **Stats Organisateur** → `/organizer/stats` (Performance, revenus)
-- **Badge visible** → Niveau 0 / 🏅 Niveau 1 / 🥈 Niveau 2 / 🥇 Niveau 3
+- **Solde MLM** → Affichage du nombre de pièces disponibles
 
 ---
 
@@ -92,30 +89,14 @@
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────┐
-│  [LOGO MLM]  Accueil  Modération  Plaintes  Validations  [🔔] [🛡️] [Avatar ▼] │
+│  [LOGO MLM]  Accueil  Validations Profils  [🛡️] [Avatar ▼] │
 └────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 **Menu Items supplémentaires** :
-- **Modération** → `/moderator/dashboard` (Dashboard modération)
-- **Plaintes** → `/moderator/complaints` (Liste des plaintes utilisateurs)
-- **Validations** → `/moderator/validations` (Demandes de certification organisateurs)
+- **Accueil** → `/moderator/dashboard` (Dashboard modération)
+- **Validations Profils** → `/moderator/profile-validations` (Validation des profils joueurs)
 - **🛡️ Badge Modérateur** → Visible à côté de l'avatar
-
----
-
-#### **Pour Arbitre**
-
-```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│  [LOGO MLM]  Accueil  Litiges  Historique  [🔔] [⚖️] [Avatar ▼]              │
-└──────────────────────────────────────────────────────────────────────────────┘
-```
-
-**Menu Items supplémentaires** :
-- **Litiges** → `/arbitre/disputes` (File d'attente des litiges)
-- **Historique** → `/arbitre/history` (Décisions passées)
-- **⚖️ Badge Arbitre** → Visible à côté de l'avatar
 
 ---
 
