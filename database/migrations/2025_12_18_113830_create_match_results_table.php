@@ -13,7 +13,19 @@ return new class extends Migration
     {
         Schema::create('match_results', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('match_id')->constrained()->onDelete('cascade');
+            $table->foreignId('submitted_by')->constrained('users')->onDelete('cascade');
+            $table->integer('own_score');
+            $table->integer('opponent_score');
+            $table->string('screenshot_path');
+            $table->text('comment')->nullable();
+            $table->enum('status', ['pending', 'validated', 'rejected'])->default('pending');
             $table->timestamps();
+
+            // Indexes
+            $table->index('match_id');
+            $table->index('submitted_by');
+            $table->index('status');
         });
     }
 

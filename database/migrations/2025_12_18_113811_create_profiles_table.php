@@ -13,7 +13,19 @@ return new class extends Migration
     {
         Schema::create('profiles', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('whatsapp_number');
+            $table->string('country');
+            $table->string('city');
+            $table->enum('status', ['pending', 'validated', 'rejected'])->default('pending');
+            $table->text('rejection_reason')->nullable();
+            $table->foreignId('validated_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->timestamp('validated_at')->nullable();
             $table->timestamps();
+
+            // Indexes
+            $table->unique('user_id');
+            $table->index('status');
         });
     }
 

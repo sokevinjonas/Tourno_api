@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -20,7 +20,11 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'password',
+        'avatar_url',
+        'role',
+        'is_banned',
+        'banned_until',
+        'ban_reason',
     ];
 
     /**
@@ -29,7 +33,6 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
-        'password',
         'remember_token',
     ];
 
@@ -42,7 +45,89 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'banned_until' => 'datetime',
+            'is_banned' => 'boolean',
         ];
+    }
+
+    /**
+     * Relationships
+     */
+    public function oauthProviders()
+    {
+        return $this->hasMany(OAuthProvider::class);
+    }
+
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
+    }
+
+    public function gameAccounts()
+    {
+        return $this->hasMany(GameAccount::class);
+    }
+
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    public function tournamentRegistrations()
+    {
+        return $this->hasMany(TournamentRegistration::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function player1Matches()
+    {
+        return $this->hasMany(TournamentMatch::class, 'player1_id');
+    }
+
+    public function player2Matches()
+    {
+        return $this->hasMany(TournamentMatch::class, 'player2_id');
+    }
+
+    public function wonMatches()
+    {
+        return $this->hasMany(TournamentMatch::class, 'winner_id');
+    }
+
+    public function submittedMatchResults()
+    {
+        return $this->hasMany(MatchResult::class, 'submitted_by');
+    }
+
+    /**
+     * Scopes
+     */
+    public function scopeAdmins($query)
+    {
+        return $query->where('role', 'admin');
+    }
+
+    public function scopeModerators($query)
+    {
+        return $query->where('role', 'moderator');
+    }
+
+    public function scopeOrganizers($query)
+    {
+        return $query->where('role', 'organizer');
+    }
+
+    public function scopePlayers($query)
+    {
+        return $query->where('role', 'player');
+    }
+
+    public function scopeNotBanned($query)
+    {
+        return $query->where('is_banned', false);
     }
 }
