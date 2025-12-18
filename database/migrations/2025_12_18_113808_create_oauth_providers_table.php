@@ -13,7 +13,18 @@ return new class extends Migration
     {
         Schema::create('oauth_providers', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->enum('provider', ['google', 'apple', 'facebook']);
+            $table->string('provider_user_id');
+            $table->string('provider_email')->nullable();
+            $table->text('access_token')->nullable();
+            $table->text('refresh_token')->nullable();
+            $table->timestamp('token_expires_at')->nullable();
             $table->timestamps();
+
+            // Indexes
+            $table->unique(['provider', 'provider_user_id']);
+            $table->index('user_id');
         });
     }
 

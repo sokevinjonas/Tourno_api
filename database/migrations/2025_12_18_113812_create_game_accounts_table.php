@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('game_accounts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->enum('game', ['efootball', 'fc_mobile', 'dream_league_soccer']);
+            $table->string('game_username');
+            $table->string('team_screenshot_path');
             $table->timestamps();
+
+            // Indexes
+            $table->index('user_id');
+            $table->index('game');
+            $table->unique(['user_id', 'game']);
         });
     }
 
