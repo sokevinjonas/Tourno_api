@@ -6,6 +6,7 @@ use App\Models\LoginToken;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\Transaction;
+use App\Mail\MagicLinkMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -125,15 +126,7 @@ class MagicLinkService
      */
     protected function sendEmail(string $email, string $magicLink): void
     {
-        // For development, just log the magic link
-        // In production, replace with actual email sending
-        Mail::raw(
-            "Cliquez sur ce lien pour vous connecter à MLM :\n\n{$magicLink}\n\nCe lien expire dans 15 minutes.",
-            function ($message) use ($email) {
-                $message->to($email)
-                    ->subject('Votre lien de connexion MLM');
-            }
-        );
+        Mail::to($email)->send(new MagicLinkMail($magicLink, $email));
     }
 
     /**
