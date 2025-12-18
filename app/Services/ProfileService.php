@@ -1,0 +1,102 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Profile;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+
+class ProfileService
+{
+    /**
+     * Create or update user profile
+     */
+    public function createOrUpdateProfile(User $user, array $data): Profile
+    {
+        return DB::transaction(function () use ($user, $data) {
+            $profile = Profile::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'whatsapp_number' => $data['whatsapp_number'],
+                    'country' => $data['country'],
+                    'city' => $data['city'],
+                    'date_of_birth' => $data['date_of_birth'] ?? null,
+                    'bio' => $data['bio'] ?? null,
+                    'validation_status' => $data['validation_status'] ?? 'pending',
+                ]
+            );
+
+            return $profile->fresh();
+        });
+    }
+
+    /**
+     * Get profile for a user
+     */
+    public function getProfile(User $user): ?Profile
+    {
+        return $user->profile;
+    }
+
+    /**
+     * Validate a profile (moderator action)
+     */
+    public function validateProfile(Profile $profile, User $moderator): Profile
+    {
+        if (!in_array($moderator->role, ['admin', 'moderator'])) {
+            throw new \Exception('Unauthorized: Only admins and moderators can validate profiles');
+        }
+
+        $profile->update([
+            'validation_status' => 'validated',
+            'validated_by' => $moderator->id,
+            'validated_at' => now(),
+            'rejection_reason' => null,
+        ]);
+
+        return $profile->fresh();
+    }
+
+    /**
+     * Reject a profile (moderator action)
+     */
+    public function rejectProfile(Profile $profile, User $moderator, string $reason): Profile
+    {
+        if (!in_array($moderator->role, ['admin', 'moderator'])) {
+            throw new \Exception('Unauthorized: Only admins and moderators can reject profiles');
+        }
+
+        $profile->update([
+            'validation_status' => 'rejected',
+            'validated_by' => $moderator->id,
+            'validated_at' => now(),
+            'rejection_reason' => $reason,
+        ]);
+
+        return $profile->fresh();
+    }
+
+    /**
+     * Get all pending profiles (for moderators)
+     */
+    public function getPendingProfiles()
+    {
+        return Profile::pending()
+            ->with(['user', 'user.gameAccounts'])
+            ->orderBy('created_at', 'asc')
+            ->get();
+    }
+
+    /**
+     * Get profile statistics
+     */
+    public function getProfileStatistics(): array
+    {
+        return [
+            'total' => Profile::count(),
+            'pending' => Profile::pending()->count(),
+            'validated' => Profile::validated()->count(),
+            'rejected' => Profile::rejected()->count(),
+        ];
+    }
+}
