@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Auth\MagicLinkController;
 use App\Http\Controllers\Auth\OAuthController;
+use App\Http\Controllers\GameAccountController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -40,4 +42,29 @@ Route::middleware('auth:sanctum')->group(function () {
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Logged out successfully']);
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Profile Management
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [ProfileController::class, 'show']);
+        Route::post('/', [ProfileController::class, 'store']);
+        Route::get('/statistics', [ProfileController::class, 'statistics']);
+    });
+
+    // Profile validation routes (Moderators only)
+    Route::prefix('profiles')->group(function () {
+        Route::get('/pending', [ProfileController::class, 'pending']);
+        Route::post('/{id}/validate', [ProfileController::class, 'validate']);
+        Route::post('/{id}/reject', [ProfileController::class, 'reject']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Game Accounts Management
+    |--------------------------------------------------------------------------
+    */
+    Route::apiResource('game-accounts', GameAccountController::class);
 });
