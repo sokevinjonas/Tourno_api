@@ -20,9 +20,7 @@ class ProfileService
                     'whatsapp_number' => $data['whatsapp_number'],
                     'country' => $data['country'],
                     'city' => $data['city'],
-                    'date_of_birth' => $data['date_of_birth'] ?? null,
-                    'bio' => $data['bio'] ?? null,
-                    'validation_status' => $data['validation_status'] ?? 'pending',
+                    'status' => $data['status'] ?? 'pending',
                 ]
             );
 
@@ -48,7 +46,7 @@ class ProfileService
         }
 
         $profile->update([
-            'validation_status' => 'validated',
+            'status' => 'validated',
             'validated_by' => $moderator->id,
             'validated_at' => now(),
             'rejection_reason' => null,
@@ -67,7 +65,7 @@ class ProfileService
         }
 
         $profile->update([
-            'validation_status' => 'rejected',
+            'status' => 'rejected',
             'validated_by' => $moderator->id,
             'validated_at' => now(),
             'rejection_reason' => $reason,

@@ -11,9 +11,9 @@ class GameAccount extends Model
 
     protected $fillable = [
         'user_id',
-        'game_type',
-        'in_game_name',
-        'screenshot_path',
+        'game',
+        'game_username',
+        'team_screenshot_path',
     ];
 
     /**

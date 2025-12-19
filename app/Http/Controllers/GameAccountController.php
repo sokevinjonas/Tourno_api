@@ -34,9 +34,9 @@ class GameAccountController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'game_type' => 'required|string|in:efootball,fc_mobile,dream_league_soccer',
-            'in_game_name' => 'required|string|max:100',
-            'screenshot' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'game' => 'required|string|in:efootball,fc_mobile,dream_league_soccer',
+            'game_username' => 'required|string|max:100',
+            'team_screenshot_path' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if ($validator->fails()) {
