@@ -84,7 +84,7 @@ class TournamentService
      */
     public function getTournaments(array $filters = [])
     {
-        $query = Tournament::with(['organizer:id,name,email']);
+        $query = Tournament::with(['organizer:id,name,email', 'registrations']);
 
         // Filter by status
         if (isset($filters['status'])) {
@@ -104,7 +104,12 @@ class TournamentService
         // Order by start date
         $query->orderBy('start_date', $filters['sort'] ?? 'desc');
 
-        return $query->get();
+        $tournaments = $query->get();
+
+        return [
+            'tournaments' => $tournaments,
+            'total' => $tournaments->count()
+        ];
     }
 
     /**

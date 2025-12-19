@@ -70,13 +70,24 @@ class AdditionalTournamentRegistrationSeeder extends Seeder
                 $registeredCount = 0;
 
                 foreach ($availablePlayers as $player) {
+                    // Re-check available spots before each registration to prevent exceeding max
+                    $tournament->refresh();
+                    $currentCount = $tournament->registrations()->count();
+
+                    if ($currentCount >= $tournament->max_participants) {
+                        $this->command->warn("   ⚠️  Tournament is now full, stopping registrations");
+                        break;
+                    }
+
                     if ($this->registerPlayer($tournament, $player)) {
                         $registeredCount++;
                         $totalRegistrations++;
                     }
                 }
 
-                $newTotal = $currentRegistrations + $registeredCount;
+                // Refresh to get accurate count
+                $tournament->refresh();
+                $newTotal = $tournament->registrations()->count();
                 $newAvailableSpots = $tournament->max_participants - $newTotal;
 
                 $this->command->line("   Registered: {$registeredCount} new player(s)");
@@ -102,6 +113,23 @@ class AdditionalTournamentRegistrationSeeder extends Seeder
     private function registerPlayer(Tournament $tournament, User $player): bool
     {
         try {
+            // Double-check that tournament is not full (safety check)
+            $currentRegistrations = $tournament->registrations()->count();
+            if ($currentRegistrations >= $tournament->max_participants) {
+                $this->command->warn("   ⚠️  Cannot register {$player->name}: Tournament is full ({$currentRegistrations}/{$tournament->max_participants})");
+                return false;
+            }
+
+            // Check if player is already registered
+            $alreadyRegistered = TournamentRegistration::where('tournament_id', $tournament->id)
+                ->where('user_id', $player->id)
+                ->exists();
+
+            if ($alreadyRegistered) {
+                $this->command->warn("   ⚠️  {$player->name} is already registered");
+                return false;
+            }
+
             // Get or create game account for this game
             $gameAccount = GameAccount::firstOrCreate(
                 [
