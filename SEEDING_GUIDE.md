@@ -66,13 +66,41 @@ Cette commande va:
 3. Exécuter le seeder principal
 4. Afficher un résumé de la création
 
-### 2. Exécuter uniquement le seeder (sans migration)
+### 2. Exécuter uniquement le seeder principal (sans migration)
 
 ```bash
 php artisan db:seed --class=TournamentSystemSeeder
 ```
 
-### 3. Vérifier les données créées
+Ce seeder crée:
+- 119 utilisateurs (1 admin + 5 mods + 3 orgs + 110 joueurs)
+- 3 tournois Swiss avec inscriptions variées:
+  - Tournoi 1: **COMPLET** (18/18)
+  - Tournoi 2: **1 place libre** (17/18)
+  - Tournoi 3: **2 places libres** (16/18)
+
+### 3. Ajouter des inscriptions supplémentaires
+
+```bash
+php artisan db:seed --class=AdditionalTournamentRegistrationSeeder
+```
+
+Ce seeder **intelligent**:
+- Détecte automatiquement les tournois avec des places disponibles
+- Inscrit des joueurs aléatoires avec un solde suffisant
+- Affiche le nombre d'inscriptions ajoutées pour chaque tournoi
+- Peut être exécuté plusieurs fois pour remplir progressivement les tournois
+
+**Exemple d'utilisation:**
+```bash
+# Créer les données initiales avec places disponibles
+php artisan db:seed --class=TournamentSystemSeeder
+
+# Remplir partiellement ou totalement les places
+php artisan db:seed --class=AdditionalTournamentRegistrationSeeder
+```
+
+### 4. Vérifier les données créées
 
 ```bash
 php artisan tournament:verify

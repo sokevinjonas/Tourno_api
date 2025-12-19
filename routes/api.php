@@ -94,7 +94,8 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('tournaments')->group(function () {
-
+        // Public for authenticated users
+        Route::get('/registering', [TournamentController::class, 'registering']);
         // Organizer/Admin only
         Route::post('/', [TournamentController::class, 'store']);
         Route::get('/my/tournaments', [TournamentController::class, 'myTournaments']);
@@ -146,6 +147,5 @@ Route::prefix('tournaments')->group(function () {
         // Public tournament queries
         Route::get('/', [TournamentController::class, 'index']);
         Route::get('/upcoming', [TournamentController::class, 'upcoming']);
-        Route::get('/registering', [TournamentController::class, 'registering']);
         Route::get('/{id}', [TournamentController::class, 'show']); 
 });
