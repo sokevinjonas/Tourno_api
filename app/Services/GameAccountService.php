@@ -15,24 +15,24 @@ class GameAccountService
     {
         // Check if user already has an account for this game type
         $existingAccount = GameAccount::where('user_id', $user->id)
-            ->where('game_type', $data['game_type'])
+            ->where('game', $data['game'])
             ->first();
 
         if ($existingAccount) {
-            throw new \Exception("You already have an account for {$data['game_type']}");
+            throw new \Exception("You already have an account for {$data['game']}");
         }
 
         // Handle screenshot upload
         $screenshotPath = null;
-        if (isset($data['screenshot'])) {
-            $screenshotPath = $this->uploadScreenshot($data['screenshot'], $user->id, $data['game_type']);
+        if (isset($data['team_screenshot_path'])) {
+            $screenshotPath = $this->uploadScreenshot($data['team_screenshot_path'], $user->id, $data['game']);
         }
 
         $gameAccount = GameAccount::create([
             'user_id' => $user->id,
-            'game_type' => $data['game_type'],
-            'in_game_name' => $data['in_game_name'],
-            'screenshot_path' => $screenshotPath,
+            'game' => $data['game'],
+            'game_username' => $data['game_username'],
+            'team_screenshot_path' => $screenshotPath,
         ]);
 
         return $gameAccount;
@@ -45,21 +45,21 @@ class GameAccountService
     {
         $updateData = [];
 
-        if (isset($data['in_game_name'])) {
-            $updateData['in_game_name'] = $data['in_game_name'];
+        if (isset($data['game_username'])) {
+            $updateData['game_username'] = $data['game_username'];
         }
 
         // Handle screenshot upload
-        if (isset($data['screenshot'])) {
+        if (isset($data['team_screenshot_path'])) {
             // Delete old screenshot if exists
-            if ($gameAccount->screenshot_path) {
-                Storage::disk('public')->delete($gameAccount->screenshot_path);
+            if ($gameAccount->team_screenshot_path) {
+                Storage::disk('public')->delete($gameAccount->team_screenshot_path);
             }
 
-            $updateData['screenshot_path'] = $this->uploadScreenshot(
-                $data['screenshot'],
+            $updateData['team_screenshot_path'] = $this->uploadScreenshot(
+                $data['team_screenshot_path'],
                 $gameAccount->user_id,
-                $gameAccount->game_type
+                $gameAccount->game
             );
         }
 

@@ -43,8 +43,6 @@ class ProfileController extends Controller
             'whatsapp_number' => 'required|string|max:20',
             'country' => 'required|string|max:100',
             'city' => 'required|string|max:100',
-            'date_of_birth' => 'nullable|date|before:today',
-            'bio' => 'nullable|string|max:500',
         ]);
 
         if ($validator->fails()) {
