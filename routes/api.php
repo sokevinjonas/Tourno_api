@@ -94,11 +94,6 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('tournaments')->group(function () {
-        // Public tournament queries
-        Route::get('/', [TournamentController::class, 'index']);
-        Route::get('/upcoming', [TournamentController::class, 'upcoming']);
-        Route::get('/registering', [TournamentController::class, 'registering']);
-        Route::get('/{id}', [TournamentController::class, 'show']);
 
         // Organizer/Admin only
         Route::post('/', [TournamentController::class, 'store']);
@@ -140,4 +135,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/disputed/all', [MatchController::class, 'disputed']);
         Route::post('/{id}/validate', [MatchController::class, 'validateResult']);
     });
+});
+
+/*
+|--------------------------------------------------------------------------
+| // Public tournament queries (NO Authentication)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('tournaments')->group(function () {
+        // Public tournament queries
+        Route::get('/', [TournamentController::class, 'index']);
+        Route::get('/upcoming', [TournamentController::class, 'upcoming']);
+        Route::get('/registering', [TournamentController::class, 'registering']);
+        Route::get('/{id}', [TournamentController::class, 'show']); 
 });
