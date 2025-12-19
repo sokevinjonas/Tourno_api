@@ -110,20 +110,27 @@ class TournamentSystemSeeder extends Seeder
                 ),
             ];
 
-            // Step 6: Register players to tournaments
+            // Step 6: Register players to tournaments with varied availability
             $this->command->info('📝 Registering players to tournaments...');
 
-            // Tournament 1: 18 players (full)
-            $this->registerPlayers($tournaments[0], array_slice($players, 0, 18));
+            $playerIndex = 0;
+
+            // Tournament 1: FULL (18/18)
+            $this->registerPlayers($tournaments[0], array_slice($players, $playerIndex, 18));
             $this->command->info('   ✓ Tournament 1: 18/18 players (FULL)');
+            $playerIndex += 18;
 
-            // Tournament 2: 18 players (full)
-            $this->registerPlayers($tournaments[1], array_slice($players, 18, 18));
-            $this->command->info('   ✓ Tournament 2: 18/18 players (FULL)');
+            // Tournament 2: 1 spot left (17/18)
+            $this->registerPlayers($tournaments[1], array_slice($players, $playerIndex, 17));
+            $this->command->info('   ✓ Tournament 2: 17/18 players (1 spot available)');
+            $playerIndex += 17;
 
-            // Tournament 3: 17 players (1 spot left)
-            $this->registerPlayers($tournaments[2], array_slice($players, 36, 17));
-            $this->command->info('   ✓ Tournament 3: 17/18 players (1 spot available)');
+            // Tournament 3: 2 spots left (16/18)
+            $this->registerPlayers($tournaments[2], array_slice($players, $playerIndex, 16));
+            $this->command->info('   ✓ Tournament 3: 16/18 players (2 spots available)');
+            $playerIndex += 16;
+
+            $totalRegistrations = 18 + 17 + 16;
 
             $this->command->info('');
             $this->command->info('✨ Tournament System Seeding Completed!');
@@ -134,7 +141,8 @@ class TournamentSystemSeeder extends Seeder
             $this->command->info('   • 3 Organizers');
             $this->command->info('   • 110 Players (all with validated profiles)');
             $this->command->info('   • 3 Swiss Format Tournaments');
-            $this->command->info('   • 53 Tournament Registrations (18+18+17)');
+            $this->command->info('   • ' . $totalRegistrations . ' Tournament Registrations (18 FULL + 17 + 16)');
+            $this->command->info('   • Available spots: 3 (1 in Tournament 2, 2 in Tournament 3)');
             $this->command->info('   • Start Date: December 25, 2025 at 12:00 PM');
         });
     }
