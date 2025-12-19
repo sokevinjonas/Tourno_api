@@ -32,12 +32,9 @@ class TournamentController extends Controller
         // Remove null filters
         $filters = array_filter($filters, fn($value) => !is_null($value));
 
-        $tournaments = $this->tournamentService->getTournaments($filters);
+        $result = $this->tournamentService->getTournaments($filters);
 
-        return response()->json([
-            'tournaments' => $tournaments,
-            'total' => $tournaments->count(),
-        ], 200);
+        return response()->json($result, 200);
     }
 
     /**
