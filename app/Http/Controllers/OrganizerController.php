@@ -200,4 +200,47 @@ class OrganizerController extends Controller
             'total' => $following->count(),
         ], 200);
     }
+
+    /**
+     * Upgrade current user to organizer
+     */
+    public function upgradeToOrganizer(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Check if user is already an organizer
+        if ($user->role === 'organizer') {
+            return response()->json([
+                'message' => 'User is already an organizer',
+            ], 400);
+        }
+
+        // Update user role
+        $user->role = 'organizer';
+        $user->save();
+
+        // Create organizer profile
+        $organizerProfile = OrganizerProfile::create([
+            'user_id' => $user->id,
+            'display_name' => $user->name,
+            'avatar_initial' => strtoupper(substr($user->name, 0, 1)),
+            'is_featured' => false,
+        ]);
+
+        return response()->json([
+            'message' => 'User upgraded to organizer successfully',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ],
+            'organizer_profile' => [
+                'id' => $organizerProfile->id,
+                'display_name' => $organizerProfile->display_name,
+                'avatar_initial' => $organizerProfile->avatar_initial,
+                'is_featured' => $organizerProfile->is_featured,
+            ],
+        ], 200);
+    }
 }

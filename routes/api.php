@@ -167,6 +167,7 @@ Route::prefix('organizers')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->prefix('organizers')->group(function () {
+    Route::post('/upgrade', [OrganizerController::class, 'upgradeToOrganizer']);
     Route::post('/{id}/follow', [OrganizerController::class, 'toggleFollow']);
     Route::get('/{id}/check-following', [OrganizerController::class, 'checkFollowing']);
     Route::get('/my/following', [OrganizerController::class, 'myFollowing']);
