@@ -30,6 +30,9 @@ return new class extends Migration
             $table->boolean('is_featured')->default(false);
             $table->timestamps();
 
+            $table->text('rejection_reason')->nullable();
+            $table->foreignId('processed_by_user_id')->nullable()->constrained('users')->onDelete('set null');
+
             // Indexes
             $table->unique('user_id');
             $table->index('is_featured');

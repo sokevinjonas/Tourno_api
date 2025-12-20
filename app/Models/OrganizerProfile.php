@@ -23,6 +23,8 @@ class OrganizerProfile extends Model
         'doc_verso',
         'status',
         'contrat_signer',
+        'rejection_reason',
+        'processed_by_user_id',
     ];
 
     protected function casts(): array
@@ -39,6 +41,11 @@ class OrganizerProfile extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function processedBy()
+    {
+        return $this->belongsTo(User::class, 'processed_by_user_id');
     }
 
     /**
