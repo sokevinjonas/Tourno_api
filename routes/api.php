@@ -137,6 +137,25 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/disputed/all', [MatchController::class, 'disputed']);
         Route::post('/{id}/validate', [MatchController::class, 'validateResult']);
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Organizers Management
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('organizers')->group(function () {
+        Route::get('/check-if-organizer', [OrganizerController::class, 'checkIfOrganizer']);
+        Route::post('/upgrade', [OrganizerController::class, 'upgradeToOrganizer']);
+        Route::get('/my/following', [OrganizerController::class, 'myFollowing']);
+        Route::post('/{id}/follow', [OrganizerController::class, 'toggleFollow']);
+        Route::get('/{id}/check-following', [OrganizerController::class, 'checkFollowing']);
+
+        // Verification requests
+        Route::post('/verification/submit', [OrganizerController::class, 'submitVerificationRequest']);
+        Route::get('/verification/pending', [OrganizerController::class, 'getPendingVerifications']);
+        Route::post('/verification/{id}/validate', [OrganizerController::class, 'validateVerificationRequest']);
+        Route::post('/verification/{id}/reject', [OrganizerController::class, 'rejectVerificationRequest']);
+    });
 });
 
 /*
@@ -159,16 +178,4 @@ Route::prefix('tournaments')->group(function () {
 Route::prefix('organizers')->group(function () {
     Route::get('/', [OrganizerController::class, 'index']);
     Route::get('/{id}', [OrganizerController::class, 'show']);
-});
-
-/*
-|--------------------------------------------------------------------------
-| Organizers - Protected Routes (Authentication Required)
-|--------------------------------------------------------------------------
-*/
-Route::middleware('auth:sanctum')->prefix('organizers')->group(function () {
-    Route::post('/upgrade', [OrganizerController::class, 'upgradeToOrganizer']);
-    Route::post('/{id}/follow', [OrganizerController::class, 'toggleFollow']);
-    Route::get('/{id}/check-following', [OrganizerController::class, 'checkFollowing']);
-    Route::get('/my/following', [OrganizerController::class, 'myFollowing']);
 });

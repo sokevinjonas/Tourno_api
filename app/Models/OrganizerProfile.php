@@ -18,6 +18,11 @@ class OrganizerProfile extends Model
         'bio',
         'social_links',
         'is_featured',
+        'nature_document',
+        'doc_recto',
+        'doc_verso',
+        'status',
+        'contrat_signer',
     ];
 
     protected function casts(): array
@@ -47,5 +52,20 @@ class OrganizerProfile extends Model
     public function scopeCertified($query)
     {
         return $query->where('badge', 'certified');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', 'attente');
+    }
+
+    public function scopeValidated($query)
+    {
+        return $query->where('status', 'valider');
+    }
+
+    public function scopeRejected($query)
+    {
+        return $query->where('status', 'rejeter');
     }
 }

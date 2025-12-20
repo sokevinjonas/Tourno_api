@@ -18,6 +18,13 @@ return new class extends Migration
             $table->enum('badge', ['certified', 'verified', 'partner'])->nullable();
             $table->string('avatar_url')->nullable();
             $table->string('avatar_initial', 2)->nullable();
+
+            $table->enum('nature_document', ['cnib', 'permis', 'passport'])->nullable();
+            $table->string('doc_recto')->nullable();
+            $table->string('doc_verso')->nullable();
+            $table->string('contrat_signer')->nullable();
+            $table->enum('status', ['attente', 'valider', 'rejeter'])->nullable();
+
             $table->text('bio')->nullable();
             $table->json('social_links')->nullable();
             $table->boolean('is_featured')->default(false);
@@ -27,6 +34,7 @@ return new class extends Migration
             $table->unique('user_id');
             $table->index('is_featured');
             $table->index('badge');
+            $table->index('status');
         });
     }
 
