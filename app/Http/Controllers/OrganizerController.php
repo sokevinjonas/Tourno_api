@@ -110,6 +110,13 @@ class OrganizerController extends Controller
     {
         $user = $request->user();
 
+        // Prevent user from following themselves
+        if ($user->id === $organizerId) {
+            return response()->json([
+                'message' => 'You cannot follow yourself',
+            ], 400);
+        }
+
         $organizer = User::where('role', 'organizer')->find($organizerId);
 
         if (!$organizer) {
@@ -202,6 +209,28 @@ class OrganizerController extends Controller
     }
 
     /**
+     * Check if current user is an organizer
+     */
+    public function checkIfOrganizer(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $response = [
+            'is_organizer' => $user->role === 'organizer',
+            'role' => $user->role,
+            'badge' => null,
+        ];
+
+        // If user is an organizer, load their profile and get badge
+        if ($user->role === 'organizer') {
+            $user->load('organizerProfile');
+            $response['badge'] = $user->organizerProfile?->badge;
+        }
+
+        return response()->json($response, 200);
+    }
+
+    /**
      * Upgrade current user to organizer
      */
     public function upgradeToOrganizer(Request $request): JsonResponse
@@ -241,6 +270,183 @@ class OrganizerController extends Controller
                 'avatar_initial' => $organizerProfile->avatar_initial,
                 'is_featured' => $organizerProfile->is_featured,
             ],
+        ], 200);
+    }
+
+    /**
+     * Submit verification request for verified/partner badge
+     */
+    public function submitVerificationRequest(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Check if user is an organizer
+        if ($user->role !== 'organizer') {
+            return response()->json([
+                'message' => 'Only organizers can submit verification requests',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'badge_type' => 'required|in:verified,partner',
+            'nature_document' => 'required|in:cnib,permis,passport',
+            'doc_recto' => 'required|string',
+            'doc_verso' => 'required|string',
+            'contrat_signer' => 'required|string',
+        ]);
+
+        $organizerProfile = $user->organizerProfile;
+
+        if (!$organizerProfile) {
+            return response()->json([
+                'message' => 'Organizer profile not found',
+            ], 404);
+        }
+
+        // Check if already has a pending request
+        if ($organizerProfile->status === 'attente') {
+            return response()->json([
+                'message' => 'You already have a pending verification request',
+            ], 400);
+        }
+
+        // Update organizer profile with verification data
+        $organizerProfile->update([
+            'nature_document' => $validated['nature_document'],
+            'doc_recto' => $validated['doc_recto'],
+            'doc_verso' => $validated['doc_verso'],
+            'contrat_signer' => $validated['contrat_signer'],
+            'status' => 'attente',
+        ]);
+
+        return response()->json([
+            'message' => 'Verification request submitted successfully',
+            'verification' => [
+                'nature_document' => $organizerProfile->nature_document,
+                'status' => $organizerProfile->status,
+                'requested_badge' => $validated['badge_type'],
+            ],
+        ], 200);
+    }
+
+    /**
+     * Get all pending verification requests (Moderators only)
+     */
+    public function getPendingVerifications(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Check if user is moderator or admin
+        if (!in_array($user->role, ['moderator', 'admin'])) {
+            return response()->json([
+                'message' => 'Unauthorized. Moderators only.',
+            ], 403);
+        }
+
+        $pendingVerifications = OrganizerProfile::with('user:id,name,email')
+            ->where('status', 'attente')
+            ->latest()
+            ->get()
+            ->map(function ($profile) {
+                return [
+                    'id' => $profile->id,
+                    'organizer' => [
+                        'id' => $profile->user->id,
+                        'name' => $profile->display_name ?? $profile->user->name,
+                        'email' => $profile->user->email,
+                    ],
+                    'nature_document' => $profile->nature_document,
+                    'doc_recto' => $profile->doc_recto,
+                    'doc_verso' => $profile->doc_verso,
+                    'contrat_signer' => $profile->contrat_signer,
+                    'status' => $profile->status,
+                    'submitted_at' => $profile->updated_at,
+                ];
+            });
+
+        return response()->json([
+            'verifications' => $pendingVerifications,
+            'total' => $pendingVerifications->count(),
+        ], 200);
+    }
+
+    /**
+     * Validate verification request (Moderators only)
+     */
+    public function validateVerificationRequest(Request $request, int $profileId): JsonResponse
+    {
+        $user = $request->user();
+
+        // Check if user is moderator or admin
+        if (!in_array($user->role, ['moderator', 'admin'])) {
+            return response()->json([
+                'message' => 'Unauthorized. Moderators only.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'badge' => 'required|in:verified,partner',
+        ]);
+
+        $organizerProfile = OrganizerProfile::find($profileId);
+
+        if (!$organizerProfile) {
+            return response()->json([
+                'message' => 'Organizer profile not found',
+            ], 404);
+        }
+
+        // Update profile with badge and status
+        $organizerProfile->update([
+            'badge' => $validated['badge'],
+            'status' => 'valider',
+        ]);
+
+        return response()->json([
+            'message' => 'Verification request validated successfully',
+            'organizer_profile' => [
+                'id' => $organizerProfile->id,
+                'display_name' => $organizerProfile->display_name,
+                'badge' => $organizerProfile->badge,
+                'status' => $organizerProfile->status,
+            ],
+        ], 200);
+    }
+
+    /**
+     * Reject verification request (Moderators only)
+     */
+    public function rejectVerificationRequest(Request $request, int $profileId): JsonResponse
+    {
+        $user = $request->user();
+
+        // Check if user is moderator or admin
+        if (!in_array($user->role, ['moderator', 'admin'])) {
+            return response()->json([
+                'message' => 'Unauthorized. Moderators only.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        $organizerProfile = OrganizerProfile::find($profileId);
+
+        if (!$organizerProfile) {
+            return response()->json([
+                'message' => 'Organizer profile not found',
+            ], 404);
+        }
+
+        // Update status to rejected
+        $organizerProfile->update([
+            'status' => 'rejeter',
+        ]);
+
+        return response()->json([
+            'message' => 'Verification request rejected',
+            'reason' => $validated['reason'] ?? null,
         ], 200);
     }
 }
