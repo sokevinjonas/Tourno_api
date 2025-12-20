@@ -84,7 +84,11 @@ class TournamentService
      */
     public function getTournaments(array $filters = [])
     {
-        $query = Tournament::with(['organizer:id,name,email', 'registrations']);
+        $query = Tournament::with([
+            'organizer:id,name,email',
+            'registrations.gameAccount',
+            'registrations.user:id,name,email'
+        ]);
 
         // Filter by status
         if (isset($filters['status'])) {
@@ -117,7 +121,7 @@ class TournamentService
      */
     public function getTournament(int $id): ?Tournament
     {
-        return Tournament::with(['organizer:id,name,email', 'registrations', 'rounds', 'matches'])
+        return Tournament::with(['organizer:id,name,email', 'registrations.gameAccount', 'registrations.user:id,name,email', 'rounds', 'matches'])
             ->find($id);
     }
 
