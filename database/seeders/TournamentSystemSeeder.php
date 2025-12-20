@@ -8,6 +8,7 @@ use App\Models\GameAccount;
 use App\Models\Wallet;
 use App\Models\Tournament;
 use App\Models\TournamentRegistration;
+use App\Models\OrganizerProfile;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -37,6 +38,8 @@ class TournamentSystemSeeder extends Seeder
 
             // Clean existing data
             $this->command->info('🧹 Cleaning existing data...');
+            DB::table('organizer_followers')->truncate();
+            OrganizerProfile::truncate();
             TournamentRegistration::truncate();
             Tournament::truncate();
             GameAccount::truncate();
@@ -71,6 +74,10 @@ class TournamentSystemSeeder extends Seeder
                     'organizer'
                 );
             }
+
+            // Step 3.5: Create Organizer Profiles
+            $this->command->info('✨ Creating Organizer Profiles...');
+            $this->createOrganizerProfiles($organizers);
 
             // Step 4: Create 110 Players
             $this->command->info('🎮 Creating 110 Players with validated profiles...');
@@ -248,6 +255,56 @@ class TournamentSystemSeeder extends Seeder
             $wallet = Wallet::where('user_id', $player->id)->first();
             $wallet->update([
                 'balance' => $wallet->balance - $tournament->entry_fee,
+            ]);
+        }
+    }
+
+    /**
+     * Create organizer profiles with realistic data
+     */
+    private function createOrganizerProfiles(array $organizers): void
+    {
+        $organizerData = [
+            [
+                'display_name' => 'Tourno Official',
+                'badge' => 'certified',
+                'avatar_initial' => 'T',
+                'bio' => 'Organisation officielle de tournois MLM. Nous organisons des compétitions équitables et professionnelles pour tous les joueurs.',
+                'social_links' => [
+                    'twitter' => 'https://twitter.com/tourno_mlm',
+                    'discord' => 'https://discord.gg/tourno',
+                ],
+                'is_featured' => true,
+            ],
+            [
+                'display_name' => 'Elite Gaming',
+                'badge' => 'certified',
+                'avatar_initial' => 'E',
+                'bio' => 'Communauté de gamers passionnés. Rejoignez-nous pour des tournois compétitifs et des événements exclusifs.',
+                'social_links' => [
+                    'twitter' => 'https://twitter.com/elite_gaming',
+                ],
+                'is_featured' => false,
+            ],
+            [
+                'display_name' => 'Pro Esports',
+                'badge' => 'verified',
+                'avatar_initial' => 'P',
+                'bio' => 'Organisation esport professionnelle avec des années d\'expérience dans la gestion de tournois.',
+                'social_links' => null,
+                'is_featured' => false,
+            ],
+        ];
+
+        foreach ($organizers as $index => $organizer) {
+            OrganizerProfile::create([
+                'user_id' => $organizer->id,
+                'display_name' => $organizerData[$index]['display_name'],
+                'badge' => $organizerData[$index]['badge'],
+                'avatar_initial' => $organizerData[$index]['avatar_initial'],
+                'bio' => $organizerData[$index]['bio'],
+                'social_links' => $organizerData[$index]['social_links'],
+                'is_featured' => $organizerData[$index]['is_featured'],
             ]);
         }
     }

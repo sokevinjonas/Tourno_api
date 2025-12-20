@@ -103,6 +103,25 @@ class User extends Authenticatable
         return $this->hasMany(MatchResult::class, 'submitted_by');
     }
 
+    public function organizerProfile()
+    {
+        return $this->hasOne(OrganizerProfile::class);
+    }
+
+    // Les organisateurs que cet utilisateur suit
+    public function followingOrganizers()
+    {
+        return $this->belongsToMany(User::class, 'organizer_followers', 'user_id', 'organizer_id')
+            ->withTimestamps();
+    }
+
+    // Les followers de cet organisateur (si l'utilisateur est un organisateur)
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'organizer_followers', 'organizer_id', 'user_id')
+            ->withTimestamps();
+    }
+
     /**
      * Scopes
      */

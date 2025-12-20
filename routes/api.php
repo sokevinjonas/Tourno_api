@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\MagicLinkController;
 use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\GameAccountController;
 use App\Http\Controllers\MatchController;
+use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoundController;
 use App\Http\Controllers\TournamentController;
@@ -147,5 +148,26 @@ Route::prefix('tournaments')->group(function () {
         // Public tournament queries
         Route::get('/', [TournamentController::class, 'index']);
         Route::get('/upcoming', [TournamentController::class, 'upcoming']);
-        Route::get('/{id}', [TournamentController::class, 'show']); 
+        Route::get('/{id}', [TournamentController::class, 'show']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Organizers (Public - NO Authentication)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('organizers')->group(function () {
+    Route::get('/', [OrganizerController::class, 'index']);
+    Route::get('/{id}', [OrganizerController::class, 'show']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Organizers - Protected Routes (Authentication Required)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth:sanctum')->prefix('organizers')->group(function () {
+    Route::post('/{id}/follow', [OrganizerController::class, 'toggleFollow']);
+    Route::get('/{id}/check-following', [OrganizerController::class, 'checkFollowing']);
+    Route::get('/my/following', [OrganizerController::class, 'myFollowing']);
 });
