@@ -343,7 +343,7 @@ class OrganizerController extends Controller
             ], 403);
         }
 
-        $pendingVerifications = OrganizerProfile::with('user:id,name,email')
+        $pendingVerifications = OrganizerProfile::with(['user:id,name,email', 'processedBy:id,name,email'])
             ->where('status', 'attente')
             ->latest()
             ->get()
@@ -360,6 +360,11 @@ class OrganizerController extends Controller
                     'doc_verso' => $profile->doc_verso,
                     'contrat_signer' => $profile->contrat_signer,
                     'status' => $profile->status,
+                    'rejection_reason' => $profile->rejection_reason,
+                    'processed_by' => $profile->processedBy ? [
+                        'id' => $profile->processedBy->id,
+                        'name' => $profile->processedBy->name,
+                    ] : null,
                     'submitted_at' => $profile->updated_at,
                 ];
             });
@@ -400,6 +405,8 @@ class OrganizerController extends Controller
         $organizerProfile->update([
             'badge' => $validated['badge'],
             'status' => 'valider',
+            'processed_by_user_id' => $user->id,
+            'rejection_reason' => null, // Clear any previous rejection reason
         ]);
 
         return response()->json([
@@ -409,6 +416,10 @@ class OrganizerController extends Controller
                 'display_name' => $organizerProfile->display_name,
                 'badge' => $organizerProfile->badge,
                 'status' => $organizerProfile->status,
+                'processed_by' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                ],
             ],
         ], 200);
     }
@@ -428,7 +439,7 @@ class OrganizerController extends Controller
         }
 
         $validated = $request->validate([
-            'reason' => 'nullable|string|max:500',
+            'rejection_reason' => 'nullable|string|max:500',
         ]);
 
         $organizerProfile = OrganizerProfile::find($profileId);
@@ -442,11 +453,17 @@ class OrganizerController extends Controller
         // Update status to rejected
         $organizerProfile->update([
             'status' => 'rejeter',
+            'rejection_reason' => $validated['rejection_reason'] ?? null,
+            'processed_by_user_id' => $user->id,
         ]);
 
         return response()->json([
             'message' => 'Verification request rejected',
-            'reason' => $validated['reason'] ?? null,
+            'rejection_reason' => $organizerProfile->rejection_reason,
+            'processed_by' => [
+                'id' => $user->id,
+                'name' => $user->name,
+            ],
         ], 200);
     }
 }
