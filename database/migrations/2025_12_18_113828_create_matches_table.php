@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('tournament_id')->constrained()->onDelete('cascade');
             $table->foreignId('round_id')->constrained()->onDelete('cascade');
             $table->foreignId('player1_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('player2_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('player2_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->integer('player1_score')->nullable();
             $table->integer('player2_score')->nullable();
             $table->foreignId('winner_id')->nullable()->constrained('users')->onDelete('set null');
