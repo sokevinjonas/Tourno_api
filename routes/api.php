@@ -43,6 +43,10 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user()->load(['profile', 'wallet', 'gameAccounts']);
     });
 
+    Route::get('is-authenticated', function () {
+        return response()->json(['authenticated' => true]);
+    });
+    
     // Logout
     Route::post('/auth/logout', function (Request $request) {
         $request->user()->currentAccessToken()->delete();
