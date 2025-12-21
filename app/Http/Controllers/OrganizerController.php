@@ -5,12 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Tournament;
 use App\Models\OrganizerProfile;
+use App\Services\OrganizerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class OrganizerController extends Controller
 {
+    protected $organizerService;
+
+    public function __construct(OrganizerService $organizerService)
+    {
+        $this->organizerService = $organizerService;
+    }
     /**
      * Get all organizers with their profiles and statistics
      */
@@ -219,12 +227,14 @@ class OrganizerController extends Controller
             'is_organizer' => $user->role === 'organizer',
             'role' => $user->role,
             'badge' => null,
+            'status' => null,
         ];
 
-        // If user is an organizer, load their profile and get badge
+        // If user is an organizer, load their profile and get badge & status
         if ($user->role === 'organizer') {
             $user->load('organizerProfile');
             $response['badge'] = $user->organizerProfile?->badge;
+            $response['status'] = $user->organizerProfile?->status;
         }
 
         return response()->json($response, 200);
@@ -235,42 +245,34 @@ class OrganizerController extends Controller
      */
     public function upgradeToOrganizer(Request $request): JsonResponse
     {
-        $user = $request->user();
+        try {
+            $result = $this->organizerService->upgradeToOrganizer($request->user());
 
-        // Check if user is already an organizer
-        if ($user->role === 'organizer') {
             return response()->json([
-                'message' => 'User is already an organizer',
+                'message' => 'User upgraded to organizer successfully',
+                'user' => [
+                    'id' => $result['user']->id,
+                    'name' => $result['user']->name,
+                    'email' => $result['user']->email,
+                    'role' => $result['user']->role,
+                ],
+                'organizer_profile' => [
+                    'id' => $result['organizer_profile']->id,
+                    'display_name' => $result['organizer_profile']->display_name,
+                    'avatar_initial' => $result['organizer_profile']->avatar_initial,
+                    'badge' => $result['organizer_profile']->badge,
+                    'is_featured' => $result['organizer_profile']->is_featured,
+                ],
+                'transaction' => [
+                    'amount' => $result['transaction_amount'],
+                    'new_balance' => $result['new_balance'],
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
             ], 400);
         }
-
-        // Update user role
-        $user->role = 'organizer';
-        $user->save();
-
-        // Create organizer profile
-        $organizerProfile = OrganizerProfile::create([
-            'user_id' => $user->id,
-            'display_name' => $user->name,
-            'avatar_initial' => strtoupper(substr($user->name, 0, 1)),
-            'is_featured' => false,
-        ]);
-
-        return response()->json([
-            'message' => 'User upgraded to organizer successfully',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-            ],
-            'organizer_profile' => [
-                'id' => $organizerProfile->id,
-                'display_name' => $organizerProfile->display_name,
-                'avatar_initial' => $organizerProfile->avatar_initial,
-                'is_featured' => $organizerProfile->is_featured,
-            ],
-        ], 200);
     }
 
     /**
@@ -290,43 +292,38 @@ class OrganizerController extends Controller
         $validated = $request->validate([
             'badge_type' => 'required|in:verified,partner',
             'nature_document' => 'required|in:cnib,permis,passport',
-            'doc_recto' => 'required|string',
-            'doc_verso' => 'required|string',
-            'contrat_signer' => 'required|string',
+            'doc_recto' => 'required|file|mimes:jpeg,jpg,png|max:5120',
+            'doc_verso' => 'required|file|mimes:jpeg,jpg,png|max:5120',
+            'contrat_signer' => 'required|file|mimes:pdf|max:10240',
         ]);
 
-        $organizerProfile = $user->organizerProfile;
+        try {
+            $result = $this->organizerService->submitVerificationRequest(
+                $user,
+                $validated['badge_type'],
+                $validated['nature_document'],
+                $request->file('doc_recto'),
+                $request->file('doc_verso'),
+                $request->file('contrat_signer')
+            );
 
-        if (!$organizerProfile) {
             return response()->json([
-                'message' => 'Organizer profile not found',
-            ], 404);
-        }
-
-        // Check if already has a pending request
-        if ($organizerProfile->status === 'attente') {
+                'message' => 'Verification request submitted successfully',
+                'verification' => [
+                    'nature_document' => $result['organizer_profile']->nature_document,
+                    'status' => $result['organizer_profile']->status,
+                    'requested_badge' => $result['requested_badge'],
+                ],
+                'transaction' => [
+                    'amount' => $result['transaction_amount'],
+                    'new_balance' => $result['new_balance'],
+                ],
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
-                'message' => 'You already have a pending verification request',
+                'message' => $e->getMessage(),
             ], 400);
         }
-
-        // Update organizer profile with verification data
-        $organizerProfile->update([
-            'nature_document' => $validated['nature_document'],
-            'doc_recto' => $validated['doc_recto'],
-            'doc_verso' => $validated['doc_verso'],
-            'contrat_signer' => $validated['contrat_signer'],
-            'status' => 'attente',
-        ]);
-
-        return response()->json([
-            'message' => 'Verification request submitted successfully',
-            'verification' => [
-                'nature_document' => $organizerProfile->nature_document,
-                'status' => $organizerProfile->status,
-                'requested_badge' => $validated['badge_type'],
-            ],
-        ], 200);
     }
 
     /**
@@ -356,9 +353,9 @@ class OrganizerController extends Controller
                         'email' => $profile->user->email,
                     ],
                     'nature_document' => $profile->nature_document,
-                    'doc_recto' => $profile->doc_recto,
-                    'doc_verso' => $profile->doc_verso,
-                    'contrat_signer' => $profile->contrat_signer,
+                    'doc_recto' => $profile->doc_recto ? Storage::disk('public')->url($profile->doc_recto) : null,
+                    'doc_verso' => $profile->doc_verso ? Storage::disk('public')->url($profile->doc_verso) : null,
+                    'contrat_signer' => $profile->contrat_signer ? Storage::disk('public')->url($profile->contrat_signer) : null,
                     'status' => $profile->status,
                     'rejection_reason' => $profile->rejection_reason,
                     'processed_by' => $profile->processedBy ? [
@@ -393,35 +390,31 @@ class OrganizerController extends Controller
             'badge' => 'required|in:verified,partner',
         ]);
 
-        $organizerProfile = OrganizerProfile::find($profileId);
+        try {
+            $result = $this->organizerService->validateVerificationRequest(
+                $profileId,
+                $validated['badge'],
+                $user
+            );
 
-        if (!$organizerProfile) {
             return response()->json([
-                'message' => 'Organizer profile not found',
+                'message' => 'Verification request validated successfully',
+                'organizer_profile' => [
+                    'id' => $result['organizer_profile']->id,
+                    'display_name' => $result['organizer_profile']->display_name,
+                    'badge' => $result['organizer_profile']->badge,
+                    'status' => $result['organizer_profile']->status,
+                    'processed_by' => [
+                        'id' => $result['processed_by']->id,
+                        'name' => $result['processed_by']->name,
+                    ],
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
             ], 404);
         }
-
-        // Update profile with badge and status
-        $organizerProfile->update([
-            'badge' => $validated['badge'],
-            'status' => 'valider',
-            'processed_by_user_id' => $user->id,
-            'rejection_reason' => null, // Clear any previous rejection reason
-        ]);
-
-        return response()->json([
-            'message' => 'Verification request validated successfully',
-            'organizer_profile' => [
-                'id' => $organizerProfile->id,
-                'display_name' => $organizerProfile->display_name,
-                'badge' => $organizerProfile->badge,
-                'status' => $organizerProfile->status,
-                'processed_by' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                ],
-            ],
-        ], 200);
     }
 
     /**
@@ -442,28 +435,29 @@ class OrganizerController extends Controller
             'rejection_reason' => 'nullable|string|max:500',
         ]);
 
-        $organizerProfile = OrganizerProfile::find($profileId);
+        try {
+            $result = $this->organizerService->rejectVerificationRequest(
+                $profileId,
+                $validated['rejection_reason'] ?? null,
+                $user
+            );
 
-        if (!$organizerProfile) {
             return response()->json([
-                'message' => 'Organizer profile not found',
+                'message' => 'Verification request rejected',
+                'rejection_reason' => $result['organizer_profile']->rejection_reason,
+                'refund' => [
+                    'amount' => $result['refund_amount'],
+                    'new_balance' => $result['new_balance'],
+                ],
+                'processed_by' => [
+                    'id' => $result['processed_by']->id,
+                    'name' => $result['processed_by']->name,
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
             ], 404);
         }
-
-        // Update status to rejected
-        $organizerProfile->update([
-            'status' => 'rejeter',
-            'rejection_reason' => $validated['rejection_reason'] ?? null,
-            'processed_by_user_id' => $user->id,
-        ]);
-
-        return response()->json([
-            'message' => 'Verification request rejected',
-            'rejection_reason' => $organizerProfile->rejection_reason,
-            'processed_by' => [
-                'id' => $user->id,
-                'name' => $user->name,
-            ],
-        ], 200);
     }
 }
