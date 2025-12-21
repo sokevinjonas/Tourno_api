@@ -90,18 +90,17 @@ class TournamentController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:200',
             'description' => 'nullable|string|max:1000',
-            'game_type' => 'required|string|in:efootball,fc_mobile,dream_league_soccer',
-            'format' => 'nullable|string|in:swiss',
-            'max_participants' => 'required|integer|min:2|max:128',
+            'game' => 'required|string|in:efootball,fc_mobile,dream_league_soccer',
+            'format' => 'required|string|in:single_elimination,swiss,champions_league',
+            'max_participants' => 'required|integer|in:8,16,32,64',
             'entry_fee' => 'required|numeric|min:0',
-            'prize_pool' => 'nullable|numeric|min:0',
             'prize_distribution' => 'nullable|json',
-            'status' => 'nullable|string|in:upcoming,registering',
-            'registration_start' => 'required|date|after:now',
-            'registration_end' => 'required|date|after:registration_start',
-            'start_date' => 'required|date|after:registration_end',
-            'end_date' => 'nullable|date|after:start_date',
-            'rules' => 'nullable|string|max:2000',
+            'visibility' => 'nullable|string|in:public,private',
+            'auto_managed' => 'nullable|boolean',
+            'start_date' => 'required|date',
+            'tournament_duration_days' => 'nullable|integer|min:1|max:30',
+            'time_slot' => 'nullable|string|in:morning,afternoon,evening',
+            'match_deadline_minutes' => 'nullable|integer|min:30|max:180',
         ]);
 
         if ($validator->fails()) {

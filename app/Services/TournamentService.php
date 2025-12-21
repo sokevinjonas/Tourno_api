@@ -24,23 +24,32 @@ class TournamentService
         }
 
         return DB::transaction(function () use ($organizer, $data) {
+            // Calculate total rounds based on format and participants
+            $schedulingService = new TournamentSchedulingService();
+            $totalRounds = $schedulingService->calculateTotalRounds(
+                $data['format'],
+                $data['max_participants']
+            );
+
             // Create tournament
             $tournament = Tournament::create([
                 'organizer_id' => $organizer->id,
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
-                'game_type' => $data['game_type'],
-                'format' => $data['format'] ?? 'swiss',
+                'game' => $data['game'],
+                'format' => $data['format'],
                 'max_participants' => $data['max_participants'],
                 'entry_fee' => $data['entry_fee'],
-                'prize_pool' => $data['prize_pool'] ?? 0,
                 'prize_distribution' => $data['prize_distribution'] ?? null,
-                'status' => $data['status'] ?? 'upcoming',
-                'registration_start' => $data['registration_start'],
-                'registration_end' => $data['registration_end'],
+                'status' => 'draft',
+                'visibility' => $data['visibility'] ?? 'public',
+                'auto_managed' => $data['auto_managed'] ?? false,
                 'start_date' => $data['start_date'],
-                'end_date' => $data['end_date'] ?? null,
-                'rules' => $data['rules'] ?? null,
+                'tournament_duration_days' => $data['tournament_duration_days'] ?? $schedulingService->calculateRecommendedDuration($data['format'], $data['max_participants']),
+                'time_slot' => $data['time_slot'] ?? 'evening',
+                'match_deadline_minutes' => $data['match_deadline_minutes'] ?? 60,
+                'total_rounds' => $totalRounds,
+                'current_round' => 0,
             ]);
 
             return $tournament;
@@ -246,17 +255,11 @@ class TournamentService
      */
     public function validateTournamentDates(array $data): void
     {
-        $registrationStart = new \DateTime($data['registration_start']);
-        $registrationEnd = new \DateTime($data['registration_end']);
+        // Validation simplifiée: la date de début peut être dans le passé ou le futur
+        // selon les besoins de l'organisateur
         $startDate = new \DateTime($data['start_date']);
 
-        if ($registrationEnd <= $registrationStart) {
-            throw new \Exception('Registration end date must be after registration start date');
-        }
-
-        if ($startDate <= $registrationEnd) {
-            throw new \Exception('Tournament start date must be after registration end date');
-        }
+        // Pas de validation stricte ici, l'organisateur peut programmer pour le futur
     }
 
     /**
