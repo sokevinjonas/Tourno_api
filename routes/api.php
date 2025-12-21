@@ -185,6 +185,7 @@ Route::prefix('tournaments')->group(function () {
         Route::get('/upcoming', [TournamentController::class, 'upcoming']);
         Route::post('/preview-schedule', [TournamentController::class, 'previewSchedule']);
         Route::get('/{id}', [TournamentController::class, 'show']);
+        Route::get('/{id}/matches', [TournamentController::class, 'getMatches']);
 });
 
 /*

@@ -323,4 +323,29 @@ class TournamentController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Get all matches for a tournament
+     */
+    public function getMatches(int $id): JsonResponse
+    {
+        $tournament = Tournament::with([
+            'matches' => function ($query) {
+                $query->with(['player1', 'player2', 'winner', 'round'])
+                    ->orderBy('round_id', 'asc')
+                    ->orderBy('created_at', 'asc');
+            }
+        ])->find($id);
+
+        if (!$tournament) {
+            return response()->json([
+                'message' => 'Tournament not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $tournament->matches,
+        ], 200);
+    }
 }
