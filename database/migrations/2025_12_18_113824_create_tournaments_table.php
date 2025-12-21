@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->foreignId('organizer_id')->constrained('users')->onDelete('cascade');
             $table->enum('game', ['efootball', 'fc_mobile', 'dream_league_soccer']);
+            $table->enum('format', ['single_elimination', 'swiss', 'champions_league']);
             $table->integer('max_participants');
             $table->decimal('entry_fee', 10, 2);
             $table->datetime('start_date');
@@ -40,6 +41,7 @@ return new class extends Migration
             // Indexes
             $table->index('organizer_id');
             $table->index('game');
+            $table->index('format');
             $table->index('status');
             $table->index('start_date');
         });
