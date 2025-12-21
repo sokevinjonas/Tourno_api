@@ -183,6 +183,7 @@ Route::prefix('tournaments')->group(function () {
         // Public tournament queries
         Route::get('/', [TournamentController::class, 'index']);
         Route::get('/upcoming', [TournamentController::class, 'upcoming']);
+        Route::post('/preview-schedule', [TournamentController::class, 'previewSchedule']);
         Route::get('/{id}', [TournamentController::class, 'show']);
 });
 

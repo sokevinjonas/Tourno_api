@@ -122,22 +122,22 @@ class TournamentSystemSeeder extends Seeder
 
             $playerIndex = 0;
 
-            // Tournament 1: FULL (18/18)
-            $this->registerPlayers($tournaments[0], array_slice($players, $playerIndex, 18));
-            $this->command->info('   ✓ Tournament 1: 18/18 players (FULL)');
-            $playerIndex += 18;
-
-            // Tournament 2: 1 spot left (17/18)
-            $this->registerPlayers($tournaments[1], array_slice($players, $playerIndex, 17));
-            $this->command->info('   ✓ Tournament 2: 17/18 players (1 spot available)');
-            $playerIndex += 17;
-
-            // Tournament 3: 2 spots left (16/18)
-            $this->registerPlayers($tournaments[2], array_slice($players, $playerIndex, 16));
-            $this->command->info('   ✓ Tournament 3: 16/18 players (2 spots available)');
+            // Tournament 1: FULL (16/16)
+            $this->registerPlayers($tournaments[0], array_slice($players, $playerIndex, 16));
+            $this->command->info('   ✓ Tournament 1: 16/16 players (FULL)');
             $playerIndex += 16;
 
-            $totalRegistrations = 18 + 17 + 16;
+            // Tournament 2: 1 spot left (15/16)
+            $this->registerPlayers($tournaments[1], array_slice($players, $playerIndex, 15));
+            $this->command->info('   ✓ Tournament 2: 15/16 players (1 spot available)');
+            $playerIndex += 15;
+
+            // Tournament 3: 2 spots left (14/16)
+            $this->registerPlayers($tournaments[2], array_slice($players, $playerIndex, 14));
+            $this->command->info('   ✓ Tournament 3: 14/16 players (2 spots available)');
+            $playerIndex += 14;
+
+            $totalRegistrations = 16 + 15 + 14;
 
             $this->command->info('');
             $this->command->info('✨ Tournament System Seeding Completed!');
@@ -145,12 +145,13 @@ class TournamentSystemSeeder extends Seeder
             $this->command->info('📊 Summary:');
             $this->command->info('   • 1 Admin');
             $this->command->info('   • 5 Moderators');
-            $this->command->info('   • 3 Organizers');
+            $this->command->info('   • 3 Organizers (with profiles and badges)');
             $this->command->info('   • 110 Players (all with validated profiles)');
-            $this->command->info('   • 3 Swiss Format Tournaments');
-            $this->command->info('   • ' . $totalRegistrations . ' Tournament Registrations (18 FULL + 17 + 16)');
+            $this->command->info('   • 3 Swiss Format Tournaments (16 participants max each)');
+            $this->command->info('   • ' . $totalRegistrations . ' Tournament Registrations (16 FULL + 15 + 14)');
             $this->command->info('   • Available spots: 3 (1 in Tournament 2, 2 in Tournament 3)');
             $this->command->info('   • Start Date: December 25, 2025 at 12:00 PM');
+            $this->command->info('   • Tournament Duration: 8 days (4 rounds × 2 days)');
         });
     }
 
@@ -208,7 +209,8 @@ class TournamentSystemSeeder extends Seeder
             'description' => "Tournoi Swiss Format - {$name}. Venez affronter les meilleurs joueurs dans un format compétitif équitable!",
             'organizer_id' => $organizer->id,
             'game' => $game,
-            'max_participants' => 18,
+            'format' => 'swiss',
+            'max_participants' => 16, // Swiss format: 16 participants standard
             'entry_fee' => 4.00,
             'start_date' => $startDate,
             'status' => 'open',
@@ -218,7 +220,13 @@ class TournamentSystemSeeder extends Seeder
                 '3rd' => 15.00,
                 '4th' => 10.00,
             ]),
-            'total_rounds' => 5, // Swiss format typically 5 rounds for 18 players
+            'tournament_duration_days' => 8, // 4 rounds × 2 days per round
+            'time_slot' => 'evening',
+            'match_deadline_minutes' => 60,
+            'total_rounds' => 4, // Swiss format: log₂(16) = 4 rounds
+            'current_round' => 0,
+            'visibility' => 'public',
+            'auto_managed' => false,
         ]);
     }
 
