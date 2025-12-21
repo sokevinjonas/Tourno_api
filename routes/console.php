@@ -1,8 +1,17 @@
 <?php
 
+use App\Jobs\AutoStartTournamentsJob;
+use App\Jobs\CheckFullTournamentsJob;
+use App\Jobs\CheckMatchDeadlinesJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+// Schedule jobs
+Schedule::job(new AutoStartTournamentsJob)->hourly();
+Schedule::job(new CheckFullTournamentsJob)->hourly();
+Schedule::job(new CheckMatchDeadlinesJob)->everyFifteenMinutes();

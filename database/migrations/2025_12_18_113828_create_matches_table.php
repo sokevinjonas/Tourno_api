@@ -23,6 +23,8 @@ return new class extends Migration
             $table->enum('status', ['scheduled', 'in_progress', 'pending_validation', 'completed', 'disputed'])->default('scheduled');
             $table->datetime('scheduled_at')->nullable();
             $table->datetime('completed_at')->nullable();
+
+            $table->datetime('deadline_at')->nullable();
             $table->timestamps();
 
             // Indexes

@@ -11,15 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('wallets', function (Blueprint $table) {
+        Schema::create('match_messages', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('match_id')->constrained('matches')->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->decimal('balance', 10, 2)->default(0.00);
-            $table->decimal('blocked_balance', 10, 2)->default(0);
+            $table->text('message');
+            $table->timestamp('read_at')->nullable();
             $table->timestamps();
 
-            // Index
-            $table->unique('user_id');
+            // Indexes
+            $table->index('match_id');
+            $table->index('user_id');
+            $table->index('created_at');
         });
     }
 
@@ -28,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('wallets');
+        Schema::dropIfExists('match_messages');
     }
 };

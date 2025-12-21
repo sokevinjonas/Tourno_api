@@ -20,10 +20,19 @@ class Tournament extends Model
         'prize_pool',
         'prize_distribution',
         'status',
+        'visibility',
+        'unique_url',
+        'creation_fee_paid',
+        'full_since',
+        'auto_managed',
         'registration_start',
         'registration_end',
         'start_date',
+        'actual_start_date',
         'end_date',
+        'tournament_duration_days',
+        'time_slot',
+        'match_deadline_minutes',
         'rules',
     ];
 
@@ -32,11 +41,15 @@ class Tournament extends Model
         return [
             'entry_fee' => 'decimal:2',
             'prize_pool' => 'decimal:2',
+            'creation_fee_paid' => 'decimal:2',
             'prize_distribution' => 'json',
+            'auto_managed' => 'boolean',
             'registration_start' => 'datetime',
             'registration_end' => 'datetime',
             'start_date' => 'datetime',
+            'actual_start_date' => 'datetime',
             'end_date' => 'datetime',
+            'full_since' => 'datetime',
         ];
     }
 
