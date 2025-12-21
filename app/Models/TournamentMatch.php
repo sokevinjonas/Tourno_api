@@ -21,6 +21,7 @@ class TournamentMatch extends Model
         'winner_id',
         'status',
         'scheduled_at',
+        'deadline_at',
         'completed_at',
     ];
 
@@ -28,6 +29,7 @@ class TournamentMatch extends Model
     {
         return [
             'scheduled_at' => 'datetime',
+            'deadline_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
     }
@@ -65,6 +67,16 @@ class TournamentMatch extends Model
         return $this->hasMany(MatchResult::class, 'match_id');
     }
 
+    public function messages()
+    {
+        return $this->hasMany(MatchMessage::class, 'match_id');
+    }
+
+    public function evidence()
+    {
+        return $this->hasMany(MatchEvidence::class, 'match_id');
+    }
+
     /**
      * Scopes
      */
@@ -91,5 +103,10 @@ class TournamentMatch extends Model
     public function scopeDisputed($query)
     {
         return $query->where('status', 'disputed');
+    }
+
+    public function scopeExpired($query)
+    {
+        return $query->where('status', 'expired');
     }
 }

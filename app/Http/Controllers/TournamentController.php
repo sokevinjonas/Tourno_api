@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tournament;
+use App\Services\TournamentSchedulingService;
 use App\Services\TournamentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -281,6 +282,44 @@ class TournamentController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to update tournament status',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Preview tournament schedule
+     */
+    public function previewSchedule(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'format' => 'required|string|in:single_elimination,swiss,champions_league',
+            'max_participants' => 'required|integer|in:8,16,32,64',
+            'start_date' => 'required|date',
+            'tournament_duration_days' => 'nullable|integer|min:1|max:30',
+            'time_slot' => 'nullable|string|in:morning,afternoon,evening',
+            'match_deadline_minutes' => 'nullable|integer|min:30|max:180',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            $schedulingService = new TournamentSchedulingService();
+            $preview = $schedulingService->previewSchedule($request->all());
+
+            return response()->json([
+                'success' => true,
+                'data' => $preview,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to preview schedule',
                 'error' => $e->getMessage(),
             ], 500);
         }

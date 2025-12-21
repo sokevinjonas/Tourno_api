@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\MagicLinkController;
 use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\GameAccountController;
+use App\Http\Controllers\MatchChatController;
 use App\Http\Controllers\MatchController;
 use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\ProfileController;
@@ -136,6 +137,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/submit-result', [MatchController::class, 'submitResult']);
         Route::get('/my/matches', [MatchController::class, 'myMatches']);
         Route::get('/my/pending', [MatchController::class, 'myPendingMatches']);
+
+        // Match chat
+        Route::post('/{id}/messages', [MatchChatController::class, 'sendMessage']);
+        Route::get('/{id}/messages', [MatchChatController::class, 'getMessages']);
+
+        // Match evidence
+        Route::post('/{id}/evidence', [MatchChatController::class, 'uploadEvidence']);
+        Route::get('/{id}/evidence', [MatchChatController::class, 'getEvidence']);
+
+        // Enter scores (Organizer only)
+        Route::post('/{id}/enter-score', [MatchChatController::class, 'enterScore']);
 
         // Moderator only: disputed matches
         Route::get('/disputed/all', [MatchController::class, 'disputed']);

@@ -12,12 +12,14 @@ class Wallet extends Model
     protected $fillable = [
         'user_id',
         'balance',
+        'blocked_balance',
     ];
 
     protected function casts(): array
     {
         return [
             'balance' => 'decimal:2',
+            'blocked_balance' => 'decimal:2',
         ];
     }
 
@@ -32,5 +34,10 @@ class Wallet extends Model
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function tournamentLocks()
+    {
+        return $this->hasMany(TournamentWalletLock::class);
     }
 }

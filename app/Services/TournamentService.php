@@ -3,8 +3,14 @@
 namespace App\Services;
 
 use App\Models\Tournament;
+use App\Models\TournamentMatch;
+use App\Models\TournamentRegistration;
+use App\Models\Round;
 use App\Models\User;
+use App\Mail\TournamentStartedMail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class TournamentService
 {
@@ -250,6 +256,118 @@ class TournamentService
 
         if ($startDate <= $registrationEnd) {
             throw new \Exception('Tournament start date must be after registration end date');
+        }
+    }
+
+    /**
+     * Auto-start tournament when conditions are met
+     */
+    public function autoStartTournament(Tournament $tournament): void
+    {
+        DB::transaction(function () use ($tournament) {
+            // Update tournament status
+            $tournament->update([
+                'status' => 'in_progress',
+                'actual_start_date' => now(),
+            ]);
+
+            // Lock organizer's funds
+            $walletLockService = new WalletLockService();
+            $walletLockService->lockFundsForTournament($tournament);
+
+            // Generate first round matches
+            $this->generateMatches($tournament);
+
+            // Notify all participants
+            $this->notifyTournamentStarted($tournament);
+
+            Log::info("Tournament {$tournament->id} auto-started successfully");
+        });
+    }
+
+    /**
+     * Generate first round match pairings
+     */
+    public function generateMatches(Tournament $tournament): void
+    {
+        $registrations = $tournament->registrations()
+            ->where('status', 'registered')
+            ->with('user')
+            ->get()
+            ->shuffle();
+
+        $participants = $registrations->pluck('user_id')->toArray();
+        $participantCount = count($participants);
+
+        // Create Round 1
+        $round = Round::create([
+            'tournament_id' => $tournament->id,
+            'round_number' => 1,
+            'status' => 'in_progress',
+            'start_date' => now(),
+        ]);
+
+        // Handle odd number of participants (one gets a bye)
+        if ($participantCount % 2 !== 0) {
+            $participants[] = null; // null represents a bye
+        }
+
+        // Create matches by pairing participants
+        $matches = [];
+        for ($i = 0; $i < count($participants); $i += 2) {
+            $player1 = $participants[$i];
+            $player2 = $participants[$i + 1] ?? null;
+
+            $match = TournamentMatch::create([
+                'tournament_id' => $tournament->id,
+                'round_id' => $round->id,
+                'player1_id' => $player1,
+                'player2_id' => $player2,
+                'status' => $player2 === null ? 'completed' : 'scheduled',
+                'player1_score' => $player2 === null ? 1 : null,
+                'player2_score' => $player2 === null ? 0 : null,
+                'winner_id' => $player2 === null ? $player1 : null,
+            ]);
+
+            $matches[] = $match;
+        }
+
+        Log::info("Generated {$participantCount} participants into " . count($matches) . " matches for tournament {$tournament->id}");
+    }
+
+    /**
+     * Notify all participants that tournament has started
+     */
+    public function notifyTournamentStarted(Tournament $tournament): void
+    {
+        $tournament->load(['registrations.user', 'matches', 'rounds']);
+
+        // Get first round
+        $firstRound = $tournament->rounds()->where('round_number', 1)->first();
+
+        if (!$firstRound) {
+            Log::warning("No first round found for tournament {$tournament->id}");
+            return;
+        }
+
+        foreach ($tournament->registrations as $registration) {
+            $user = $registration->user;
+
+            // Find user's first match
+            $firstMatch = $tournament->matches()
+                ->where('round_id', $firstRound->id)
+                ->where(function ($query) use ($user) {
+                    $query->where('player1_id', $user->id)
+                        ->orWhere('player2_id', $user->id);
+                })
+                ->first();
+
+            // Send email notification
+            Mail::to($user)->send(
+                new TournamentStartedMail($tournament, $user, $firstMatch)
+            );
+
+            Log::info("Sent tournament started email to user {$user->id} for tournament {$tournament->id}");
         }
     }
 }
