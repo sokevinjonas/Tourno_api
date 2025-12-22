@@ -213,10 +213,9 @@ class TournamentSchedulingService
     private function getTimeSlotHours(string $timeSlot): array
     {
         return match ($timeSlot) {
-            'morning' => ['start' => 9, 'end' => 12],
-            'afternoon' => ['start' => 13, 'end' => 16],
-            'evening' => ['start' => 18, 'end' => 23],
-            default => ['start' => 18, 'end' => 23],
+            'morning' => ['start' => 10, 'end' => 12],
+            'evening' => ['start' => 14, 'end' => 23],
+            default => ['start' => 14, 'end' => 23],
         };
     }
 

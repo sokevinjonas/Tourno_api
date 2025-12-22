@@ -25,7 +25,7 @@ class TournamentController extends Controller
     {
         $filters = [
             'status' => $request->input('status'),
-            'game_type' => $request->input('game_type'),
+            'game' => $request->input('game'),
             'organizer_id' => $request->input('organizer_id'),
             'sort' => $request->input('sort', 'desc'),
         ];
@@ -43,7 +43,7 @@ class TournamentController extends Controller
      */
     public function upcoming(Request $request): JsonResponse
     {
-        $gameType = $request->input('game_type');
+        $gameType = $request->input('game');
         $tournaments = $this->tournamentService->getUpcomingTournaments($gameType);
 
         return response()->json([
@@ -56,7 +56,7 @@ class TournamentController extends Controller
      */
     public function registering(Request $request): JsonResponse
     {
-        $gameType = $request->input('game_type');
+        $gameType = $request->input('game');
         $tournaments = $this->tournamentService->getRegisteringTournaments($gameType);
 
         return response()->json([
@@ -296,8 +296,8 @@ class TournamentController extends Controller
             'max_participants' => 'required|integer|in:8,16,32,64',
             'start_date' => 'required|date',
             'tournament_duration_days' => 'nullable|integer|min:1|max:30',
-            'time_slot' => 'nullable|string|in:morning,afternoon,evening',
-            'match_deadline_minutes' => 'nullable|integer|min:30|max:180',
+            'time_slot' => 'required|string|in:morning,evening',
+            'match_deadline_minutes' => 'required|integer|min:30|max:180',
         ]);
 
         if ($validator->fails()) {
