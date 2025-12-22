@@ -105,14 +105,18 @@ class TournamentService
             'registrations.user:id,name,email'
         ]);
 
+         // Exclure les tournois avec status == 'draft'
+        $query->where('status', '!=', 'draft');
+
+
         // Filter by status
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-        // Filter by game type
-        if (isset($filters['game_type'])) {
-            $query->where('game_type', $filters['game_type']);
+        // Filter by game
+        if (isset($filters['game'])) {
+            $query->where('game', $filters['game']);
         }
 
         // Filter by organizer
@@ -150,7 +154,7 @@ class TournamentService
             ->where('start_date', '>', now());
 
         if ($gameType) {
-            $query->where('game_type', $gameType);
+            $query->where('game', $gameType);
         }
 
         return $query->orderBy('start_date', 'asc')->get();
@@ -167,7 +171,7 @@ class TournamentService
             ->where('registration_end', '>=', now());
 
         if ($gameType) {
-            $query->where('game_type', $gameType);
+            $query->where('game', $gameType);
         }
 
         return $query->orderBy('registration_end', 'asc')->get();
