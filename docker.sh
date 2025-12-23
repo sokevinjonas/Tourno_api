@@ -24,9 +24,11 @@ case "$1" in
         ;;
 
     "build")
-        echo "🔨 Building Tourno services..."
-        docker-compose up -d --build
+        echo "🔨 Building Tourno app image..."
+        docker build --network=host -t tourno_app .
         echo "✅ Build completed!"
+        echo "Now starting services..."
+        docker-compose up -d
         ;;
 
     "logs")
@@ -136,22 +138,25 @@ case "$1" in
 
     "install")
         echo "📦 Installing Tourno..."
-        echo "Step 1: Building containers..."
-        docker-compose up -d --build
+        echo "Step 1: Building app image..."
+        docker build --network=host -t tourno_app .
 
-        echo "Step 2: Installing composer dependencies..."
-        docker-compose exec app composer install
+        echo "Step 2: Starting containers..."
+        docker-compose up -d
 
-        echo "Step 3: Setting up environment..."
+        echo "Step 3: Installing composer dependencies (if needed)..."
+        docker-compose exec app composer install --no-interaction
+
+        echo "Step 4: Setting up environment..."
         if [ ! -f .env ]; then
             cp .env.docker .env
             docker-compose exec app php artisan key:generate
         fi
 
-        echo "Step 4: Running migrations and seeders..."
+        echo "Step 5: Running migrations and seeders..."
         docker-compose exec app php artisan migrate:fresh --seed
 
-        echo "Step 5: Fixing permissions..."
+        echo "Step 6: Fixing permissions..."
         docker-compose exec app chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
         docker-compose exec app chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 

@@ -1,5 +1,5 @@
-# Use PHP 8.2 with Apache (Debian Bookworm - stable)
-FROM php:8.2.26-apache-bookworm
+# Use PHP 8.4 with Apache (Debian Bookworm - stable)
+FROM php:8.4-apache-bookworm
 
 # Set timezone
 ENV TZ=UTC
