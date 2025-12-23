@@ -3,9 +3,7 @@ version: '3.8'
 services:
   # Laravel Application
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: tourno_app:latest
     container_name: tourno_app
     restart: unless-stopped
     working_dir: /var/www/html
@@ -47,7 +45,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
       - tourno_network
     healthcheck:
