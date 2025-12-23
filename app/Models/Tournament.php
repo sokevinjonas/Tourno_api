@@ -79,12 +79,12 @@ class Tournament extends Model
      */
     public function scopeUpcoming($query)
     {
-        return $query->where('status', 'upcoming');
+        return $query->where('status', 'open');
     }
 
     public function scopeRegistering($query)
     {
-        return $query->where('status', 'registering');
+        return $query->where('status', 'open');
     }
 
     public function scopeInProgress($query)
