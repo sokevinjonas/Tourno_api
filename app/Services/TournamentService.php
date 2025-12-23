@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Tournament;
 use App\Models\TournamentMatch;
-use App\Models\TournamentRegistration;
 use App\Models\Round;
 use App\Models\User;
 use App\Mail\TournamentStartedMail;
