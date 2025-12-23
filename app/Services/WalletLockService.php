@@ -29,7 +29,8 @@ class WalletLockService
                 'status' => 'locked',
             ]);
 
-            // Mettre à jour le solde bloqué
+            // Transférer les fonds de balance vers blocked_balance
+            $organizer->wallet->balance -= $totalEntryFees;
             $organizer->wallet->blocked_balance += $totalEntryFees;
             $organizer->wallet->save();
         });

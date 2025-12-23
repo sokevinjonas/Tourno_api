@@ -152,9 +152,11 @@ Organisateur (après libération):
 
 ---
 
-## 📡 Routes API - Wallet
+## 📡 Routes API
 
-### 1. Obtenir le Wallet de l'utilisateur connecté
+### Routes Wallet
+
+#### 1. Obtenir le Wallet de l'utilisateur connecté
 
 ```http
 GET /api/wallet
@@ -175,9 +177,11 @@ Authorization: Bearer {token}
 }
 ```
 
+**💡 Recommandation :** Utilisez cette route pour afficher à la fois le solde disponible et le solde bloqué.
+
 ---
 
-### 2. Obtenir uniquement le solde
+#### 2. Obtenir uniquement le solde disponible
 
 ```http
 GET /api/wallet/balance
@@ -191,11 +195,11 @@ Authorization: Bearer {token}
 }
 ```
 
-> ⚠️ **Note :** Cette route retourne uniquement le `balance` (solde disponible), **pas** le `blocked_balance`.
+> ⚠️ **Note :** Cette route retourne uniquement le `balance` (solde disponible), **pas** le `blocked_balance`. Pour obtenir le `blocked_balance`, utilisez `GET /api/wallet`.
 
 ---
 
-### 3. Historique des transactions
+#### 3. Historique des transactions
 
 ```http
 GET /api/wallet/transactions?limit=50&offset=0
@@ -300,6 +304,136 @@ Content-Type: application/json
     "reason": "admin_adjustment"
   },
   "new_balance": "150.00"
+}
+```
+
+---
+
+### Routes Tournoi (Impact sur le Solde Bloqué)
+
+#### 1. Inscription à un tournoi
+
+```http
+POST /api/tournaments/{id}/register
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "game_account_id": 123
+}
+```
+
+**Impact sur les wallets :**
+
+- 💳 Participant : `-entry_fee` (débit)
+- 💰 Organisateur : `+entry_fee` (crédit)
+
+**Réponse succès (201) :**
+```json
+{
+  "message": "Successfully registered to tournament",
+  "registration": {
+    "id": 1,
+    "tournament_id": 1,
+    "user_id": 10,
+    "game_account_id": 123,
+    "status": "registered"
+  }
+}
+```
+
+---
+
+#### 2. Retrait d'un tournoi (avant le début)
+
+```http
+POST /api/tournaments/{id}/withdraw
+Authorization: Bearer {token}
+```
+
+**Conditions :**
+
+- Le tournoi ne doit **pas** être en status `in_progress` ou `completed`
+
+**Impact sur les wallets :**
+
+- 💰 Participant : `+entry_fee` (remboursement)
+- 💳 Organisateur : `-entry_fee` (débit)
+
+**Réponse succès (200) :**
+```json
+{
+  "message": "Successfully withdrawn from tournament",
+  "registration": {
+    "status": "withdrawn"
+  }
+}
+```
+
+---
+
+#### 3. Démarrer un tournoi
+
+```http
+POST /api/tournaments/{id}/start
+Authorization: Bearer {token}
+```
+
+**🔒 Action critique :** Cette route **bloque** automatiquement les fonds de l'organisateur.
+
+**Impact :**
+
+- Organisateur `balance` → diminue de `total_entry_fees`
+- Organisateur `blocked_balance` → augmente de `total_entry_fees`
+
+---
+
+#### 4. Terminer un tournoi
+
+```http
+POST /api/tournaments/{id}/complete
+Authorization: Bearer {token}
+```
+
+**💸 Action critique :** Cette route distribue automatiquement les prix et libère les fonds restants.
+
+**Impact :**
+
+- Gagnants : `+prize_amount` (crédit)
+- Organisateur `blocked_balance` → retombe à 0
+- Organisateur `balance` → augmente du reste (si prize_distribution < 100%)
+
+---
+
+#### 5. Changer le statut d'un tournoi
+
+```http
+POST /api/tournaments/{id}/status
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "status": "open"
+}
+```
+
+**Statuts possibles :**
+
+- `draft` - Brouillon
+- `open` - Ouvert aux inscriptions
+- `in_progress` - En cours
+- `completed` - Terminé
+- `cancelled` - Annulé
+
+**Réponse :**
+
+```json
+{
+  "message": "Tournament status updated successfully",
+  "tournament": {
+    "id": 1,
+    "status": "open"
+  }
 }
 ```
 
