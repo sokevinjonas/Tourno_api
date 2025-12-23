@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
+use App\Mail\TournamentNewRegistrationMail;
+use App\Mail\TournamentRegistrationConfirmationMail;
 use App\Models\GameAccount;
 use App\Models\Tournament;
 use App\Models\TournamentRegistration;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class TournamentRegistrationService
 {
@@ -58,6 +61,24 @@ class TournamentRegistrationService
                 'draws' => 0,
                 'losses' => 0,
             ]);
+
+            // Get total registrations after this one
+            $totalRegistrations = $tournament->registrations()->where('status', 'registered')->count();
+
+            // Send confirmation email to participant
+            Mail::to($user)->send(
+                new TournamentRegistrationConfirmationMail($tournament, $user)
+            );
+
+            // Send notification email to organizer
+            Mail::to($tournament->organizer)->send(
+                new TournamentNewRegistrationMail(
+                    $tournament,
+                    $user,
+                    $totalRegistrations,
+                    $tournament->max_participants
+                )
+            );
 
             return $registration->fresh();
         });

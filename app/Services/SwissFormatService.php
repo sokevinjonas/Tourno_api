@@ -10,13 +10,20 @@ use Illuminate\Support\Facades\DB;
 
 class SwissFormatService
 {
+    protected WalletLockService $walletLockService;
+
+    public function __construct(WalletLockService $walletLockService)
+    {
+        $this->walletLockService = $walletLockService;
+    }
+
     /**
      * Start tournament and generate first round
      */
     public function startTournament(Tournament $tournament): Round
     {
-        if ($tournament->status !== 'registering') {
-            throw new \Exception('Tournament must be in registering status to start');
+        if ($tournament->status !== 'open') {
+            throw new \Exception('Tournament must be in open status to start');
         }
 
         $participants = TournamentRegistration::where('tournament_id', $tournament->id)
@@ -30,6 +37,9 @@ class SwissFormatService
         return DB::transaction(function () use ($tournament) {
             // Update tournament status
             $tournament->update(['status' => 'in_progress']);
+
+            // Lock organizer's funds for this tournament
+            $this->walletLockService->lockFundsForTournament($tournament);
 
             // Generate first round
             return $this->generateNextRound($tournament);
