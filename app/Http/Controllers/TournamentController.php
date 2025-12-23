@@ -257,7 +257,7 @@ class TournamentController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'status' => 'required|string|in:open,in_progress,completed,cancelled',
+            'status' => 'required|string|in:draft,open,in_progress,completed,cancelled',
         ]);
 
         if ($validator->fails()) {

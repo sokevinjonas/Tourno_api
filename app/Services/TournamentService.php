@@ -186,7 +186,7 @@ class TournamentService
             throw new \Exception('Unauthorized: You can only update your own tournaments');
         }
 
-        $allowedStatuses = ['upcoming', 'registering', 'in_progress', 'completed', 'cancelled'];
+        $allowedStatuses = ['draft', 'open', 'in_progress', 'completed', 'cancelled'];
 
         if (!in_array($status, $allowedStatuses)) {
             throw new \Exception("Invalid status: {$status}");
