@@ -31,10 +31,19 @@ class TournamentRegistrationService
                 throw new \Exception('Insufficient balance. Please add funds to your wallet.');
             }
 
-            // Debit entry fee from wallet
+            // Debit entry fee from participant's wallet
             $this->walletService->processTournamentRegistration(
                 $user,
                 $tournament->entry_fee,
+                $tournament->id
+            );
+
+            // Credit entry fee to organizer's wallet
+            $this->walletService->credit(
+                $tournament->organizer,
+                $tournament->entry_fee,
+                'tournament_entry_received',
+                "Entry fee received for tournament #{$tournament->id}",
                 $tournament->id
             );
 
@@ -60,22 +69,13 @@ class TournamentRegistrationService
     protected function validateRegistration(User $user, Tournament $tournament, int $gameAccountId): void
     {
         // Check if user has a validated profile
-        if (!$user->profile || $user->profile->validation_status !== 'validated') {
+        if (!$user->profile || $user->profile->status !== 'validated') {
             throw new \Exception('Your profile must be validated before registering to tournaments');
         }
 
         // Check if tournament is accepting registrations
-        if ($tournament->status !== 'registering') {
+        if ($tournament->status !== 'open') {
             throw new \Exception('Tournament is not accepting registrations');
-        }
-
-        // Check registration period
-        if (now()->lt($tournament->registration_start)) {
-            throw new \Exception('Registration has not started yet');
-        }
-
-        if (now()->gt($tournament->registration_end)) {
-            throw new \Exception('Registration period has ended');
         }
 
         // Check if tournament is full
@@ -103,9 +103,9 @@ class TournamentRegistrationService
             throw new \Exception('Game account not found');
         }
 
-        // Check if game account matches tournament game type
-        if ($gameAccount->game_type !== $tournament->game_type) {
-            throw new \Exception("Game account type must match tournament game type ({$tournament->game_type})");
+        // Check if game account matches tournament game
+        if ($gameAccount->game !== $tournament->game) {
+            throw new \Exception("Game account type must match tournament game ({$tournament->game})");
         }
     }
 
@@ -128,7 +128,16 @@ class TournamentRegistrationService
             // Update registration status
             $registration->update(['status' => 'withdrawn']);
 
-            // Refund entry fee
+            // Debit entry fee from organizer's wallet
+            $this->walletService->debit(
+                $registration->tournament->organizer,
+                $registration->tournament->entry_fee,
+                'tournament_entry_refunded',
+                "Refund entry fee for tournament #{$registration->tournament_id}",
+                $registration->tournament_id
+            );
+
+            // Refund entry fee to participant
             $this->walletService->processTournamentRefund(
                 $user,
                 $registration->tournament->entry_fee,
