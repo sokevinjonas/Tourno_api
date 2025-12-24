@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Mail\MatchMessageNotification;
+use App\Mail\MatchResultLoserMail;
+use App\Mail\MatchResultWinnerMail;
 use App\Models\MatchEvidence;
 use App\Models\MatchMessage;
 use App\Models\TournamentMatch;
@@ -231,10 +233,32 @@ class MatchChatController extends Controller
 
             Log::info("Organizer entered scores for match {$match->id}: P1={$player1Score}, P2={$player2Score}");
 
+            // Send email notifications to both players
+            $match = $match->fresh(['player1', 'player2', 'round.tournament']);
+
+            if ($winnerId) {
+                $winner = $winnerId === $match->player1_id ? $match->player1 : $match->player2;
+                $loser = $winnerId === $match->player1_id ? $match->player2 : $match->player1;
+                $winnerScore = $winnerId === $match->player1_id ? $player1Score : $player2Score;
+                $loserScore = $winnerId === $match->player1_id ? $player2Score : $player1Score;
+
+                // Send winner email
+                Mail::to($winner)->send(
+                    new MatchResultWinnerMail($winner, $match, $winnerScore, $loserScore)
+                );
+
+                // Send loser email
+                Mail::to($loser)->send(
+                    new MatchResultLoserMail($loser, $match, $loserScore, $winnerScore)
+                );
+
+                Log::info("Sent match result emails to players for match {$match->id}");
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Scores entered successfully',
-                'data' => $match->fresh(['player1', 'player2', 'winner'])
+                'data' => $match
             ]);
         });
     }

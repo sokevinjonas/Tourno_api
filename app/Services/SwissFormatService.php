@@ -2,11 +2,16 @@
 
 namespace App\Services;
 
+use App\Mail\MatchResultLoserMail;
+use App\Mail\MatchResultWinnerMail;
+use App\Mail\NextRoundGeneratedMail;
 use App\Models\Round;
 use App\Models\Tournament;
 use App\Models\TournamentMatch;
 use App\Models\TournamentRegistration;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class SwissFormatService
 {
@@ -88,6 +93,24 @@ class SwissFormatService
 
             // Generate pairings
             $this->generatePairings($tournament, $round);
+
+            // Send email notifications to all players in this round
+            $matches = $round->matches()->with(['player1', 'player2'])->get();
+            foreach ($matches as $match) {
+                // Send email to player 1
+                if ($match->player1) {
+                    Mail::to($match->player1)->send(
+                        new NextRoundGeneratedMail($match->player1, $tournament, $round, $match)
+                    );
+                }
+
+                // Send email to player 2
+                if ($match->player2) {
+                    Mail::to($match->player2)->send(
+                        new NextRoundGeneratedMail($match->player2, $tournament, $round, $match)
+                    );
+                }
+            }
 
             return $round;
         });
@@ -252,7 +275,27 @@ class SwissFormatService
             $player2Result = $result === 'win' ? 'loss' : ($result === 'loss' ? 'win' : 'draw');
             $this->updatePlayerStats($match->player2_id, $match->tournament_id, $player2Result);
 
-            return $match->fresh();
+            // Send email notifications to both players
+            $match = $match->fresh(['player1', 'player2', 'round.tournament']);
+
+            if ($winnerId) {
+                $winner = $winnerId === $match->player1_id ? $match->player1 : $match->player2;
+                $loser = $winnerId === $match->player1_id ? $match->player2 : $match->player1;
+                $winnerScore = $winnerId === $match->player1_id ? $player1Score : $player2Score;
+                $loserScore = $winnerId === $match->player1_id ? $player2Score : $player1Score;
+
+                // Send winner email
+                Mail::to($winner)->send(
+                    new MatchResultWinnerMail($winner, $match, $winnerScore, $loserScore)
+                );
+
+                // Send loser email
+                Mail::to($loser)->send(
+                    new MatchResultLoserMail($loser, $match, $loserScore, $winnerScore)
+                );
+            }
+
+            return $match;
         });
     }
 
