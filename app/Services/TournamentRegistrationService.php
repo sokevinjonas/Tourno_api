@@ -35,20 +35,17 @@ class TournamentRegistrationService
             }
 
             // Debit entry fee from participant's wallet
+            // Les fonds vont dans le "pot du tournoi" et ne sont PAS crédités à l'organisateur
             $this->walletService->processTournamentRegistration(
                 $user,
                 $tournament->entry_fee,
                 $tournament->id
             );
 
-            // Credit entry fee to organizer's wallet
-            $this->walletService->credit(
-                $tournament->organizer,
-                $tournament->entry_fee,
-                'tournament_entry_received',
-                "Entry fee received for tournament #{$tournament->id}",
-                $tournament->id
-            );
+            // NOTE: Les entry fees ne vont PAS directement à l'organisateur
+            // Ils seront distribués à la fin du tournoi :
+            // - Prix aux gagnants
+            // - Reste à l'organisateur
 
             // Create registration
             $registration = TournamentRegistration::create([
