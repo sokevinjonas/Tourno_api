@@ -23,7 +23,7 @@
 </p>
 
 <p style="margin-bottom: 20px;">
-    Bonne chance ! 🎮
+    Bonne chance !
 </p>
 
 <p style="color: #6c757d; font-size: 14px; margin-top: 30px;">

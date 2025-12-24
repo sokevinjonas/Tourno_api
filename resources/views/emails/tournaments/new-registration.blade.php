@@ -1,7 +1,7 @@
 @extends('emails.layout')
 
 @section('content')
-<h2 style="color: #333; margin-bottom: 20px;">Nouvelle inscription reçue ! 🎉</h2>
+<h2 style="color: #333; margin-bottom: 20px;">Nouvelle inscription reçue</h2>
 
 <p style="margin-bottom: 15px;">Bonjour <strong>{{ $tournament->organizer->name }}</strong>,</p>
 
@@ -22,11 +22,11 @@
 
     @if ($spotsRemaining === 0)
         <p style="margin-top: 10px; color: #4caf50; font-weight: bold;">
-            ✅ Le tournoi est complet ! Vous pouvez maintenant le démarrer.
+            Le tournoi est complet ! Vous pouvez maintenant le démarrer.
         </p>
     @else
         <p style="margin-top: 10px; color: #ff9800;">
-            ⏳ En attente de {{ $spotsRemaining }} participant(s) supplémentaire(s).
+            En attente de {{ $spotsRemaining }} participant(s) supplémentaire(s).
         </p>
     @endif
 </div>
@@ -41,7 +41,7 @@
 
 <div style="margin-top: 30px; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">
     <p style="margin: 0; font-size: 14px; color: #555;">
-        💡 <strong>Astuce :</strong> Vous pouvez consulter la liste complète des participants depuis votre tableau de bord organisateur.
+        <strong>Astuce :</strong> Vous pouvez consulter la liste complète des participants depuis votre tableau de bord organisateur.
     </p>
 </div>
 @endsection
