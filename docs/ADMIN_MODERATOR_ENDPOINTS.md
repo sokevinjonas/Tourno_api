@@ -103,17 +103,17 @@ Authorization: Bearer {moderator_token}
 Content-Type: application/json
 
 {
-  "rejection_reason": "Informations incomplètes ou incorrectes"
+  "reason": "Informations incomplètes ou incorrectes"
 }
 ```
 
 **Paramètres :**
-- `rejection_reason` (string, requis) - Raison du rejet
+- `reason` (string, requis) - Raison du rejet
 
 **Réponse (200) :**
 ```json
 {
-  "message": "Profile rejected successfully",
+  "message": "Profile rejected",
   "profile": {
     "id": 1,
     "status": "rejected",
@@ -301,7 +301,211 @@ Content-Type: application/json
 
 **Note :** Les admins ont accès à TOUS les endpoints modérateur + les suivants :
 
-### 1. Gestion des Wallets
+### 1. Gestion des Utilisateurs
+
+#### Obtenir la liste des utilisateurs
+
+```http
+GET /api/users
+Authorization: Bearer {admin_token}
+```
+
+**Paramètres de requête (optionnels) :**
+- `role` (string) - Filtrer par rôle : admin, moderator, organizer, player
+- `profile_status` (string) - Filtrer par statut de profil : pending, validated, rejected
+- `search` (string) - Rechercher par nom ou email
+- `country` (string) - Filtrer par pays
+- `sort_by` (string) - Trier par : created_at, name, email (défaut: created_at)
+- `sort_order` (string) - Ordre : asc, desc (défaut: desc)
+- `per_page` (integer) - Nombre par page (défaut: 20)
+
+**Réponse (200) :**
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john@example.com",
+      "role": "player",
+      "avatar_url": "https://...",
+      "created_at": "2025-12-20T10:00:00.000000Z",
+      "profile": {
+        "id": 1,
+        "whatsapp_number": "+1234567890",
+        "country": "France",
+        "city": "Paris",
+        "status": "validated"
+      },
+      "wallet": {
+        "id": 1,
+        "balance": "100.00",
+        "blocked_balance": "0.00"
+      }
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "last_page": 5,
+    "per_page": 20,
+    "total": 95
+  }
+}
+```
+
+**Exemples d'utilisation :**
+
+```bash
+# Tous les joueurs
+GET /api/users?role=player
+
+# Profils en attente
+GET /api/users?profile_status=pending
+
+# Recherche par nom
+GET /api/users?search=john
+
+# Utilisateurs français
+GET /api/users?country=France
+
+# Combinaison de filtres
+GET /api/users?role=organizer&country=Cameroon&sort_by=name&sort_order=asc
+```
+
+---
+
+#### Obtenir les détails d'un utilisateur
+
+```http
+GET /api/users/{id}
+Authorization: Bearer {admin_token}
+```
+
+**Réponse (200) :**
+```json
+{
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "role": "organizer",
+    "avatar_url": "https://...",
+    "created_at": "2025-12-20T10:00:00.000000Z",
+    "profile": {
+      "id": 1,
+      "whatsapp_number": "+1234567890",
+      "country": "France",
+      "city": "Paris",
+      "status": "validated",
+      "validated_at": "2025-12-21T14:00:00.000000Z"
+    },
+    "wallet": {
+      "id": 1,
+      "balance": "250.00",
+      "blocked_balance": "50.00"
+    },
+    "game_accounts": [
+      {
+        "id": 1,
+        "game": "efootball",
+        "game_username": "JohnDoe123"
+      }
+    ],
+    "tournaments": [
+      {
+        "id": 10,
+        "name": "Tournoi eFootball",
+        "status": "in_progress"
+      }
+    ],
+    "registrations": [
+      {
+        "id": 5,
+        "tournament_id": 10,
+        "status": "registered",
+        "tournament": {
+          "id": 10,
+          "name": "Tournoi eFootball"
+        }
+      }
+    ]
+  }
+}
+```
+
+---
+
+#### Modifier le rôle d'un utilisateur
+
+```http
+PATCH /api/users/{id}/role
+Authorization: Bearer {admin_token}
+Content-Type: application/json
+
+{
+  "role": "moderator"
+}
+```
+
+**Paramètres :**
+- `role` (string, requis) - Nouveau rôle : admin, moderator, organizer, player
+
+**Réponse (200) :**
+```json
+{
+  "message": "User role updated successfully",
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "role": "moderator",
+    "profile": {...},
+    "wallet": {...}
+  }
+}
+```
+
+**Restrictions :**
+- ❌ Un admin ne peut pas changer son propre rôle
+- ⚠️ Attention : Changer le rôle ne modifie pas automatiquement les permissions existantes
+
+---
+
+#### Obtenir les statistiques utilisateurs
+
+```http
+GET /api/users/statistics
+Authorization: Bearer {admin_token}
+```
+
+**Réponse (200) :**
+```json
+{
+  "statistics": {
+    "total_users": 1250,
+    "by_role": {
+      "admins": 2,
+      "moderators": 5,
+      "organizers": 43,
+      "players": 1200
+    },
+    "profiles": {
+      "pending": 15,
+      "validated": 1180,
+      "rejected": 55
+    },
+    "recent_signups": {
+      "today": 12,
+      "this_week": 87,
+      "this_month": 342
+    }
+  }
+}
+```
+
+---
+
+### 2. Gestion des Wallets
 
 #### Ajouter des fonds à un utilisateur
 

@@ -10,6 +10,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoundController;
 use App\Http\Controllers\TournamentController;
 use App\Http\Controllers\TournamentRegistrationController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\WalletController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -92,6 +93,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Admin only: Add funds to user wallet
         Route::post('/add-funds', [WalletController::class, 'addFunds']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Users Management (Admin only)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'index']);
+        Route::get('/statistics', [UserController::class, 'statistics']);
+        Route::get('/{id}', [UserController::class, 'show']);
+        Route::patch('/{id}/role', [UserController::class, 'updateRole']);
     });
 
     /*
