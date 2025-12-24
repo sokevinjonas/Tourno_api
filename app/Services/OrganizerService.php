@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\Mail\OrganizerVerificationApprovedMail;
+use App\Mail\OrganizerWelcomeMail;
 use App\Models\User;
 use App\Models\OrganizerProfile;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class OrganizerService
@@ -69,6 +72,11 @@ class OrganizerService
             ]);
 
             DB::commit();
+
+            // Send welcome email to the new organizer
+            Mail::to($user)->send(
+                new OrganizerWelcomeMail($user, $organizerProfile)
+            );
 
             return [
                 'user' => $user,
@@ -177,7 +185,7 @@ class OrganizerService
      */
     public function validateVerificationRequest(int $profileId, string $badge, User $moderator): array
     {
-        $organizerProfile = OrganizerProfile::find($profileId);
+        $organizerProfile = OrganizerProfile::with('user')->find($profileId);
 
         if (!$organizerProfile) {
             throw new \Exception('Organizer profile not found');
@@ -190,6 +198,17 @@ class OrganizerService
             'processed_by_user_id' => $moderator->id,
             'rejection_reason' => null,
         ]);
+
+        // Send welcome email to the organizer
+        if ($organizerProfile->user) {
+            Mail::to($organizerProfile->user)->send(
+                new OrganizerVerificationApprovedMail(
+                    $organizerProfile->user,
+                    $organizerProfile,
+                    $badge
+                )
+            );
+        }
 
         return [
             'organizer_profile' => $organizerProfile,
