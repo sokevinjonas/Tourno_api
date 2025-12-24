@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\Mail\ProfileRejectedMail;
+use App\Mail\ProfileValidatedMail;
 use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class ProfileService
 {
@@ -52,6 +55,11 @@ class ProfileService
             'rejection_reason' => null,
         ]);
 
+        // Send email notification to user
+        Mail::to($profile->user)->send(
+            new ProfileValidatedMail($profile->user, $profile)
+        );
+
         return $profile->fresh();
     }
 
@@ -70,6 +78,11 @@ class ProfileService
             'validated_at' => now(),
             'rejection_reason' => $reason,
         ]);
+
+        // Send email notification to user
+        Mail::to($profile->user)->send(
+            new ProfileRejectedMail($profile->user, $profile, $reason)
+        );
 
         return $profile->fresh();
     }
