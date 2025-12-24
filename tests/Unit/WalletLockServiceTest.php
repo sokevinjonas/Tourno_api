@@ -66,6 +66,7 @@ class WalletLockServiceTest extends TestCase
         // Register 2 players (20 MLM total)
         $this->registerPlayers(2);
 
+        $this->organizer->wallet->refresh();
         $initialBalance = $this->organizer->wallet->balance;
         $initialBlocked = $this->organizer->wallet->blocked_balance;
 

@@ -20,10 +20,20 @@ class WalletLockService
         // Calculer le montant total des inscriptions
         $totalEntryFees = $tournament->entry_fee * $tournament->registrations()->count();
 
+        // Check if funds already locked
+        $existingLock = TournamentWalletLock::where('tournament_id', $tournament->id)
+            ->where('organizer_id', $organizer->id)
+            ->exists();
+
+        if ($existingLock) {
+            throw new \Exception('Funds already locked for this tournament');
+        }
+
         DB::transaction(function () use ($organizer, $tournament, $totalEntryFees) {
             // Créer le lock
             TournamentWalletLock::create([
                 'tournament_id' => $tournament->id,
+                'organizer_id' => $organizer->id,
                 'wallet_id' => $organizer->wallet->id,
                 'locked_amount' => $totalEntryFees,
                 'status' => 'locked',
@@ -108,7 +118,10 @@ class WalletLockService
             $organizer->wallet->save();
 
             // Marquer comme libéré
-            $lock->update(['status' => 'released']);
+            $lock->update([
+                'status' => 'released',
+                'released_at' => now(),
+            ]);
 
             // Mettre à jour le statut du tournoi
             $tournament->update(['status' => 'payouts_completed']);
@@ -129,6 +142,32 @@ class WalletLockService
                     'updated_at' => now(),
                 ]);
             }
+        });
+    }
+
+    /**
+     * Unlock funds for a tournament (simple unlock without payouts)
+     */
+    public function unlockFundsForTournament(Tournament $tournament): void
+    {
+        $lock = TournamentWalletLock::where('tournament_id', $tournament->id)
+            ->where('status', 'locked')
+            ->firstOrFail();
+
+        $organizer = $tournament->organizer;
+        $organizer->load('wallet');
+
+        DB::transaction(function () use ($lock, $organizer) {
+            // Libérer tous les fonds vers le solde normal
+            $organizer->wallet->blocked_balance -= $lock->locked_amount;
+            $organizer->wallet->balance += $lock->locked_amount;
+            $organizer->wallet->save();
+
+            // Marquer comme libéré
+            $lock->update([
+                'status' => 'released',
+                'released_at' => now(),
+            ]);
         });
     }
 

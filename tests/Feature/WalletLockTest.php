@@ -86,12 +86,15 @@ class WalletLockTest extends TestCase
         // Verify funds stay blocked
         $this->assertEquals(20.00, $blockedAmount);
 
-        // Try to spend blocked balance (should fail if properly implemented)
+        // Verify available balance is less than total (some funds are locked)
         $this->organizer->wallet->refresh();
         $availableBalance = $this->organizer->wallet->balance;
 
-        // Available balance should not include blocked amount
-        $this->assertLessThan($blockedAmount + $availableBalance, 120.00);
+        // Available balance should be less than total (100 < 120)
+        $this->assertLessThan(120.00, $availableBalance);
+
+        // Total should still be 120 (no funds lost)
+        $this->assertEquals(120.00, $blockedAmount + $availableBalance);
     }
 
     protected function createPlayerAndRegister(): User
