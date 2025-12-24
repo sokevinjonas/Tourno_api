@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\MatchMessageNotification;
+use App\Mail\MatchResultDrawMail;
 use App\Mail\MatchResultLoserMail;
 use App\Mail\MatchResultWinnerMail;
 use App\Models\MatchEvidence;
@@ -237,6 +238,7 @@ class MatchChatController extends Controller
             $match = $match->fresh(['player1', 'player2', 'round.tournament']);
 
             if ($winnerId) {
+                // Match with winner and loser
                 $winner = $winnerId === $match->player1_id ? $match->player1 : $match->player2;
                 $loser = $winnerId === $match->player1_id ? $match->player2 : $match->player1;
                 $winnerScore = $winnerId === $match->player1_id ? $player1Score : $player2Score;
@@ -253,6 +255,17 @@ class MatchChatController extends Controller
                 );
 
                 Log::info("Sent match result emails to players for match {$match->id}");
+            } else {
+                // Draw match - send draw email to both players
+                Mail::to($match->player1)->send(
+                    new MatchResultDrawMail($match->player1, $match, $player1Score)
+                );
+
+                Mail::to($match->player2)->send(
+                    new MatchResultDrawMail($match->player2, $match, $player2Score)
+                );
+
+                Log::info("Sent draw match emails to players for match {$match->id}");
             }
 
             return response()->json([
