@@ -279,6 +279,16 @@ class TournamentController extends Controller
                 'tournament' => $updatedTournament,
             ], 200);
         } catch (\Exception $e) {
+            // Check if it's an authorization error
+            if (str_contains($e->getMessage(), 'Unauthorized') ||
+                str_contains($e->getMessage(), 'not authorized') ||
+                str_contains($e->getMessage(), 'permission')) {
+                return response()->json([
+                    'message' => 'Unauthorized',
+                    'error' => $e->getMessage(),
+                ], 403);
+            }
+
             return response()->json([
                 'message' => 'Failed to update tournament status',
                 'error' => $e->getMessage(),

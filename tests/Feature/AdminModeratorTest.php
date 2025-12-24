@@ -77,12 +77,12 @@ class AdminModeratorTest extends TestCase
 
         $response = $this->actingAs($this->moderator, 'sanctum')
             ->postJson("/api/profiles/{$pendingUser->profile->id}/reject", [
-                'rejection_reason' => 'Invalid information',
+                'reason' => 'Invalid information',
             ]);
 
         $response->assertStatus(200)
             ->assertJson([
-                'message' => 'Profile rejected successfully',
+                'message' => 'Profile rejected',
             ]);
 
         $this->assertDatabaseHas('profiles', [

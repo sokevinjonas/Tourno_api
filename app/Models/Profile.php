@@ -46,16 +46,16 @@ class Profile extends Model
      */
     public function scopePending($query)
     {
-        return $query->where('validation_status', 'pending');
+        return $query->where('status', 'pending');
     }
 
     public function scopeValidated($query)
     {
-        return $query->where('validation_status', 'validated');
+        return $query->where('status', 'validated');
     }
 
     public function scopeRejected($query)
     {
-        return $query->where('validation_status', 'rejected');
+        return $query->where('status', 'rejected');
     }
 }

@@ -31,7 +31,7 @@ class TournamentRegistrationService
 
             // Check if user has sufficient balance
             if (!$this->walletService->hasSufficientBalance($user, $tournament->entry_fee)) {
-                throw new \Exception('Insufficient balance. Please add funds to your wallet.');
+                throw new \Exception('Insufficient wallet balance');
             }
 
             // Debit entry fee from participant's wallet
@@ -112,7 +112,7 @@ class TournamentRegistrationService
             ->first();
 
         if ($existingRegistration) {
-            throw new \Exception('You are already registered for this tournament');
+            throw new \Exception('Already registered to this tournament');
         }
 
         // Validate game account
