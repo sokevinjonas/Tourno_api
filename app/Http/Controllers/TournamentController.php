@@ -358,4 +358,47 @@ class TournamentController extends Controller
             'data' => $tournament->matches,
         ], 200);
     }
+
+    /**
+     * Get tournament rounds information
+     */
+    public function getRoundsInfo(int $id): JsonResponse
+    {
+        $tournament = Tournament::with(['rounds'])->find($id);
+
+        if (!$tournament) {
+            return response()->json([
+                'message' => 'Tournament not found',
+            ], 404);
+        }
+
+        // Calculer le nombre total de rounds
+        $totalRounds = ceil(log($tournament->max_participants, 2));
+
+        // Obtenir le round actuel (le dernier round créé)
+        $currentRound = $tournament->rounds()
+            ->orderBy('round_number', 'desc')
+            ->first();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'tournament_id' => $tournament->id,
+                'tournament_name' => $tournament->name,
+                'tournament_status' => $tournament->status,
+                'total_rounds' => (int) $totalRounds,
+                'current_round_number' => $currentRound ? $currentRound->round_number : 0,
+                'current_round' => $currentRound ? [
+                    'id' => $currentRound->id,
+                    'round_number' => $currentRound->round_number,
+                    'status' => $currentRound->status,
+                    'total_matches' => $currentRound->matches()->count(),
+                    'completed_matches' => $currentRound->matches()->where('status', 'completed')->count(),
+                    'pending_matches' => $currentRound->matches()->whereIn('status', ['pending', 'in_progress'])->count(),
+                ] : null,
+                'rounds_completed' => $tournament->rounds()->where('status', 'completed')->count(),
+                'rounds_remaining' => $currentRound ? ($totalRounds - $currentRound->round_number) : $totalRounds,
+            ],
+        ], 200);
+    }
 }

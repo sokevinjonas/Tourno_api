@@ -56,6 +56,17 @@ class SwissFormatService
             ->orderBy('round_number', 'desc')
             ->first();
 
+        // Si ce n'est pas le premier round, vérifier que tous les matchs du round précédent sont terminés
+        if ($lastRound) {
+            $pendingMatches = $lastRound->matches()
+                ->whereIn('status', ['pending', 'in_progress'])
+                ->count();
+
+            if ($pendingMatches > 0) {
+                throw new \Exception("Cannot generate next round: {$pendingMatches} match(es) from Round {$lastRound->round_number} are not completed yet");
+            }
+        }
+
         $nextRoundNumber = $lastRound ? $lastRound->round_number + 1 : 1;
 
         // Calculate total rounds needed
