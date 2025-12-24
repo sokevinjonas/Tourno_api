@@ -27,8 +27,9 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'avatar_url' => null,
+            'role' => 'player',
+            'is_banned' => false,
         ];
     }
 
@@ -40,5 +41,29 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    /**
+     * Configure the model factory.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (\App\Models\User $user) {
+            // Create profile
+            \App\Models\Profile::create([
+                'user_id' => $user->id,
+                'whatsapp_number' => '+237' . rand(600000000, 699999999),
+                'country' => 'Cameroon',
+                'city' => 'Douala',
+                'status' => 'pending',
+            ]);
+
+            // Create wallet
+            \App\Models\Wallet::create([
+                'user_id' => $user->id,
+                'balance' => 0.00,
+                'blocked_balance' => 0.00,
+            ]);
+        });
     }
 }
