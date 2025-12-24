@@ -1,24 +1,51 @@
+# Git
 .git
 .gitignore
-.env
-.env.example
-node_modules
-vendor
-storage/logs/*
-storage/framework/cache/*
-storage/framework/sessions/*
-storage/framework/views/*
-bootstrap/cache/*
-.phpunit.result.cache
-Homestead.json
-Homestead.yaml
+.gitattributes
+
+# Documentation
+README.md
+docs/
+cahier_de_charge.md
+
+# Node modules (si présent)
+node_modules/
 npm-debug.log
 yarn-error.log
+
+# Tests
+tests/
+phpunit.xml
+.phpunit.result.cache
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
 Thumbs.db
-*.sqlite
-*.sqlite-journal
-docker-compose.yml
-Dockerfile
-.dockerignore
-README.md
+
+# Laravel
+/storage/*.key
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/bootstrap/cache/*
+.env.example
+.env.testing
+
+# Vendor (sera installé dans le container)
+# vendor/
+
+# Public assets build (si présent)
+public/hot
+public/storage
+
+# Autres
+*.log
+.phpunit.cache
