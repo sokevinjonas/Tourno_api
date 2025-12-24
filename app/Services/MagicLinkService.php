@@ -102,7 +102,7 @@ class MagicLinkService
      */
     protected function createWalletWithBonus(User $user): void
     {
-        $initialBonus = 100.00;
+        $initialBonus = 4.00;
 
         $wallet = Wallet::create([
             'user_id' => $user->id,
@@ -117,7 +117,7 @@ class MagicLinkService
             'balance_before' => 0,
             'balance_after' => $initialBonus,
             'reason' => 'initial_bonus',
-            'description' => 'Bonus de bienvenue - 100 pièces MLM offertes',
+            'description' => 'Bonus de bienvenue - 4 pièces MLM offertes',
         ]);
     }
 
