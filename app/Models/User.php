@@ -78,6 +78,16 @@ class User extends Authenticatable
         return $this->hasMany(TournamentRegistration::class);
     }
 
+    public function tournaments()
+    {
+        return $this->hasMany(Tournament::class, 'organizer_id');
+    }
+
+    public function registrations()
+    {
+        return $this->hasMany(TournamentRegistration::class);
+    }
+
     public function transactions()
     {
         return $this->hasMany(Transaction::class);

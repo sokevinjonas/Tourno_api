@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Profile;
+use Illuminate\Http\Request;
 use App\Services\ProfileService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
@@ -127,7 +128,7 @@ class ProfileController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'reason' => 'required|string|max:500',
+            'rejection_reason' => 'required|string|max:500',
         ]);
 
         if ($validator->fails()) {
@@ -138,11 +139,11 @@ class ProfileController extends Controller
         }
 
         try {
-            $profile = \App\Models\Profile::findOrFail($profileId);
+            $profile = Profile::findOrFail($profileId);
             $rejectedProfile = $this->profileService->rejectProfile(
                 $profile,
                 $request->user(),
-                $request->reason
+                $request->rejection_reason
             );
 
             return response()->json([
