@@ -31,18 +31,33 @@ class TournamentSeeder extends Seeder
                 'game' => 'efootball',
                 'max_participants' => 8,
                 'registered_count' => 7, // Laisser 1 place
+                'prize_distribution' => [
+                    '1st' => 18,  // 1er: 18 MLM
+                    '2nd' => 10,  // 2ème: 10 MLM
+                    '3rd' => 0,   // 3ème: 0 MLM
+                ], // Total: 28 MLM (7 × 4)
             ],
             [
                 'name' => 'Tournoi Dream League Soccer Décembre 2025',
                 'game' => 'dream_league_soccer',
                 'max_participants' => 16,
                 'registered_count' => 15, // Laisser 1 place
+                'prize_distribution' => [
+                    '1st' => 35,  // 1er: 35 MLM
+                    '2nd' => 20,  // 2ème: 20 MLM
+                    '3rd' => 5,   // 3ème: 5 MLM
+                ], // Total: 60 MLM (15 × 4)
             ],
             [
                 'name' => 'Tournoi FC Mobile Décembre 2025',
                 'game' => 'fc_mobile',
                 'max_participants' => 32,
                 'registered_count' => 31, // Laisser 1 place
+                'prize_distribution' => [
+                    '1st' => 70,  // 1er: 70 MLM
+                    '2nd' => 40,  // 2ème: 40 MLM
+                    '3rd' => 14,  // 3ème: 14 MLM
+                ], // Total: 124 MLM (31 × 4)
             ],
         ];
 
@@ -58,11 +73,7 @@ class TournamentSeeder extends Seeder
                 'format' => 'swiss',
                 'max_participants' => $tournamentData['max_participants'],
                 'entry_fee' => 4.00,
-                'prize_distribution' => json_encode([
-                    '1st' => 20,
-                    '2nd' => 10,
-                    '3rd' => 0,
-                ]),
+                'prize_distribution' => json_encode($tournamentData['prize_distribution']),
                 'start_date' => now()->setTime(19, 30, 0),
                 'tournament_duration_days' => 1,
                 'time_slot' => 'evening',

@@ -55,6 +55,48 @@ class WalletLockService
             ->where('status', 'locked')
             ->firstOrFail();
 
+        $organizer = $tournament->organizer;
+        $organizer->load('wallet');
+
+        // Calculer le total des prix à distribuer
+        $totalPrizesToPay = array_sum(array_column($winners, 'prize_amount'));
+
+        // Vérifier si les fonds bloqués suffisent
+        $shortage = $totalPrizesToPay - $lock->locked_amount;
+
+        if ($shortage > 0) {
+            // Les fonds bloqués ne suffisent pas, essayer de prendre depuis balance
+            if ($organizer->wallet->balance < $shortage) {
+                // Même avec la balance principale, c'est insuffisant
+                $totalShortage = $shortage - $organizer->wallet->balance;
+
+                // Envoyer email à l'organisateur
+                \Mail::to($organizer)->send(
+                    new \App\Mail\InsufficientFundsWarningMail(
+                        $tournament,
+                        $organizer,
+                        $totalShortage,
+                        $totalPrizesToPay,
+                        $lock->locked_amount
+                    )
+                );
+
+                // Marquer le tournoi comme en attente de fonds
+                $tournament->update(['status' => 'awaiting_organizer_funds']);
+
+                // Logger l'événement
+                \Log::warning("Insufficient funds for tournament {$tournament->id}. Shortage: {$totalShortage} MLM");
+
+                throw new \Exception("Fonds insuffisants. Un email a été envoyé à l'organisateur. Manque: {$totalShortage} MLM");
+            }
+
+            // On a assez avec balance + blocked_balance, débiter le manque depuis balance
+            $organizer->wallet->balance -= $shortage;
+            $organizer->wallet->save();
+
+            \Log::info("Deducted {$shortage} MLM from organizer's main balance for tournament {$tournament->id}");
+        }
+
         DB::transaction(function () use ($lock, $tournament, $winners) {
             $lock->update(['status' => 'processing_payouts']);
 

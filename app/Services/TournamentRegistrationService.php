@@ -34,18 +34,19 @@ class TournamentRegistrationService
                 throw new \Exception('Insufficient wallet balance');
             }
 
-            // Debit entry fee from participant's wallet
-            // Les fonds vont dans le "pot du tournoi" et ne sont PAS crédités à l'organisateur
+            // Process payment: Debit participant and credit organizer
+            // Les entry fees vont dans le balance de l'organisateur
+            // Au démarrage du tournoi, ils seront bloqués dans blocked_balance
             $this->walletService->processTournamentRegistration(
                 $user,
                 $tournament->entry_fee,
                 $tournament->id
             );
 
-            // NOTE: Les entry fees ne vont PAS directement à l'organisateur
-            // Ils seront distribués à la fin du tournoi :
-            // - Prix aux gagnants
-            // - Reste à l'organisateur
+            // NOTE: Flow des fonds:
+            // 1. Inscription: Joueur → Organisateur (balance)
+            // 2. Démarrage: balance → blocked_balance (chez l'organisateur)
+            // 3. Fin: blocked_balance → Gagnants + Reste à l'organisateur
 
             // Create registration
             $registration = TournamentRegistration::create([
