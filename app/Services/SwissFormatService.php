@@ -2,25 +2,30 @@
 
 namespace App\Services;
 
-use App\Mail\MatchResultDrawMail;
-use App\Mail\MatchResultLoserMail;
-use App\Mail\MatchResultWinnerMail;
-use App\Mail\NextRoundGeneratedMail;
+use App\Models\User;
 use App\Models\Round;
 use App\Models\Tournament;
 use App\Models\TournamentMatch;
-use App\Models\TournamentRegistration;
-use App\Models\User;
+use App\Mail\MatchResultDrawMail;
+use App\Mail\MatchResultLoserMail;
 use Illuminate\Support\Facades\DB;
+use App\Mail\MatchResultWinnerMail;
+use App\Mail\TournamentStartedMail;
+use App\Mail\NextRoundGeneratedMail;
 use Illuminate\Support\Facades\Mail;
+use App\Models\TournamentRegistration;
 
 class SwissFormatService
 {
     protected WalletLockService $walletLockService;
+    protected UserStatsService $userStatsService;
 
-    public function __construct(WalletLockService $walletLockService)
-    {
+    public function __construct(
+        WalletLockService $walletLockService,
+        UserStatsService $userStatsService
+    ) {
         $this->walletLockService = $walletLockService;
+        $this->userStatsService = $userStatsService;
     }
 
     /**
@@ -371,6 +376,15 @@ class SwissFormatService
     public function completeTournament(Tournament $tournament, WalletService $walletService): Tournament
     {
         return DB::transaction(function () use ($tournament, $walletService) {
+            // Verify all matches are completed
+            $pendingMatches = TournamentMatch::where('tournament_id', $tournament->id)
+                ->whereIn('status', ['scheduled', 'in_progress', 'pending_validation', 'disputed'])
+                ->count();
+
+            if ($pendingMatches > 0) {
+                throw new \Exception("Cannot complete tournament while {$pendingMatches} match(es) are still pending");
+            }
+
             // Get final rankings
             $rankings = TournamentRegistration::where('tournament_id', $tournament->id)
                 ->where('status', 'registered')
@@ -379,28 +393,47 @@ class SwissFormatService
                 ->orderBy('draws', 'desc')
                 ->get();
 
-            // Update final ranks
+            // Prepare winners array for payout
+            $winners = [];
+            $totalPrizePool = 0;
+
+            // Update final ranks and prepare winners
             foreach ($rankings as $index => $registration) {
                 $rank = $index + 1;
                 $registration->update(['final_rank' => $rank]);
 
-                // Distribute prizes if defined
+                // Prepare prize distribution if defined
                 if ($tournament->prize_distribution) {
                     $prizeDistribution = json_decode($tournament->prize_distribution, true);
                     if (isset($prizeDistribution[(string)$rank])) {
+                        // Prize amount is directly specified (not a percentage)
                         $prizeAmount = $prizeDistribution[(string)$rank];
 
-                        // Credit prize to winner
-                        $walletService->processTournamentPrize(
-                            $registration->user,
-                            $prizeAmount,
-                            $tournament->id,
-                            $rank
-                        );
+                        $winners[] = [
+                            'user_id' => $registration->user_id,
+                            'prize_amount' => $prizeAmount,
+                            'rank' => $rank,
+                        ];
 
+                        $totalPrizePool += $prizeAmount;
                         $registration->update(['prize_won' => $prizeAmount]);
                     }
                 }
+            }
+
+            // Process payouts using WalletLockService
+            if (!empty($winners)) {
+                $this->walletLockService->processPayouts($tournament, $winners);
+                $this->walletLockService->releaseFunds($tournament);
+            }
+
+            // Update user stats for all participants
+            foreach ($rankings as $registration) {
+                $this->userStatsService->updateStatsAfterTournament(
+                    $registration->user,
+                    $tournament,
+                    $registration
+                );
             }
 
             // Update tournament status
@@ -440,7 +473,7 @@ class SwissFormatService
 
             // Send email notification
             \Mail::to($user)->send(
-                new \App\Mail\TournamentStartedMail($tournament, $user, $firstMatch)
+                new TournamentStartedMail($tournament, $user, $firstMatch)
             );
 
             \Log::info("Sent tournament started email to user {$user->id} for tournament {$tournament->id}");

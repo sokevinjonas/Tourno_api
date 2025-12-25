@@ -22,11 +22,7 @@ class TournamentSeeder extends Seeder
         $organizer = User::where('role', 'organizer')->first();
         if (!$organizer) {
             $organizer = User::factory()->create(['role' => 'organizer']);
-            $organizer->wallet->update(['balance' => 4.00]);
         }
-
-        // Ensure organizer has enough balance for prizes
-        $organizer->wallet->update(['balance' => 4.00]);
 
         // Define tournaments configuration
         $tournaments = [
@@ -102,9 +98,10 @@ class TournamentSeeder extends Seeder
                         ]);
                     }
 
-                    // Ensure player has enough balance (at least 10 pièces)
-                    if ($player->wallet->balance < 10.00) {
-                        $player->wallet->update(['balance' => 50.00]);
+                    // Ensure player has enough balance for entry fee
+                    $requiredBalance = $tournament->entry_fee;
+                    if ($player->wallet->balance < $requiredBalance) {
+                        $player->wallet->update(['balance' => $requiredBalance]); // Donner le montant exact requis
                     }
 
                     // Register player to tournament
