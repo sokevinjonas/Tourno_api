@@ -3,6 +3,7 @@
 use App\Jobs\AutoStartTournamentsJob;
 use App\Jobs\CheckFullTournamentsJob;
 use App\Jobs\CheckMatchDeadlinesJob;
+use App\Jobs\SendMatchDeadlineWarningsJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -15,3 +16,4 @@ Artisan::command('inspire', function () {
 Schedule::job(new AutoStartTournamentsJob)->hourly();
 Schedule::job(new CheckFullTournamentsJob)->hourly();
 Schedule::job(new CheckMatchDeadlinesJob)->everyFifteenMinutes();
+Schedule::job(new SendMatchDeadlineWarningsJob)->everyFifteenMinutes();
