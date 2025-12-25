@@ -297,10 +297,12 @@ class KnockoutFormatService
                 // Prepare prize distribution if defined
                 if ($tournament->prize_distribution) {
                     $prizeDistribution = json_decode($tournament->prize_distribution, true);
-                    if (isset($prizeDistribution[(string)$rank])) {
-                        // Prize amount is directly specified (not a percentage)
-                        $prizeAmount = $prizeDistribution[(string)$rank];
 
+                    // Support both "1st", "2nd", "3rd" AND "1", "2", "3" formats
+                    $rankKey = $this->getRankKey($rank);
+                    $prizeAmount = $prizeDistribution[$rankKey] ?? null;
+
+                    if ($prizeAmount !== null && $prizeAmount > 0) {
                         $winners[] = [
                             'user_id' => $registration->user_id,
                             'prize_amount' => $prizeAmount,
@@ -333,6 +335,20 @@ class KnockoutFormatService
 
             return $tournament->fresh();
         });
+    }
+
+    /**
+     * Get the rank key in the prize_distribution array
+     * Supports both "1st", "2nd", "3rd" format AND "1", "2", "3" format
+     */
+    private function getRankKey(int $rank): string
+    {
+        return match ($rank) {
+            1 => '1st',
+            2 => '2nd',
+            3 => '3rd',
+            default => (string)$rank . 'th',
+        };
     }
 
     /**
