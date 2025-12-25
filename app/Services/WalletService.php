@@ -177,13 +177,30 @@ class WalletService
      */
     public function processTournamentRegistration(User $user, float $entryFee, int $tournamentId): Transaction
     {
-        return $this->debit(
-            $user,
-            $entryFee,
-            'tournament_registration',
-            "Inscription au tournoi #$tournamentId",
-            $tournamentId
-        );
+        return DB::transaction(function () use ($user, $entryFee, $tournamentId) {
+            // Débiter le joueur
+            $debitTransaction = $this->debit(
+                $user,
+                $entryFee,
+                'tournament_registration',
+                "Inscription au tournoi #$tournamentId",
+                $tournamentId
+            );
+
+            // Créditer l'organisateur du tournoi
+            $tournament = \App\Models\Tournament::findOrFail($tournamentId);
+            $organizer = $tournament->organizer;
+
+            $this->credit(
+                $organizer,
+                $entryFee,
+                'tournament_entry_received',
+                "Frais d'inscription reçu pour le tournoi #$tournamentId",
+                $tournamentId
+            );
+
+            return $debitTransaction;
+        });
     }
 
     /**
