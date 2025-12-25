@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Round;
 use App\Models\Tournament;
+use App\Services\KnockoutFormatService;
 use App\Services\SwissFormatService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
@@ -12,11 +13,16 @@ use Illuminate\Http\Request;
 class RoundController extends Controller
 {
     protected SwissFormatService $swissService;
+    protected KnockoutFormatService $knockoutService;
     protected WalletService $walletService;
 
-    public function __construct(SwissFormatService $swissService, WalletService $walletService)
-    {
+    public function __construct(
+        SwissFormatService $swissService,
+        KnockoutFormatService $knockoutService,
+        WalletService $walletService
+    ) {
         $this->swissService = $swissService;
+        $this->knockoutService = $knockoutService;
         $this->walletService = $walletService;
     }
 
@@ -41,7 +47,12 @@ class RoundController extends Controller
         }
 
         try {
-            $round = $this->swissService->startTournament($tournament);
+            // Route to appropriate service based on tournament format
+            $round = match($tournament->format) {
+                'swiss' => $this->swissService->startTournament($tournament),
+                'single_elimination' => $this->knockoutService->startTournament($tournament),
+                default => throw new \Exception('Unsupported tournament format: ' . $tournament->format),
+            };
 
             return response()->json([
                 'message' => 'Tournament started successfully',
@@ -76,6 +87,12 @@ class RoundController extends Controller
         }
 
         try {
+            // Only Swiss format supports manual next round generation
+            // Knockout generates all rounds at start
+            if ($tournament->format !== 'swiss') {
+                throw new \Exception('Manual round generation is only available for Swiss format tournaments');
+            }
+
             $round = $this->swissService->generateNextRound($tournament);
 
             return response()->json([
@@ -154,7 +171,12 @@ class RoundController extends Controller
         }
 
         try {
-            $completedTournament = $this->swissService->completeTournament($tournament, $this->walletService);
+            // Route to appropriate service based on tournament format
+            $completedTournament = match($tournament->format) {
+                'swiss' => $this->swissService->completeTournament($tournament, $this->walletService),
+                'single_elimination' => $this->knockoutService->completeTournament($tournament, $this->walletService),
+                default => throw new \Exception('Unsupported tournament format: ' . $tournament->format),
+            };
 
             return response()->json([
                 'message' => 'Tournament completed successfully. Prizes have been distributed.',

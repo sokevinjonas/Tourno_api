@@ -12,6 +12,7 @@ class Round extends Model
     protected $fillable = [
         'tournament_id',
         'round_number',
+        'round_name',
         'status',
         'start_date',
         'end_date',

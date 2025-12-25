@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tournament_id')->constrained()->onDelete('cascade');
             $table->foreignId('round_id')->constrained()->onDelete('cascade');
-            $table->foreignId('player1_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('player1_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->foreignId('player2_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->integer('player1_score')->nullable();
             $table->integer('player2_score')->nullable();
@@ -24,6 +24,8 @@ return new class extends Migration
             $table->datetime('scheduled_at')->nullable();
             $table->datetime('deadline_at')->nullable();
             $table->datetime('completed_at')->nullable();
+            $table->foreignId('next_match_id')->nullable()->constrained('matches')->onDelete('set null'); // For knockout bracket
+            $table->integer('bracket_position')->nullable(); // Visual position in bracket
             $table->timestamps();
 
             // Indexes
@@ -33,6 +35,7 @@ return new class extends Migration
             $table->index('player2_id');
             $table->index('winner_id');
             $table->index('status');
+            $table->index('next_match_id');
         });
     }
 

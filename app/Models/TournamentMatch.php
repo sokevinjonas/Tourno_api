@@ -23,6 +23,8 @@ class TournamentMatch extends Model
         'scheduled_at',
         'deadline_at',
         'completed_at',
+        'next_match_id',
+        'bracket_position',
     ];
 
     protected function casts(): array
@@ -75,6 +77,11 @@ class TournamentMatch extends Model
     public function evidence()
     {
         return $this->hasMany(MatchEvidence::class, 'match_id');
+    }
+
+    public function nextMatch()
+    {
+        return $this->belongsTo(TournamentMatch::class, 'next_match_id');
     }
 
     /**

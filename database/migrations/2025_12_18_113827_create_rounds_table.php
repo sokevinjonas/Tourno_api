@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tournament_id')->constrained()->onDelete('cascade');
             $table->integer('round_number');
+            $table->string('round_name')->nullable(); // "Quarter-finals", "Semi-finals", "Final"
             $table->enum('status', ['pending', 'in_progress', 'completed'])->default('pending');
             $table->datetime('start_date')->nullable();
             $table->datetime('end_date')->nullable();
