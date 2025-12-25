@@ -26,6 +26,8 @@ return new class extends Migration
             $table->datetime('completed_at')->nullable();
             $table->foreignId('next_match_id')->nullable()->constrained('matches')->onDelete('set null'); // For knockout bracket
             $table->integer('bracket_position')->nullable(); // Visual position in bracket
+            $table->boolean('deadline_extended')->default(false);
+            $table->timestamp('deadline_warning_sent_at')->nullable();
             $table->timestamps();
 
             // Indexes
