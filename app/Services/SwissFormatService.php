@@ -441,8 +441,73 @@ class SwissFormatService
             // Update tournament status
             $tournament->update(['status' => 'completed']);
 
+            // Send emails to all participants via bulk job
+            $this->sendCompletionEmails($tournament, $rankings, $winners);
+
             return $tournament->fresh();
         });
+    }
+
+    /**
+     * Send completion emails to all participants
+     */
+    protected function sendCompletionEmails(Tournament $tournament, $rankings, array $winners): void
+    {
+        $emailData = [];
+        $topPlayers = $rankings->take(3);
+
+        // Prepare emails for all participants
+        foreach ($rankings as $registration) {
+            $user = $registration->user;
+
+            // Check if this user won a prize
+            $wonPrize = collect($winners)->firstWhere('user_id', $user->id);
+
+            // If user won a prize, send prize notification email
+            if ($wonPrize) {
+                $emailData[] = [
+                    'recipient' => $user,
+                    'mailable' => new \App\Mail\TournamentPrizeWonMail(
+                        $user,
+                        $tournament,
+                        $wonPrize['rank'],
+                        $wonPrize['prize_amount']
+                    ),
+                    'context' => [
+                        'user_id' => $user->id,
+                        'tournament_id' => $tournament->id,
+                        'type' => 'prize_won',
+                        'rank' => $wonPrize['rank'],
+                        'amount' => $wonPrize['prize_amount'],
+                    ],
+                ];
+            }
+
+            // Send tournament completion email to everyone
+            $emailData[] = [
+                'recipient' => $user,
+                'mailable' => new \App\Mail\TournamentCompletedMail(
+                    $user,
+                    $tournament,
+                    $registration,
+                    $topPlayers
+                ),
+                'context' => [
+                    'user_id' => $user->id,
+                    'tournament_id' => $tournament->id,
+                    'type' => 'tournament_completed',
+                    'rank' => $registration->final_rank,
+                ],
+            ];
+        }
+
+        // Dispatch bulk email job with 100ms delay between emails
+        \App\Jobs\SendBulkEmailsJob::dispatch($emailData, 100);
+
+        \Log::info("Tournament completion emails queued", [
+            'tournament_id' => $tournament->id,
+            'total_emails' => count($emailData),
+        ]);
     }
 
     /**

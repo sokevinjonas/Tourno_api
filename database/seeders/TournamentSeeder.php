@@ -22,6 +22,17 @@ class TournamentSeeder extends Seeder
         $organizer = User::where('role', 'organizer')->first();
         if (!$organizer) {
             $organizer = User::factory()->create(['role' => 'organizer']);
+
+            // Créer le profil organisateur avec badge certified
+            \App\Models\OrganizerProfile::create([
+                'user_id' => $organizer->id,
+                'display_name' => $organizer->name,
+                'badge' => 'certified',
+                'bio' => 'Organisateur certifié',
+                'status' => 'valider',
+            ]);
+
+            $this->command->info("✓ Organisateur créé avec badge certified");
         }
 
         // Define tournaments configuration
