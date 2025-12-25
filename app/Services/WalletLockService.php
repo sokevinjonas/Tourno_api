@@ -81,9 +81,6 @@ class WalletLockService
                     )
                 );
 
-                // Marquer le tournoi comme en attente de fonds
-                $tournament->update(['status' => 'awaiting_organizer_funds']);
-
                 // Logger l'événement
                 \Log::warning("Insufficient funds for tournament {$tournament->id}. Shortage: {$totalShortage} MLM");
 
@@ -133,9 +130,6 @@ class WalletLockService
             // Mettre à jour le montant payé
             $lock->update(['paid_out' => $totalPaidOut]);
         });
-
-        // Mettre à jour le statut du tournoi
-        $tournament->update(['status' => 'payout_pending']);
     }
 
     /**
@@ -164,9 +158,6 @@ class WalletLockService
                 'status' => 'released',
                 'released_at' => now(),
             ]);
-
-            // Mettre à jour le statut du tournoi
-            $tournament->update(['status' => 'payouts_completed']);
 
             // Transaction record pour la plateforme
             if ($remainder > 0) {
