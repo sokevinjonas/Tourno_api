@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\MagicLinkController;
 use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\GameAccountController;
+use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\MatchChatController;
 use App\Http\Controllers\MatchController;
 use App\Http\Controllers\OrganizerController;
@@ -210,4 +211,22 @@ Route::prefix('tournaments')->group(function () {
 Route::prefix('organizers')->group(function () {
     Route::get('/', [OrganizerController::class, 'index']);
     Route::get('/{id}', [OrganizerController::class, 'show']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Leaderboards & Stats (Public - NO Authentication)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('leaderboard')->group(function () {
+    Route::get('/global', [LeaderboardController::class, 'globalLeaderboard']);
+    Route::get('/by-game/{game}', [LeaderboardController::class, 'byGameLeaderboard']);
+});
+
+Route::prefix('users')->group(function () {
+    Route::get('/{id}/stats', [LeaderboardController::class, 'userStats']);
+});
+
+Route::prefix('tournaments')->group(function () {
+    Route::get('/{id}/rankings', [LeaderboardController::class, 'tournamentRankings']);
 });

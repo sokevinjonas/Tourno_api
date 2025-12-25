@@ -105,10 +105,10 @@ class UserSeeder extends Seeder
             'validated_at' => now(),
         ]);
 
-        // Create wallet with sufficient balance
+        // Create wallet (only players get balance)
         Wallet::create([
             'user_id' => $user->id,
-            'balance' => 100.00,
+            'balance' => $role === 'player' ? 4.00 : 0.00,
         ]);
 
         // Create game accounts (only for players)
