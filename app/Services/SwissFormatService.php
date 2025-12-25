@@ -48,7 +48,12 @@ class SwissFormatService
             $this->walletLockService->lockFundsForTournament($tournament);
 
             // Generate first round
-            return $this->generateNextRound($tournament);
+            $round = $this->generateNextRound($tournament);
+
+            // Notify all participants that tournament has started
+            $this->notifyParticipants($tournament);
+
+            return $round;
         });
     }
 
@@ -403,5 +408,42 @@ class SwissFormatService
 
             return $tournament->fresh();
         });
+    }
+
+    /**
+     * Notify all participants that tournament has started
+     */
+    protected function notifyParticipants(Tournament $tournament): void
+    {
+        $tournament->load(['registrations.user', 'rounds']);
+
+        // Get first round
+        $firstRound = $tournament->rounds()->where('round_number', 1)->first();
+
+        if (!$firstRound) {
+            \Log::warning("No first round found for tournament {$tournament->id}");
+            return;
+        }
+
+        foreach ($tournament->registrations as $registration) {
+            $user = $registration->user;
+
+            // Find user's first match
+            $firstMatch = $tournament->matches()
+                ->where('round_id', $firstRound->id)
+                ->where(function ($query) use ($user) {
+                    $query->where('player1_id', $user->id)
+                        ->orWhere('player2_id', $user->id);
+                })
+                ->with(['player1', 'player2'])
+                ->first();
+
+            // Send email notification
+            \Mail::to($user)->send(
+                new \App\Mail\TournamentStartedMail($tournament, $user, $firstMatch)
+            );
+
+            \Log::info("Sent tournament started email to user {$user->id} for tournament {$tournament->id}");
+        }
     }
 }

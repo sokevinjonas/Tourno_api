@@ -22,11 +22,11 @@ class TournamentSeeder extends Seeder
         $organizer = User::where('role', 'organizer')->first();
         if (!$organizer) {
             $organizer = User::factory()->create(['role' => 'organizer']);
-            $organizer->wallet->update(['balance' => 1000.00]);
+            $organizer->wallet->update(['balance' => 4.00]);
         }
 
         // Ensure organizer has enough balance for prizes
-        $organizer->wallet->update(['balance' => 1000.00]);
+        $organizer->wallet->update(['balance' => 4.00]);
 
         // Define tournaments configuration
         $tournaments = [
@@ -63,14 +63,14 @@ class TournamentSeeder extends Seeder
                 'max_participants' => $tournamentData['max_participants'],
                 'entry_fee' => 4.00,
                 'prize_distribution' => json_encode([
-                    '1st' => 40,
-                    '2nd' => 20,
-                    '3rd' => 10,
+                    '1st' => 20,
+                    '2nd' => 10,
+                    '3rd' => 0,
                 ]),
                 'start_date' => now()->setTime(19, 30, 0),
                 'tournament_duration_days' => 1,
                 'time_slot' => 'evening',
-                'match_deadline_minutes' => 90,
+                'match_deadline_minutes' => 60,
                 'status' => 'open',
             ]);
 

@@ -3,10 +3,8 @@
 namespace App\Mail;
 
 use App\Models\Tournament;
-use App\Models\TournamentMatch;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -22,9 +20,17 @@ class TournamentStartedMail extends Mailable
     public function __construct(
         public Tournament $tournament,
         public User $user,
-        public ?TournamentMatch $firstMatch = null
+        public $firstMatch = null,
+        public $opponent = null
     ) {
-        //
+        // Find opponent if first match exists
+        if ($this->firstMatch) {
+            if ($this->firstMatch->player1_id === $this->user->id) {
+                $this->opponent = $this->firstMatch->player2;
+            } elseif ($this->firstMatch->player2_id === $this->user->id) {
+                $this->opponent = $this->firstMatch->player1;
+            }
+        }
     }
 
     /**
@@ -33,7 +39,7 @@ class TournamentStartedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Le tournoi {$this->tournament->name} a commencé!",
+            subject: 'Le tournoi a commencé !',
         );
     }
 
@@ -42,22 +48,8 @@ class TournamentStartedMail extends Mailable
      */
     public function content(): Content
     {
-        $opponent = null;
-        if ($this->firstMatch) {
-            $opponentId = $this->firstMatch->player1_id === $this->user->id
-                ? $this->firstMatch->player2_id
-                : $this->firstMatch->player1_id;
-            $opponent = User::find($opponentId);
-        }
-
         return new Content(
             view: 'emails.tournaments.tournament-started',
-            with: [
-                'tournament' => $this->tournament,
-                'user' => $this->user,
-                'firstMatch' => $this->firstMatch,
-                'opponent' => $opponent,
-            ],
         );
     }
 
