@@ -20,12 +20,17 @@ class TournamentRegistration extends Model
         'losses',
         'final_rank',
         'prize_won',
+        'eliminated',
+        'eliminated_round',
+        'eliminated_at',
     ];
 
     protected function casts(): array
     {
         return [
             'prize_won' => 'decimal:2',
+            'eliminated' => 'boolean',
+            'eliminated_at' => 'datetime',
         ];
     }
 

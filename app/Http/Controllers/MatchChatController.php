@@ -10,6 +10,8 @@ use App\Models\MatchEvidence;
 use App\Models\MatchMessage;
 use App\Models\TournamentMatch;
 use App\Models\User;
+use App\Services\KnockoutFormatService;
+use App\Services\SwissFormatService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +21,16 @@ use Illuminate\Support\Facades\Storage;
 
 class MatchChatController extends Controller
 {
+    protected SwissFormatService $swissService;
+    protected KnockoutFormatService $knockoutService;
+
+    public function __construct(
+        SwissFormatService $swissService,
+        KnockoutFormatService $knockoutService
+    ) {
+        $this->swissService = $swissService;
+        $this->knockoutService = $knockoutService;
+    }
     /**
      * Send a message in match chat
      */
@@ -211,68 +223,30 @@ class MatchChatController extends Controller
             ], 400);
         }
 
-        return DB::transaction(function () use ($request, $match) {
-            // Update match with scores
+        try {
             $player1Score = $request->player1_score;
             $player2Score = $request->player2_score;
 
-            // Determine winner
-            $winnerId = null;
-            if ($player1Score > $player2Score) {
-                $winnerId = $match->player1_id;
-            } elseif ($player2Score > $player1Score) {
-                $winnerId = $match->player2_id;
-            }
-
-            $match->update([
-                'player1_score' => $player1Score,
-                'player2_score' => $player2Score,
-                'winner_id' => $winnerId,
-                'status' => 'completed',
-                'completed_at' => now(),
-            ]);
+            // Use appropriate service based on tournament format
+            $updatedMatch = match($match->tournament->format) {
+                'swiss' => $this->swissService->updateMatchResult($match, $player1Score, $player2Score),
+                'single_elimination' => $this->knockoutService->updateMatchResult($match, $player1Score, $player2Score),
+                default => throw new \Exception('Unsupported tournament format: ' . $match->tournament->format),
+            };
 
             Log::info("Organizer entered scores for match {$match->id}: P1={$player1Score}, P2={$player2Score}");
-
-            // Send email notifications to both players
-            $match = $match->fresh(['player1', 'player2', 'round.tournament']);
-
-            if ($winnerId) {
-                // Match with winner and loser
-                $winner = $winnerId === $match->player1_id ? $match->player1 : $match->player2;
-                $loser = $winnerId === $match->player1_id ? $match->player2 : $match->player1;
-                $winnerScore = $winnerId === $match->player1_id ? $player1Score : $player2Score;
-                $loserScore = $winnerId === $match->player1_id ? $player2Score : $player1Score;
-
-                // Send winner email
-                Mail::to($winner)->send(
-                    new MatchResultWinnerMail($winner, $match, $winnerScore, $loserScore)
-                );
-
-                // Send loser email
-                Mail::to($loser)->send(
-                    new MatchResultLoserMail($loser, $match, $loserScore, $winnerScore)
-                );
-
-                Log::info("Sent match result emails to players for match {$match->id}");
-            } else {
-                // Draw match - send draw email to both players
-                Mail::to($match->player1)->send(
-                    new MatchResultDrawMail($match->player1, $match, $player1Score)
-                );
-
-                Mail::to($match->player2)->send(
-                    new MatchResultDrawMail($match->player2, $match, $player2Score)
-                );
-
-                Log::info("Sent draw match emails to players for match {$match->id}");
-            }
 
             return response()->json([
                 'success' => true,
                 'message' => 'Scores entered successfully',
-                'data' => $match
+                'data' => $updatedMatch->fresh(['player1', 'player2', 'winner', 'round.tournament'])
             ]);
-        });
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to enter scores',
+                'error' => $e->getMessage()
+            ], 400);
+        }
     }
 }

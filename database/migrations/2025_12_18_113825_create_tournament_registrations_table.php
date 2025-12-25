@@ -23,6 +23,9 @@ return new class extends Migration
             $table->integer('losses')->default(0);
             $table->integer('final_rank')->nullable();
             $table->decimal('prize_won', 10, 2)->nullable();
+            $table->boolean('eliminated')->default(false); // For knockout tournaments
+            $table->integer('eliminated_round')->nullable(); // Round where eliminated
+            $table->datetime('eliminated_at')->nullable(); // When eliminated
             $table->timestamps();
 
             // Indexes
