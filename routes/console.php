@@ -13,7 +13,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Schedule jobs
-Schedule::job(new AutoStartTournamentsJob)->hourly();
-Schedule::job(new CheckFullTournamentsJob)->hourly();
+Schedule::job(new AutoStartTournamentsJob)->everyFiveMinutes();
+Schedule::job(new CheckFullTournamentsJob)->everyFiveMinutes();
 Schedule::job(new CheckMatchDeadlinesJob)->everyFifteenMinutes();
 Schedule::job(new SendMatchDeadlineWarningsJob)->everyFifteenMinutes();

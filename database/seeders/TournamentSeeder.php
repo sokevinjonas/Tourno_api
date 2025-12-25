@@ -2,12 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\GameAccount;
-use App\Models\Tournament;
 use App\Models\User;
-use App\Services\TournamentRegistrationService;
+use App\Models\Tournament;
+use App\Models\GameAccount;
 use Illuminate\Database\Seeder;
+use App\Models\OrganizerProfile;
 use Illuminate\Support\Facades\DB;
+use App\Services\TournamentRegistrationService;
 
 class TournamentSeeder extends Seeder
 {
@@ -24,7 +25,7 @@ class TournamentSeeder extends Seeder
             $organizer = User::factory()->create(['role' => 'organizer']);
 
             // Créer le profil organisateur avec badge certified
-            \App\Models\OrganizerProfile::create([
+            OrganizerProfile::create([
                 'user_id' => $organizer->id,
                 'display_name' => $organizer->name,
                 'badge' => 'certified',
@@ -85,7 +86,7 @@ class TournamentSeeder extends Seeder
                 'max_participants' => $tournamentData['max_participants'],
                 'entry_fee' => 4.00,
                 'prize_distribution' => json_encode($tournamentData['prize_distribution']),
-                'start_date' => now()->setTime(19, 30, 0),
+                'start_date' => now()->setTime(19, 00, 0),
                 'tournament_duration_days' => 1,
                 'time_slot' => 'evening',
                 'match_deadline_minutes' => 60,
