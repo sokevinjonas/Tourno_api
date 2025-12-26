@@ -125,6 +125,7 @@ class KnockoutFormatService
                 'player2_id' => $shuffled[$i + 1]->user_id,
                 'status' => 'scheduled',
                 'scheduled_at' => now(),
+                'deadline_at' => now()->addMinutes($tournament->match_deadline_minutes),
                 'bracket_position' => (int) ($i / 2) + 1,
             ]);
 
@@ -248,8 +249,10 @@ class KnockoutFormatService
 
         // Check if both players are now assigned
         if ($nextMatch->fresh()->player1_id && $nextMatch->fresh()->player2_id) {
+            $tournament = $nextMatch->tournament;
             $nextMatch->update([
                 'scheduled_at' => now(),
+                'deadline_at' => now()->addMinutes($tournament->match_deadline_minutes),
             ]);
 
             // Check if this is the first match with both players in this round
