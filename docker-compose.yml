@@ -3,8 +3,11 @@ version: '3.8'
 services:
   # Laravel Application
   app:
-    image: tourno_app:latest
-    container_name: tourno_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tourno-api:latest
+    container_name: tourno-api
     restart: unless-stopped
     working_dir: /var/www/html
     volumes:
@@ -56,8 +59,8 @@ services:
 
   # Queue Worker
   queue:
-    image: tourno_app:latest
-    container_name: tourno_queue
+    image: tourno-api:latest
+    container_name: tourno-api-queue
     restart: unless-stopped
     working_dir: /var/www/html
     entrypoint: ["/bin/bash", "/var/www/html/docker-queue-entrypoint.sh"]

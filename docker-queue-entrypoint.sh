@@ -3,8 +3,9 @@
 echo "🚀 Starting Laravel Queue Worker..."
 
 # Fix permissions for storage and cache directories
+# Alpine uses 'apache' user instead of 'www-data'
 echo "📁 Fixing storage and cache permissions..."
-chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+chown -R apache:apache /var/www/html/storage /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Ensure critical directories are readable
