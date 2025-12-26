@@ -20,29 +20,25 @@ class WalletLockService
         // Calculer le montant total des inscriptions
         $totalEntryFees = $tournament->entry_fee * $tournament->registrations()->count();
 
-        // Check if funds already locked
-        $existingLock = TournamentWalletLock::where('tournament_id', $tournament->id)
-            ->where('organizer_id', $organizer->id)
-            ->exists();
-
-        if ($existingLock) {
-            throw new \Exception('Funds already locked for this tournament');
-        }
-
         DB::transaction(function () use ($organizer, $tournament, $totalEntryFees) {
-            // Créer le lock
-            TournamentWalletLock::create([
-                'tournament_id' => $tournament->id,
-                'organizer_id' => $organizer->id,
-                'wallet_id' => $organizer->wallet->id,
-                'locked_amount' => $totalEntryFees,
-                'status' => 'locked',
-            ]);
+            // Le lock existe déjà (créé par le TournamentObserver)
+            $lock = TournamentWalletLock::where('tournament_id', $tournament->id)
+                ->where('organizer_id', $organizer->id)
+                ->firstOrFail();
 
-            // Transférer les fonds de balance vers blocked_balance
-            $organizer->wallet->balance -= $totalEntryFees;
-            $organizer->wallet->blocked_balance += $totalEntryFees;
-            $organizer->wallet->save();
+            // Vérifier que le locked_amount correspond au total attendu
+            if ($lock->locked_amount != $totalEntryFees) {
+                throw new \Exception("Lock amount mismatch. Expected: {$totalEntryFees} MLM, Found: {$lock->locked_amount} MLM");
+            }
+
+            // Vérifier que l'organisateur a bien les fonds bloqués
+            if ($organizer->wallet->blocked_balance < $totalEntryFees) {
+                throw new \Exception("Insufficient blocked funds. Expected: {$totalEntryFees} MLM, Available: {$organizer->wallet->blocked_balance} MLM");
+            }
+
+            // NOTE: Le lock est déjà créé et le locked_amount est déjà incrémenté
+            // à chaque inscription via processTournamentRegistration()
+            // Ici on vérifie juste que tout est cohérent avant de démarrer le tournoi
         });
     }
 
@@ -145,31 +141,34 @@ class WalletLockService
         $organizer->load('wallet');
 
         DB::transaction(function () use ($lock, $organizer, $tournament) {
-            // Calculer le reste
+            // Calculer le reste (profit de l'organisateur)
             $remainder = $lock->locked_amount - $lock->paid_out;
 
-            // Libérer vers le solde normal
-            $organizer->wallet->blocked_balance -= $lock->locked_amount;
+            // Ajouter le profit à la balance de l'organisateur
+            $balanceBefore = $organizer->wallet->balance;
             $organizer->wallet->balance += $remainder;
             $organizer->wallet->save();
 
-            // Marquer comme libéré
+            // Marquer le lock comme libéré
             $lock->update([
                 'status' => 'released',
                 'released_at' => now(),
             ]);
 
-            // Transaction record pour la plateforme
+            // Synchroniser le blocked_balance (va recalculer en excluant ce lock 'released')
+            app(WalletService::class)->syncBlockedBalance($organizer);
+
+            // Transaction record pour le profit
             if ($remainder > 0) {
                 DB::table('transactions')->insert([
                     'wallet_id' => $organizer->wallet->id,
                     'user_id' => $organizer->id,
                     'type' => 'credit',
                     'amount' => $remainder,
-                    'balance_before' => $organizer->wallet->balance - $remainder,
+                    'balance_before' => $balanceBefore,
                     'balance_after' => $organizer->wallet->balance,
-                    'reason' => 'admin_adjustment',
-                    'description' => "Tournament funds released: {$tournament->name}",
+                    'reason' => 'tournament_profit',
+                    'description' => "Profit du tournoi: {$tournament->name}",
                     'tournament_id' => $tournament->id,
                     'created_at' => now(),
                     'updated_at' => now(),

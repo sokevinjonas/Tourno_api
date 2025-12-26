@@ -34,9 +34,8 @@ class TournamentRegistrationService
                 throw new \Exception('Insufficient wallet balance');
             }
 
-            // Process payment: Debit participant and credit organizer
-            // Les entry fees vont dans le balance de l'organisateur
-            // Au démarrage du tournoi, ils seront bloqués dans blocked_balance
+            // Process payment: Debit participant and credit organizer's blocked_balance
+            // Les entry fees vont directement dans le blocked_balance de l'organisateur
             $this->walletService->processTournamentRegistration(
                 $user,
                 $tournament->entry_fee,
@@ -44,9 +43,9 @@ class TournamentRegistrationService
             );
 
             // NOTE: Flow des fonds:
-            // 1. Inscription: Joueur → Organisateur (balance)
-            // 2. Démarrage: balance → blocked_balance (chez l'organisateur)
-            // 3. Fin: blocked_balance → Gagnants + Reste à l'organisateur
+            // 1. Inscription: Joueur → Organisateur (blocked_balance directement)
+            // 2. Démarrage: Créer le lock record (les fonds sont déjà bloqués)
+            // 3. Fin: blocked_balance → Gagnants + Reste à l'organisateur (balance)
 
             // Create registration
             $registration = TournamentRegistration::create([
@@ -147,19 +146,38 @@ class TournamentRegistrationService
             // Update registration status
             $registration->update(['status' => 'withdrawn']);
 
-            // Debit entry fee from organizer's wallet
-            $this->walletService->debit(
-                $registration->tournament->organizer,
-                $registration->tournament->entry_fee,
-                'tournament_entry_refunded',
-                "Refund entry fee for tournament #{$registration->tournament_id}",
-                $registration->tournament_id
-            );
+            // Décrémenter le locked_amount du tournament_wallet_lock
+            $organizer = $registration->tournament->organizer;
+            $organizer->load('wallet');
+            $entryFee = $registration->tournament->entry_fee;
+
+            $lock = \App\Models\TournamentWalletLock::where('tournament_id', $registration->tournament_id)
+                ->where('organizer_id', $organizer->id)
+                ->firstOrFail();
+
+            // Décrémenter le locked_amount
+            $lock->decrement('locked_amount', $entryFee);
+
+            // Synchroniser le blocked_balance du wallet
+            $this->walletService->syncBlockedBalance($organizer);
+
+            // Créer transaction pour tracer le remboursement
+            \App\Models\Transaction::create([
+                'wallet_id' => $organizer->wallet->id,
+                'user_id' => $organizer->id,
+                'type' => 'debit',
+                'amount' => $entryFee,
+                'balance_before' => $organizer->wallet->balance,
+                'balance_after' => $organizer->wallet->balance, // balance ne change pas
+                'reason' => 'tournament_entry_refunded',
+                'description' => "Remboursement frais d'inscription pour tournoi #{$registration->tournament_id}",
+                'tournament_id' => $registration->tournament_id,
+            ]);
 
             // Refund entry fee to participant
             $this->walletService->processTournamentRefund(
                 $user,
-                $registration->tournament->entry_fee,
+                $entryFee,
                 $registration->tournament_id
             );
 
