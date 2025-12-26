@@ -1,0 +1,96 @@
+# ==========================================
+# Stage 1: Build stage (with dev dependencies)
+# ==========================================
+FROM php:8.4-apache-bookworm AS builder
+
+# Set timezone
+ENV TZ=UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Install system dependencies (including -dev for compilation)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libpq-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip
+
+# Get latest Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy composer files first (for layer caching)
+COPY composer.json composer.lock ./
+
+# Install dependencies WITHOUT dev packages
+RUN composer install --no-dev --no-interaction --optimize-autoloader --no-scripts
+
+# Copy application code
+COPY . .
+
+# Run composer scripts (if any)
+RUN composer dump-autoload --optimize
+
+# ==========================================
+# Stage 2: Production runtime (lean image)
+# ==========================================
+FROM php:8.4-apache-bookworm AS production
+
+# Set timezone
+ENV TZ=UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Install ONLY runtime dependencies (no -dev packages)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpng16-16 \
+    libonig5 \
+    libxml2 \
+    libpq5 \
+    libzip4 \
+    zip \
+    unzip \
+    ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy PHP extensions from builder
+COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+COPY --from=builder /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
+
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
+
+# Configure Apache DocumentRoot to point to Laravel's public directory
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy application from builder (includes optimized vendor without dev)
+COPY --from=builder --chown=www-data:www-data /var/www/html /var/www/html
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Expose port 80
+EXPOSE 80
+
+# Use custom entrypoint
+ENTRYPOINT ["docker-entrypoint.sh"]
