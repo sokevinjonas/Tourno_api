@@ -29,12 +29,21 @@ class AutoStartTournamentsJob implements ShouldQueue
     public function handle(TournamentService $tournamentService): void
     {
         // Trouver les tournois auto-managed qui doivent démarrer
+        // Un tournoi démarre si :
+        // 1. Il est auto-managed
+        // 2. Il est en status 'open'
+        // 3. La date de début est passée
+        // 4. Le tournoi est COMPLET (inscriptions = max_participants)
         $tournaments = Tournament::where('auto_managed', true)
             ->where('status', 'open')
-            ->withCount('registrations')
-            ->having('registrations_count', '>=', \DB::raw('max_participants'))
             ->where('start_date', '<=', now())
-            ->get();
+            ->withCount(['registrations' => function ($query) {
+                $query->where('status', 'registered');
+            }])
+            ->get()
+            ->filter(function ($tournament) {
+                return $tournament->registrations_count >= $tournament->max_participants;
+            });
 
         foreach ($tournaments as $tournament) {
             try {

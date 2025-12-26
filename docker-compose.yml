@@ -54,6 +54,33 @@ services:
       timeout: 5s
       retries: 5
 
+  # Queue Worker
+  queue:
+    image: tourno_app:latest
+    container_name: tourno_queue
+    restart: unless-stopped
+    working_dir: /var/www/html
+    entrypoint: ["/bin/bash", "/var/www/html/docker-queue-entrypoint.sh"]
+    volumes:
+      - .:/var/www/html
+      - ./storage:/var/www/html/storage
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=pgsql
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=tourno
+      - DB_USERNAME=tourno_user
+      - DB_PASSWORD=tourno_password
+      - QUEUE_CONNECTION=database
+      - CACHE_DRIVER=file
+      - SESSION_DRIVER=database
+    depends_on:
+      - db
+    networks:
+      - tourno_network
+
   # Adminer (Database Management Tool)
   adminer:
     image: adminer:latest
