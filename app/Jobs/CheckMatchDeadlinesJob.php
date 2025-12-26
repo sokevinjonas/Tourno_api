@@ -52,6 +52,12 @@ class CheckMatchDeadlinesJob implements ShouldQueue
      */
     private function handleExpiredMatch(TournamentMatch $match): void
     {
+        // PROTECTION: Ne jamais toucher un match déjà traité par l'organisateur
+        if ($this->isAlreadyProcessedByOrganizer($match)) {
+            Log::info("Match {$match->id} - Already processed by organizer, skipping automated processing");
+            return;
+        }
+
         $submissionsCount = $match->matchResults->count();
 
         if ($submissionsCount === 0) {
@@ -61,11 +67,18 @@ class CheckMatchDeadlinesJob implements ShouldQueue
             // Un seul joueur a soumis → Il gagne par forfait
             $this->handleOneSubmission($match);
         } else {
-            // 2 soumissions → Ne devrait pas arriver ici (géré par MatchResultService)
-            // Mais au cas où, on marque comme expiré
-            $this->markAsExpired($match);
-            Log::warning("Match {$match->id} expired with {$submissionsCount} submissions (unexpected)");
+            // 2 soumissions → Vérifier la cohérence
+            $this->handleTwoSubmissions($match);
         }
+    }
+
+    /**
+     * Vérifier si le match a déjà été traité par l'organisateur
+     */
+    private function isAlreadyProcessedByOrganizer(TournamentMatch $match): bool
+    {
+        // Si les scores sont déjà renseignés (pas NULL), c'est que l'organisateur les a entrés
+        return !is_null($match->player1_score) && !is_null($match->player2_score);
     }
 
     /**
@@ -277,5 +290,56 @@ class CheckMatchDeadlinesJob implements ShouldQueue
     {
         $roundName = strtolower($match->round->round_name ?? '');
         return str_contains($roundName, 'final') && !str_contains($roundName, 'semi');
+    }
+
+    /**
+     * Gérer le cas où les deux joueurs ont soumis → Vérifier cohérence
+     */
+    private function handleTwoSubmissions(TournamentMatch $match): void
+    {
+        $submissions = $match->matchResults;
+        $submission1 = $submissions->where('submitted_by', $match->player1_id)->first();
+        $submission2 = $submissions->where('submitted_by', $match->player2_id)->first();
+
+        // Scores déclarés par chaque joueur
+        $player1DeclaredScore = $submission1->own_score;
+        $player1DeclaredOpponentScore = $submission1->opponent_score;
+
+        $player2DeclaredScore = $submission2->own_score;
+        $player2DeclaredOpponentScore = $submission2->opponent_score;
+
+        // Vérifier la cohérence
+        $isCoherent = (
+            $player1DeclaredScore === $player2DeclaredOpponentScore &&
+            $player1DeclaredOpponentScore === $player2DeclaredScore
+        );
+
+        if ($isCoherent) {
+            // Les scores correspondent → Valider automatiquement
+            $this->updateMatchResultViaService($match, $player1DeclaredScore, $player2DeclaredScore);
+
+            Log::info("Match {$match->id} - Two submissions COHERENT → Score validated: {$player1DeclaredScore}-{$player2DeclaredScore}");
+        } else {
+            // CONTRADICTION → Marquer comme disputé et alerter l'organisateur
+            $this->handleContradiction($match, $submission1, $submission2);
+        }
+    }
+
+    /**
+     * Gérer une contradiction entre deux soumissions
+     */
+    private function handleContradiction(TournamentMatch $match, $submission1, $submission2): void
+    {
+        // Marquer le match comme disputé
+        $match->update(['status' => 'disputed']);
+
+        // Envoyer email à l'organisateur
+        $organizer = $match->tournament->organizer;
+
+        \Mail::to($organizer)->send(
+            new \App\Mail\MatchResultContradictionMail($match, $submission1, $submission2)
+        );
+
+        Log::warning("Match {$match->id} - CONTRADICTION detected. Organizer notified. P1: {$submission1->own_score}-{$submission1->opponent_score}, P2: {$submission2->own_score}-{$submission2->opponent_score}");
     }
 }

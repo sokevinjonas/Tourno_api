@@ -15,5 +15,5 @@ Artisan::command('inspire', function () {
 // Schedule jobs
 Schedule::job(new AutoStartTournamentsJob)->everyFiveMinutes();
 Schedule::job(new CheckFullTournamentsJob)->everyFiveMinutes();
-Schedule::job(new CheckMatchDeadlinesJob)->everyFifteenMinutes();
+Schedule::job(new CheckMatchDeadlinesJob)->everyTenMinutes();
 Schedule::job(new SendMatchDeadlineWarningsJob)->everyFifteenMinutes();
