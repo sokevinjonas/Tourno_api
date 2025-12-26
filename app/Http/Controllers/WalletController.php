@@ -76,11 +76,29 @@ class WalletController extends Controller
      */
     public function statistics(Request $request): JsonResponse
     {
-        $stats = $this->walletService->getTransactionStatistics($request->user());
+        $user = $request->user();
+        $stats = $this->walletService->getTransactionStatistics($user);
 
-        return response()->json([
-            'statistics' => $stats,
-        ], 200);
+        // Structurer la réponse pour le frontend
+        $response = [
+            'wallet' => [
+                'balance' => $stats['balance'],
+                'blocked_balance' => $stats['blocked_balance'],
+                'available_balance' => $stats['available_balance'],
+            ],
+            'transactions' => [
+                'total_credited' => $stats['total_credited'],
+                'total_debited' => $stats['total_debited'],
+                'total_count' => $stats['total_transactions'],
+            ],
+        ];
+
+        // Ajouter les stats de tournois si disponibles
+        if (isset($stats['tournament_stats'])) {
+            $response['tournaments'] = $stats['tournament_stats'];
+        }
+
+        return response()->json($response, 200);
     }
 
     /**
