@@ -165,6 +165,7 @@ class SwissFormatService
                     'player2_id' => $shuffled[$i + 1]->user_id,
                     'status' => 'scheduled',
                     'scheduled_at' => now(),
+                    'deadline_at' => now()->addMinutes($tournament->match_deadline_minutes),
                 ]);
             } else {
                 // Odd number of players: bye (automatic win)
@@ -204,6 +205,7 @@ class SwissFormatService
                     'player2_id' => $opponent['user_id'],
                     'status' => 'scheduled',
                     'scheduled_at' => now(),
+                    'deadline_at' => now()->addMinutes($tournament->match_deadline_minutes),
                 ]);
             } else {
                 // No valid opponent: assign bye
