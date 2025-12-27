@@ -1,30 +1,15 @@
 # ==========================================
-# Stage 1: Build stage (with dev dependencies)
+# Stage 1: Builder (Alpine - Installation des dépendances)
 # ==========================================
-FROM php:8.4-apache-bookworm AS builder-bookworm
+FROM php:8.4-fpm-alpine AS builder
 
-# Set timezone
-ENV TZ=UTC
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-# Install system dependencies (including -dev for compilation)
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install build tools and Composer
+RUN apk add --no-cache \
     git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    libpq-dev \
-    libzip-dev \
-    zip \
     unzip \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    curl
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip
-
-# Get latest Composer
+# Get Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
@@ -39,47 +24,41 @@ RUN composer install --no-dev --no-interaction --optimize-autoloader --no-script
 # Copy application code
 COPY . .
 
-# Run composer scripts (if any)
+# Run composer scripts
 RUN composer dump-autoload --optimize
 
 # ==========================================
-# Stage 2: Production runtime (Alpine FPM + Nginx - ULTRA LEAN)
+# Stage 2: Production runtime (Alpine FPM + Nginx - OPTIMIZED)
 # ==========================================
 FROM php:8.4-fpm-alpine AS production
 
-# Install runtime dependencies and nginx
+# Install ONLY runtime dependencies (minimized for size)
 RUN apk add --no-cache \
-    # Nginx web server
     nginx \
-    # PostgreSQL client libraries
-    postgresql-libs \
-    # Image processing
+    postgresql-client \
     libpng \
-    # String processing
+    libjpeg-turbo \
     oniguruma \
-    # XML processing
     libxml2 \
-    # ZIP support
     libzip \
-    # Utilities
-    bash \
     curl \
     tzdata \
-    ca-certificates \
-    # Supervisor to manage nginx + php-fpm
     supervisor
 
 # Install build dependencies temporarily for PHP extensions
 RUN apk add --no-cache --virtual .build-deps \
+    $PHPIZE_DEPS \
     postgresql-dev \
     libpng-dev \
+    libjpeg-turbo-dev \
     oniguruma-dev \
     libxml2-dev \
     libzip-dev \
-    $PHPIZE_DEPS \
-    # Install PHP extensions
-    && docker-php-ext-install \
-        pdo \
+    # Configure GD (without WebP/FreeType to save space)
+    && docker-php-ext-configure gd \
+        --with-jpeg \
+    # Install PHP extensions in parallel
+    && docker-php-ext-install -j$(nproc) \
         pdo_pgsql \
         pgsql \
         mbstring \
@@ -88,44 +67,63 @@ RUN apk add --no-cache --virtual .build-deps \
         bcmath \
         gd \
         zip \
-    # Remove build dependencies to reduce image size
-    && apk del .build-deps
+        opcache \
+    # Clean up build dependencies to reduce image size
+    && apk del .build-deps \
+    && rm -rf /tmp/* /var/cache/apk/*
 
 # Set timezone
 ENV TZ=UTC
 RUN cp /usr/share/zoneinfo/$TZ /etc/localtime \
     && echo $TZ > /etc/timezone
 
-# Configure PHP-FPM to listen on 127.0.0.1:9000
-RUN sed -i 's/listen = 9000/listen = 127.0.0.1:9000/' /usr/local/etc/php-fpm.d/www.conf \
-    && sed -i 's/;listen.owner = nobody/listen.owner = nginx/' /usr/local/etc/php-fpm.d/www.conf \
-    && sed -i 's/;listen.group = nobody/listen.group = nginx/' /usr/local/etc/php-fpm.d/www.conf
-
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy nginx configuration
+# Copy PHP configurations
+COPY docker/php/php.ini /usr/local/etc/php/conf.d/99-custom.ini
+COPY docker/php/php-fpm.conf /usr/local/etc/php-fpm.d/zz-custom.conf
+
+# Copy Nginx configuration
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 
-# Create nginx directories
-RUN mkdir -p /var/log/nginx \
+# Copy Supervisor configurations
+COPY supervisord.conf /etc/supervisord.conf
+COPY docker/supervisor/queue-worker.conf /etc/supervisor/queue-worker.conf
+
+# Create required directories
+RUN mkdir -p /var/log/nginx /var/log/php-fpm /var/log/supervisor \
     && mkdir -p /var/lib/nginx/tmp \
-    && chown -R nginx:nginx /var/log/nginx \
+    && mkdir -p /run \
+    && chown -R nginx:nginx /var/log/nginx /var/log/php-fpm \
     && chown -R nginx:nginx /var/lib/nginx
 
 # Copy application from builder (includes optimized vendor without dev)
-# Alpine uses 'nginx:nginx' for web files with FPM
-COPY --from=builder-bookworm --chown=nginx:nginx /var/www/html /var/www/html
+COPY --from=builder --chown=nginx:nginx /var/www/html /var/www/html
 
-# Copy entrypoint script (Alpine FPM version)
+# Copy entrypoint scripts
 COPY docker-entrypoint-alpine.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY docker-queue-entrypoint.sh /usr/local/bin/queue-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/queue-entrypoint.sh
 
-# Set permissions
-RUN chown -R nginx:nginx /var/www/html/storage /var/www/html/bootstrap/cache
+# Set permissions and aggressive cleanup
+RUN chown -R nginx:nginx /var/www/html/storage /var/www/html/bootstrap/cache \
+    # Remove all unnecessary files
+    && rm -rf /tmp/* /var/cache/apk/* /usr/share/man/* /usr/share/doc/* \
+    # Remove unused locales to save space
+    && find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'en*' ! -name 'locale.alias' -exec rm -rf {} + \
+    # Remove PHP test files
+    && find /usr/local/lib/php -name tests -type d -exec rm -rf {} + 2>/dev/null || true \
+    # Strip binaries to reduce size
+    && find /usr/local/bin /usr/local/sbin -type f -exec strip --strip-all {} + 2>/dev/null || true
 
 # Expose port 80
 EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost/health || exit 1
 
 # Use custom entrypoint
 ENTRYPOINT ["docker-entrypoint.sh"]

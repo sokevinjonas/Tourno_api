@@ -1,12 +1,12 @@
 version: '3.8'
 
+# Docker Compose utilisant l'image depuis Docker Hub
+# Usage: docker-compose -f docker-compose.hub.yml up -d
+
 services:
-  # Laravel Application
+  # Laravel Application (depuis Docker Hub)
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: tourno-api:v1.0.0
+    image: sokevinjonas/tourno-api:v1.0.0
     container_name: tourno-api
     restart: unless-stopped
     working_dir: /var/www/html
@@ -57,9 +57,9 @@ services:
       timeout: 5s
       retries: 5
 
-  # Queue Worker
+  # Queue Worker (depuis Docker Hub)
   queue:
-    image: tourno-api:latest
+    image: sokevinjonas/tourno-api:latest
     container_name: tourno-api-queue
     restart: unless-stopped
     working_dir: /var/www/html
