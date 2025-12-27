@@ -46,6 +46,11 @@ Thumbs.db
 public/hot
 public/storage
 
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
 # Autres
 *.log
 .phpunit.cache

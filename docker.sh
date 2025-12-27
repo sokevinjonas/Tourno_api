@@ -25,7 +25,7 @@ case "$1" in
 
     "build")
         echo "🔨 Building Tourno app image..."
-        docker build --network=host -t tourno_app .
+        docker build --network=host -t tourno-api:v1.0.0 -t tourno-api:latest .
         echo "✅ Build completed!"
         echo "Now starting services..."
         docker-compose up -d
@@ -139,7 +139,7 @@ case "$1" in
     "install")
         echo "📦 Installing Tourno..."
         echo "Step 1: Building app image..."
-        docker build --network=host -t tourno_app .
+        docker build --network=host -t tourno-api:v1.0.0 -t tourno-api:latest .
 
         echo "Step 2: Starting containers..."
         docker-compose up -d
