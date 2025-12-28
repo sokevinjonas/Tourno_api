@@ -164,31 +164,43 @@ class MatchResultService
      */
     protected function sendSubmissionEmails(TournamentMatch $match, User $submitter, MatchResult $matchResult): void
     {
+        \Log::info("START sendSubmissionEmails for match {$match->id}, submitter: {$submitter->id}");
+
         // Déterminer l'adversaire
         $opponentId = $match->player1_id === $submitter->id ? $match->player2_id : $match->player1_id;
+        \Log::info("Opponent ID determined: {$opponentId}");
+
         $opponent = User::find($opponentId);
 
         if (!$opponent) {
+            \Log::warning("No opponent found for match {$match->id}");
             return; // Pas d'adversaire (cas de bye)
         }
+
+        \Log::info("Opponent found: {$opponent->name} ({$opponent->email})");
 
         // Charger les relations nécessaires pour les emails
         $match->load(['tournament.organizer', 'round']);
 
         try {
             // Email de confirmation pour le joueur qui soumet
+            \Log::info("Sending confirmation email to submitter {$submitter->email}");
             Mail::to($submitter)->send(
                 new MatchResultSubmittedConfirmationMail($match, $submitter, $opponent, $matchResult)
             );
+            \Log::info("Confirmation email sent to submitter {$submitter->id}");
 
             // Email de notification pour l'adversaire
+            \Log::info("Sending notification email to opponent {$opponent->email}");
             Mail::to($opponent)->send(
                 new OpponentSubmittedResultMail($match, $opponent, $submitter, $matchResult)
             );
+            \Log::info("Notification email sent to opponent {$opponent->id}");
 
-            \Log::info("Submission emails sent for match {$match->id}: confirmation to User {$submitter->id}, notification to User {$opponent->id}");
+            \Log::info("SUCCESS: Both submission emails sent for match {$match->id}");
         } catch (\Exception $e) {
-            \Log::error("Failed to send submission emails for match {$match->id}: {$e->getMessage()}");
+            \Log::error("FAILED to send submission emails for match {$match->id}: {$e->getMessage()}");
+            \Log::error("Exception trace: " . $e->getTraceAsString());
         }
     }
 }
