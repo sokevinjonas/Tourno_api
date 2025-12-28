@@ -25,7 +25,8 @@
 
     <div style="text-align: center; margin: 24px 0;">
         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $opponent->profile->whatsapp_number) }}"
-           style="display: inline-block; background: #0f172a; color: white; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
+           style="display: inline-block; background: #0f172a; color: white; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;"
+           target="_blank">
             📱 Contacter sur WhatsApp
         </a>
     </div>
