@@ -87,9 +87,9 @@ class MatchResultService
                 $player1ScoreFromPlayer2 = $result2->opponent_score;
             } else {
                 $player1Score = $result2->own_score;
-                $player2ScoreFromPlayer2 = $result2->opponent_score;
+                $player1ScoreFromPlayer2 = $result2->opponent_score;
                 $player2Score = $result1->own_score;
-                $player1ScoreFromPlayer1 = $result1->opponent_score;
+                $player2ScoreFromPlayer1 = $result1->opponent_score;
             }
 
             // Check if scores match
