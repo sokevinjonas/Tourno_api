@@ -1,64 +1,72 @@
 @extends('emails.layout')
 
 @section('content')
-<h2 style="color: #333; margin-bottom: 20px;">Nouveau Round généré !</h2>
+<h2 style="color: #0f172a; margin-bottom: 24px; font-size: 26px;">Nouveau Round disponible</h2>
 
-<p style="margin-bottom: 15px;">Bonjour <strong>{{ $player->name }}</strong>,</p>
+<p style="margin-bottom: 16px; font-size: 15px; line-height: 1.6;">Bonjour <strong>{{ $player->name }}</strong>,</p>
 
-<p style="margin-bottom: 20px;">
+<p style="margin-bottom: 24px; font-size: 15px; line-height: 1.6;">
     Le Round <strong>{{ $round->round_number }}</strong> du tournoi <strong>{{ $tournament->name }}</strong> vient d'être généré !
 </p>
 
-<div style="background: #667eea; padding: 25px; border-radius: 8px; text-align: center; margin: 30px 0;">
-    <p style="color: white; font-size: 24px; margin: 0 0 10px 0; font-weight: bold;">
+<div style="background: #0f172a; padding: 28px; border-radius: 8px; text-align: center; margin: 28px 0;">
+    <p style="color: white; font-size: 22px; margin: 0 0 8px 0; font-weight: 600;">
         Round {{ $round->round_number }}
     </p>
     @if($match)
-        <p style="color: white; font-size: 18px; margin: 0;">
-            Vous affronterez <strong>{{ $match->player1_id === $player->id ? $match->player2->name : $match->player1->name }}</strong>
+        <p style="color: #e2e8f0; font-size: 16px; margin: 0;">
+            Vous affronterez <strong style="color: white;">{{ $match->player1_id === $player->id ? $match->player2->name : $match->player1->name }}</strong>
         </p>
     @endif
 </div>
 
 @if($match)
 <div class="info-box">
-    <h3 style="margin-bottom: 10px; color: #667eea;">Détails du match</h3>
+    <h3 style="margin-bottom: 16px; color: #0f172a; font-size: 18px;">Détails du match</h3>
     <table style="width: 100%; border-collapse: collapse;">
         <tr>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Tournoi</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">{{ $tournament->name }}</td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-size: 14px;"><strong>Tournoi</strong></td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 14px;">{{ $tournament->name }}</td>
         </tr>
         <tr>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Round</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">Round {{ $round->round_number }}</td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-size: 14px;"><strong>Round</strong></td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 14px;">Round {{ $round->round_number }}</td>
         </tr>
         <tr>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Adversaire</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-size: 14px;"><strong>Adversaire</strong></td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 14px;">
                 {{ $match->player1_id === $player->id ? $match->player2->name : $match->player1->name }}
             </td>
         </tr>
         @php
             $opponent = $match->player1_id === $player->id ? $match->player2 : $match->player1;
         @endphp
-        @if($opponent && $opponent->phone)
+        @if($opponent && $opponent->profile && $opponent->profile->whatsapp_number)
         <tr>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Numéro</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">{{ $opponent->phone }}</td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-size: 14px;"><strong>Numéro WhatsApp</strong></td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 14px;">{{ $opponent->profile->whatsapp_number }}</td>
+        </tr>
+        @endif
+        @if($match->deadline_at)
+        <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-size: 14px;"><strong>⏰ Deadline</strong></td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 14px; color: #dc2626; font-weight: 600;">
+                {{ \Carbon\Carbon::parse($match->deadline_at)->format('d/m/Y à H:i') }}
+            </td>
         </tr>
         @endif
         <tr>
-            <td style="padding: 8px 0;"><strong>Statut</strong></td>
-            <td style="padding: 8px 0; text-align: right; color: #ff9800; font-weight: bold;">
+            <td style="padding: 10px 0; font-size: 14px;"><strong>Statut</strong></td>
+            <td style="padding: 10px 0; text-align: right; color: #f59e0b; font-weight: 600; font-size: 14px;">
                 À jouer
             </td>
         </tr>
     </table>
 
-    @if($opponent && $opponent->phone)
-    <div style="text-align: center; margin: 20px 0;">
-        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $opponent->phone) }}"
-           style="display: inline-block; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+    @if($opponent && $opponent->profile && $opponent->profile->whatsapp_number)
+    <div style="text-align: center; margin: 24px 0;">
+        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $opponent->profile->whatsapp_number) }}"
+           style="display: inline-block; background: #0f172a; color: white; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
             📱 Contacter sur WhatsApp
         </a>
     </div>
@@ -66,26 +74,24 @@
 </div>
 @endif
 
-<div class="info-box" style="background-color: #e8f5e9; border-left: 4px solid #4caf50;">
-    <h3 style="margin-bottom: 10px; color: #4caf50;">Préparez-vous !</h3>
-    <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
-        <li>Assurez-vous d'être disponible pour jouer votre match</li>
+<div style="background-color: #f1f5f9; border-left: 4px solid #0f172a; padding: 16px; margin: 24px 0; border-radius: 6px;">
+    <h3 style="margin-bottom: 12px; color: #0f172a; font-size: 16px;">Préparez-vous pour le match</h3>
+    <ul style="margin: 0; padding-left: 20px; line-height: 1.8; font-size: 14px; color: #334155;">
+        <li>Assurez-vous d'être disponible pour jouer votre match avant la deadline</li>
         <li>Contactez votre adversaire pour organiser le match</li>
         <li>Préparez votre meilleure stratégie</li>
-        <li>N'oubliez pas de soumettre les scores après le match</li>
+        <li>N'oubliez pas de soumettre les scores et preuves après le match</li>
     </ul>
 </div>
 
-<p style="margin: 30px 0 20px 0;">
+<p style="margin: 28px 0; text-align: center;">
     <a href="{{ env('FRONTEND_URL', 'http://localhost:4200') }}/tournaments/{{ $tournament->id }}"
-       style="display: inline-block; padding: 12px 30px; background-color: #667eea; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+       style="display: inline-block; padding: 12px 28px; background-color: #0f172a; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
         Voir le tournoi
     </a>
 </p>
 
-<div style="margin-top: 30px; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">
-    <p style="margin: 0; font-size: 14px; color: #555;">
-        Bonne chance pour ce nouveau round !
-    </p>
-</div>
+<p style="margin: 24px 0; font-size: 15px; color: #334155; text-align: center;">
+    Bonne chance pour ce nouveau round !
+</p>
 @endsection

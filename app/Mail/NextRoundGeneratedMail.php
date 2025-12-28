@@ -21,7 +21,17 @@ class NextRoundGeneratedMail extends Mailable
         public Tournament $tournament,
         public Round $round,
         public ?TournamentMatch $match = null
-    ) {}
+    ) {
+        // Load profile relations for opponents
+        if ($this->match) {
+            if ($this->match->player1) {
+                $this->match->player1->load('profile');
+            }
+            if ($this->match->player2) {
+                $this->match->player2->load('profile');
+            }
+        }
+    }
 
     public function envelope(): Envelope
     {
