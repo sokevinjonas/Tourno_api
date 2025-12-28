@@ -15,13 +15,21 @@
     <p style="margin: 10px 0; font-size: 18px;">
         <strong>Adversaire :</strong> {{ $opponent->name }}
     </p>
-    @if($opponent->email)
-    <p style="margin: 5px 0;"><strong>Email :</strong> {{ $opponent->email }}</p>
+    @if($opponent->phone)
+    <p style="margin: 5px 0;"><strong>Numéro :</strong> {{ $opponent->phone }}</p>
+
+    <div style="text-align: center; margin: 20px 0;">
+        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $opponent->phone) }}"
+           style="display: inline-block; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+            📱 Contacter sur WhatsApp
+        </a>
+    </div>
     @endif
     <p style="margin: 10px 0; color: #6c757d; font-size: 14px;">
         Contactez votre adversaire pour organiser votre match et soumettre les résultats.
     </p>
 </div>
+
 @elseif($firstMatch && !$opponent)
 <div class="info-box" style="background-color: #d4edda; border-left: 4px solid #28a745;">
     <h3 style="margin-bottom: 10px; color: #28a745;">Bye - Passage automatique au tour suivant</h3>
