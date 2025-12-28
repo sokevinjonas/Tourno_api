@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\Mail\MatchResultSubmittedConfirmationMail;
+use App\Mail\OpponentSubmittedResultMail;
 use App\Models\MatchResult;
 use App\Models\TournamentMatch;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class MatchResultService
@@ -38,7 +41,7 @@ class MatchResultService
             $screenshotPath = $this->uploadScreenshot($data['screenshot'], $match->id, $user->id);
         }
 
-        return DB::transaction(function () use ($match, $user, $data, $screenshotPath) {
+        $matchResult = DB::transaction(function () use ($match, $user, $data, $screenshotPath) {
             // Create match result
             $matchResult = MatchResult::create([
                 'match_id' => $match->id,
@@ -55,6 +58,11 @@ class MatchResultService
 
             return $matchResult;
         });
+
+        // Send emails after transaction
+        $this->sendSubmissionEmails($match, $user, $matchResult);
+
+        return $matchResult;
     }
 
     /**
@@ -149,5 +157,38 @@ class MatchResultService
         $path = $file->storeAs('match_results', $filename, 'public');
 
         return $path;
+    }
+
+    /**
+     * Send submission emails to submitter and opponent
+     */
+    protected function sendSubmissionEmails(TournamentMatch $match, User $submitter, MatchResult $matchResult): void
+    {
+        // Déterminer l'adversaire
+        $opponentId = $match->player1_id === $submitter->id ? $match->player2_id : $match->player1_id;
+        $opponent = User::find($opponentId);
+
+        if (!$opponent) {
+            return; // Pas d'adversaire (cas de bye)
+        }
+
+        // Charger les relations nécessaires pour les emails
+        $match->load(['tournament.organizer', 'round']);
+
+        try {
+            // Email de confirmation pour le joueur qui soumet
+            Mail::to($submitter)->send(
+                new MatchResultSubmittedConfirmationMail($match, $submitter, $opponent, $matchResult)
+            );
+
+            // Email de notification pour l'adversaire
+            Mail::to($opponent)->send(
+                new OpponentSubmittedResultMail($match, $opponent, $submitter, $matchResult)
+            );
+
+            \Log::info("Submission emails sent for match {$match->id}: confirmation to User {$submitter->id}, notification to User {$opponent->id}");
+        } catch (\Exception $e) {
+            \Log::error("Failed to send submission emails for match {$match->id}: {$e->getMessage()}");
+        }
     }
 }
