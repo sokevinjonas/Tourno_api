@@ -14,6 +14,7 @@ use App\Http\Controllers\TournamentRegistrationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WalletController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -229,4 +230,55 @@ Route::prefix('users')->group(function () {
 
 Route::prefix('tournaments')->group(function () {
     Route::get('/{id}/rankings', [LeaderboardController::class, 'tournamentRankings']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Cron Jobs Routes (Protected by secret token)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('cron')->group(function () {
+    Route::get('/scheduler', function (Request $request) {
+        // Vérifier le token secret
+        $token = $request->query('token');
+        $expectedToken = config('app.cron_secret');
+
+        if (!$expectedToken || $token !== $expectedToken) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Exécuter le scheduler
+        Artisan::call('schedule:run');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Scheduler executed successfully',
+            'output' => Artisan::output(),
+            'timestamp' => now()->toDateTimeString()
+        ]);
+    });
+
+    Route::get('/queue', function (Request $request) {
+        // Vérifier le token secret
+        $token = $request->query('token');
+        $expectedToken = config('app.cron_secret');
+
+        if (!$expectedToken || $token !== $expectedToken) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Exécuter la queue (traite les jobs en attente, puis s'arrête)
+        Artisan::call('queue:work', [
+            '--stop-when-empty' => true,
+            '--max-time' => 55,
+            '--tries' => 3
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Queue worker executed successfully',
+            'output' => Artisan::output(),
+            'timestamp' => now()->toDateTimeString()
+        ]);
+    });
 });
