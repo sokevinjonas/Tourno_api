@@ -46,7 +46,7 @@
 </div>
 
 <div style="text-align: center; margin: 28px 0;">
-    <a href="{{ config('app.frontend_url') }}/matches/{{ $match->id }}"
+    <a href="{{ config('app.frontend_url') }}/my-matches"
        style="display: inline-block; background: #0f172a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
         Soumettre le Résultat
     </a>

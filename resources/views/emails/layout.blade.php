@@ -21,18 +21,6 @@
             margin: 0 auto;
             background-color: #ffffff;
         }
-        .email-header {
-            background: #0f172a;
-            padding: 40px 20px;
-            text-align: center;
-        }
-        .email-logo {
-            font-size: 32px;
-            font-weight: bold;
-            color: #ffffff;
-            text-decoration: none;
-            letter-spacing: 2px;
-        }
         .email-body {
             padding: 40px 30px;
         }
@@ -87,10 +75,6 @@
 </head>
 <body>
     <div class="email-container">
-        <div class="email-header">
-            <div class="email-logo">MLM</div>
-        </div>
-
         <div class="email-body">
             @yield('content')
         </div>
