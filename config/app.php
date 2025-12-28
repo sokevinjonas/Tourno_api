@@ -107,6 +107,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Cron Secret Token
+    |--------------------------------------------------------------------------
+    |
+    | This secret token is used to protect cron job endpoints from unauthorized
+    | access. Set this to a random, secure string in your .env file.
+    |
+    */
+
+    'cron_secret' => env('CRON_SECRET'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Maintenance Mode Driver
     |--------------------------------------------------------------------------
     |
