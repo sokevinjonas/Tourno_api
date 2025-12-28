@@ -12,8 +12,8 @@
     </p>
 
     <div style="text-align: center; margin: 30px 0;">
-        <a href="{{ $magicLink }}" class="btn">
-            Se connecter à MLM
+        <a href="{{ $magicLink }}" class="btn" target="_blank">
+            Se connecter ici
         </a>
     </div>
 

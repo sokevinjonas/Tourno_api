@@ -80,7 +80,6 @@
         </div>
 
         <div class="email-footer">
-            <p><strong>MLM</strong></p>
             <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
             <p>&copy; {{ date('Y') }} MLM. Tous droits réservés.</p>
         </div>
