@@ -21,7 +21,7 @@ class MatchDeadlineWarningMail extends Mailable
         public TournamentMatch $match,
         public User $player,
         public User $opponent,
-        public int $hoursRemaining
+        public int $minutesRemaining
     ) {
     }
 
@@ -31,7 +31,7 @@ class MatchDeadlineWarningMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '⏰ Rappel - Deadline de Match dans ' . $this->hoursRemaining . 'h',
+            subject: '⏰ Rappel - Deadline de Match dans ' . $this->minutesRemaining . ' minutes',
         );
     }
 

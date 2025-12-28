@@ -23,7 +23,8 @@ class TournamentMatch extends Model
         'scheduled_at',
         'deadline_at',
         'deadline_extended',
-        'deadline_warning_sent_at',
+        'deadline_warning_30min_sent_at',
+        'deadline_warning_15min_sent_at',
         'completed_at',
         'next_match_id',
         'bracket_position',
@@ -35,7 +36,8 @@ class TournamentMatch extends Model
             'scheduled_at' => 'datetime',
             'deadline_at' => 'datetime',
             'deadline_extended' => 'boolean',
-            'deadline_warning_sent_at' => 'datetime',
+            'deadline_warning_30min_sent_at' => 'datetime',
+            'deadline_warning_15min_sent_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
     }
