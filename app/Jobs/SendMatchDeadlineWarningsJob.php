@@ -25,25 +25,41 @@ class SendMatchDeadlineWarningsJob implements ShouldQueue
     }
 
     /**
-     * Execute the job - Envoie des avertissements 1h avant la deadline
+     * Execute the job - Envoie des avertissements 30min et 15min avant la deadline
      */
     public function handle(): void
     {
-        // Trouver tous les matchs qui expirent dans 1h (entre 55 et 65 minutes)
-        // et qui n'ont pas encore reçu d'avertissement
-        $upcomingMatches = TournamentMatch::whereNotNull('deadline_at')
-            ->whereNull('deadline_warning_sent_at')
-            ->where('deadline_at', '>', now()->addMinutes(55))
-            ->where('deadline_at', '<=', now()->addMinutes(65))
+        // Avertissement 30 minutes avant (fenêtre: 28-32 minutes)
+        $matches30min = TournamentMatch::whereNotNull('deadline_at')
+            ->whereNull('deadline_warning_30min_sent_at')
+            ->where('deadline_at', '>', now()->addMinutes(28))
+            ->where('deadline_at', '<=', now()->addMinutes(32))
             ->whereNotIn('status', ['completed', 'disputed', 'expired'])
             ->with(['tournament', 'round', 'player1', 'player2', 'matchResults'])
             ->get();
 
-        foreach ($upcomingMatches as $match) {
+        foreach ($matches30min as $match) {
             try {
-                $this->sendWarningEmails($match);
+                $this->sendWarningEmails($match, 30, 'deadline_warning_30min_sent_at');
             } catch (\Exception $e) {
-                Log::error("Failed to send deadline warning for match {$match->id}: {$e->getMessage()}");
+                Log::error("Failed to send 30min deadline warning for match {$match->id}: {$e->getMessage()}");
+            }
+        }
+
+        // Avertissement 15 minutes avant (fenêtre: 13-17 minutes)
+        $matches15min = TournamentMatch::whereNotNull('deadline_at')
+            ->whereNull('deadline_warning_15min_sent_at')
+            ->where('deadline_at', '>', now()->addMinutes(13))
+            ->where('deadline_at', '<=', now()->addMinutes(17))
+            ->whereNotIn('status', ['completed', 'disputed', 'expired'])
+            ->with(['tournament', 'round', 'player1', 'player2', 'matchResults'])
+            ->get();
+
+        foreach ($matches15min as $match) {
+            try {
+                $this->sendWarningEmails($match, 15, 'deadline_warning_15min_sent_at');
+            } catch (\Exception $e) {
+                Log::error("Failed to send 15min deadline warning for match {$match->id}: {$e->getMessage()}");
             }
         }
     }
@@ -51,10 +67,9 @@ class SendMatchDeadlineWarningsJob implements ShouldQueue
     /**
      * Envoyer les emails d'avertissement aux joueurs qui n'ont pas soumis
      */
-    private function sendWarningEmails(TournamentMatch $match): void
+    private function sendWarningEmails(TournamentMatch $match, int $minutesRemaining, string $fieldToUpdate): void
     {
         $submissionsCount = $match->matchResults->count();
-        $hoursRemaining = 1; // 1 heure avant deadline
 
         // Vérifier quels joueurs ont déjà soumis
         $player1Submitted = $match->matchResults->where('submitted_by', $match->player1_id)->isNotEmpty();
@@ -64,28 +79,28 @@ class SendMatchDeadlineWarningsJob implements ShouldQueue
         if (!$player1Submitted) {
             // Email
             Mail::to($match->player1)->send(
-                new MatchDeadlineWarningMail($match, $match->player1, $match->player2, $hoursRemaining)
+                new MatchDeadlineWarningMail($match, $match->player1, $match->player2, $minutesRemaining)
             );
 
             // Notification push (database + broadcast)
-            $match->player1->notify(new \App\Notifications\MatchDeadlineWarningNotification($match, $hoursRemaining));
+            $match->player1->notify(new \App\Notifications\MatchDeadlineWarningNotification($match, $minutesRemaining));
 
-            Log::info("Deadline warning (email + push) sent to Player 1 (User {$match->player1_id}) for match {$match->id}");
+            Log::info("Deadline warning {$minutesRemaining}min (email + push) sent to Player 1 (User {$match->player1_id}) for match {$match->id}");
         }
 
         if (!$player2Submitted) {
             // Email
             Mail::to($match->player2)->send(
-                new MatchDeadlineWarningMail($match, $match->player2, $match->player1, $hoursRemaining)
+                new MatchDeadlineWarningMail($match, $match->player2, $match->player1, $minutesRemaining)
             );
 
             // Notification push (database + broadcast)
-            $match->player2->notify(new \App\Notifications\MatchDeadlineWarningNotification($match, $hoursRemaining));
+            $match->player2->notify(new \App\Notifications\MatchDeadlineWarningNotification($match, $minutesRemaining));
 
-            Log::info("Deadline warning (email + push) sent to Player 2 (User {$match->player2_id}) for match {$match->id}");
+            Log::info("Deadline warning {$minutesRemaining}min (email + push) sent to Player 2 (User {$match->player2_id}) for match {$match->id}");
         }
 
         // Marquer que l'avertissement a été envoyé
-        $match->update(['deadline_warning_sent_at' => now()]);
+        $match->update([$fieldToUpdate => now()]);
     }
 }

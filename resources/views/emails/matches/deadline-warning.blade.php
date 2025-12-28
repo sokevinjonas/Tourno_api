@@ -8,7 +8,7 @@
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
         <h1 style="margin: 0; font-size: 28px;">⏰ Rappel de Deadline</h1>
-        <p style="margin: 10px 0 0 0; font-size: 16px;">Votre match expire dans {{ $hoursRemaining }} heure(s)</p>
+        <p style="margin: 10px 0 0 0; font-size: 16px;">Votre match expire dans {{ $minutesRemaining }} minutes</p>
     </div>
 
     <div style="background-color: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px;">

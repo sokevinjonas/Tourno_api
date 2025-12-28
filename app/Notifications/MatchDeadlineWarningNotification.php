@@ -14,9 +14,9 @@ class MatchDeadlineWarningNotification extends Notification implements ShouldQue
     /**
      * Create a new notification instance.
      */
-    public function __construct(
+        public function __construct(
         public TournamentMatch $match,
-        public int $hoursRemaining
+        public int $minutesRemaining
     ) {
     }
 
@@ -44,9 +44,9 @@ class MatchDeadlineWarningNotification extends Notification implements ShouldQue
             'tournament_id' => $this->match->tournament_id,
             'tournament_name' => $this->match->tournament->name,
             'round_name' => $this->match->round->round_name ?? "Round {$this->match->round->round_number}",
-            'hours_remaining' => $this->hoursRemaining,
+            'minutes_remaining' => $this->minutesRemaining,
             'deadline_at' => $this->match->deadline_at->toIso8601String(),
-            'message' => "Votre match expire dans {$this->hoursRemaining} heure(s)! Soumettez votre résultat avant {$this->match->deadline_at->format('H:i')}",
+            'message' => "Votre match expire dans {$this->minutesRemaining} minutes! Soumettez votre résultat avant {$this->match->deadline_at->format('H:i')}",
             'action_url' => "/matches/{$this->match->id}",
         ];
     }
@@ -62,8 +62,8 @@ class MatchDeadlineWarningNotification extends Notification implements ShouldQue
             'type' => 'match_deadline_warning',
             'match_id' => $this->match->id,
             'tournament_name' => $this->match->tournament->name,
-            'hours_remaining' => $this->hoursRemaining,
-            'message' => "⏰ Votre match expire dans {$this->hoursRemaining}h!",
+            'minutes_remaining' => $this->minutesRemaining,
+            'message' => "⏰ Votre match expire dans {$this->minutesRemaining} minutes!",
         ];
     }
 
