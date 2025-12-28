@@ -330,9 +330,12 @@ class TournamentService
                 'player1_id' => $player1,
                 'player2_id' => $player2,
                 'status' => $player2 === null ? 'completed' : 'scheduled',
+                'scheduled_at' => now(),
+                'deadline_at' => $player2 === null ? null : now()->addMinutes($tournament->match_deadline_minutes),
                 'player1_score' => $player2 === null ? 1 : null,
                 'player2_score' => $player2 === null ? 0 : null,
                 'winner_id' => $player2 === null ? $player1 : null,
+                'completed_at' => $player2 === null ? now() : null,
             ]);
 
             $matches[] = $match;
