@@ -1,35 +1,35 @@
 @extends('emails.layout')
 
 @section('content')
-<h2 style="color: #333; margin-bottom: 20px;">Tournoi Terminé - {{ $tournament->name }}</h2>
+<h2 style="color: #0f172a; margin-bottom: 24px; font-size: 26px;">Tournoi Terminé - {{ $tournament->name }}</h2>
 
-<p style="margin-bottom: 15px;">Bonjour <strong>{{ $participant->name }}</strong>,</p>
+<p style="margin-bottom: 16px; font-size: 15px; line-height: 1.6;">Bonjour <strong>{{ $participant->name }}</strong>,</p>
 
-<p style="margin-bottom: 20px;">
+<p style="margin-bottom: 24px; font-size: 15px; line-height: 1.6;">
     Le tournoi <strong>{{ $tournament->name }}</strong> est maintenant terminé. Merci d'avoir participé !
 </p>
 
 @if($registration->final_rank <= 3)
-    <div style="background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); padding: 25px; border-radius: 12px; text-align: center; margin: 25px 0; border: 3px solid #f9a825;">
-        <p style="color: #333; font-size: 24px; margin: 0; font-weight: bold;">
+    <div style="background: #fef3c7; padding: 28px; border-radius: 8px; text-align: center; margin: 28px 0; border: 3px solid #f59e0b;">
+        <p style="color: #0f172a; font-size: 24px; margin: 0; font-weight: 600;">
             🏆 {{ $registration->final_rank }}{{ $registration->final_rank === 1 ? 'ère' : 'ème' }} place
         </p>
         @if($registration->prize_won > 0)
-            <p style="color: #333; font-size: 16px; margin: 10px 0 0 0;">
+            <p style="color: #0f172a; font-size: 16px; margin: 12px 0 0 0; font-weight: 600;">
                 Récompense : <strong>{{ number_format($registration->prize_won, 2) }} MLM</strong>
             </p>
         @endif
     </div>
 @else
-    <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; text-align: center; margin: 25px 0;">
-        <p style="color: #333; font-size: 20px; margin: 0; font-weight: bold;">
+    <div style="background: #f1f5f9; padding: 24px; border-radius: 8px; text-align: center; margin: 28px 0;">
+        <p style="color: #0f172a; font-size: 20px; margin: 0; font-weight: 600;">
             Votre classement : {{ $registration->final_rank }}{{ $registration->final_rank === 1 ? 'ère' : 'ème' }} place
         </p>
     </div>
 @endif
 
 <div class="info-box">
-    <h3 style="margin-bottom: 15px; color: #667eea;">Vos statistiques</h3>
+    <h3 style="margin-bottom: 16px; color: #0f172a; font-size: 18px;">Vos statistiques</h3>
     <table style="width: 100%; border-collapse: collapse;">
         @if($tournament->format === 'swiss')
             <tr>
@@ -85,8 +85,8 @@
     </table>
 </div>
 
-<div class="info-box" style="margin-top: 25px;">
-    <h3 style="margin-bottom: 15px; color: #667eea;">Podium</h3>
+<div class="info-box" style="margin-top: 28px;">
+    <h3 style="margin-bottom: 16px; color: #0f172a; font-size: 18px;">Podium</h3>
     @foreach($topPlayers as $index => $player)
         <div style="padding: 12px; margin-bottom: 8px; background: {{ $index === 0 ? '#fff8e1' : ($index === 1 ? '#f5f5f5' : '#fbe9e7') }}; border-radius: 8px; display: flex; align-items: center;">
             <span style="font-size: 24px; margin-right: 12px;">
@@ -107,24 +107,24 @@
     @endforeach
 </div>
 
-<p style="margin: 30px 0 20px 0; text-align: center;">
+<p style="margin: 32px 0 24px 0; text-align: center;">
     <a href="{{ env('FRONTEND_URL', 'http://localhost:4200') }}/tournaments/{{ $tournament->id }}"
-       style="display: inline-block; padding: 12px 30px; background-color: #667eea; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin-right: 10px;">
+       style="display: inline-block; padding: 12px 28px; background-color: #0f172a; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px; margin-right: 12px;">
         Voir le tournoi
     </a>
     <a href="{{ env('FRONTEND_URL', 'http://localhost:4200') }}/tournaments"
-       style="display: inline-block; padding: 12px 30px; background-color: #4caf50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+       style="display: inline-block; padding: 12px 28px; background-color: #0f172a; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
         Prochains tournois
     </a>
 </p>
 
-<p style="margin-bottom: 20px; text-align: center; color: #666;">
+<p style="margin: 24px 0; text-align: center; color: #334155; font-size: 15px;">
     Merci d'avoir participé ! À bientôt pour de nouvelles compétitions.
 </p>
 
-<div style="margin-top: 30px; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">
-    <p style="margin: 0; font-size: 14px; color: #555;">
-        <strong>Besoin d'aide ?</strong> Consultez notre <a href="{{ env('FRONTEND_URL', 'http://localhost:4200') }}/faq">FAQ</a> ou contactez le support.
+<div style="background-color: #f1f5f9; border-left: 4px solid #0f172a; padding: 16px; margin: 24px 0; border-radius: 6px;">
+    <p style="margin: 0; font-size: 14px; color: #334155;">
+        <strong>Besoin d'aide ?</strong> Consultez notre <a href="{{ env('FRONTEND_URL', 'http://localhost:4200') }}/faq" style="color: #0f172a; font-weight: 600;">FAQ</a> ou contactez le support.
     </p>
 </div>
 @endsection

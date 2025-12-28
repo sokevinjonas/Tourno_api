@@ -30,6 +30,11 @@ class TournamentStartedMail extends Mailable
             } elseif ($this->firstMatch->player2_id === $this->user->id) {
                 $this->opponent = $this->firstMatch->player1;
             }
+
+            // Charger la relation profile pour accéder au whatsapp_number
+            if ($this->opponent) {
+                $this->opponent->load('profile');
+            }
         }
     }
 
