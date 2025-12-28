@@ -38,6 +38,15 @@
                 {{ $match->player1_id === $player->id ? $match->player2->name : $match->player1->name }}
             </td>
         </tr>
+        @php
+            $opponent = $match->player1_id === $player->id ? $match->player2 : $match->player1;
+        @endphp
+        @if($opponent && $opponent->phone)
+        <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Numéro</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee; text-align: right;">{{ $opponent->phone }}</td>
+        </tr>
+        @endif
         <tr>
             <td style="padding: 8px 0;"><strong>Statut</strong></td>
             <td style="padding: 8px 0; text-align: right; color: #ff9800; font-weight: bold;">
@@ -45,6 +54,15 @@
             </td>
         </tr>
     </table>
+
+    @if($opponent && $opponent->phone)
+    <div style="text-align: center; margin: 20px 0;">
+        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $opponent->phone) }}"
+           style="display: inline-block; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+            📱 Contacter sur WhatsApp
+        </a>
+    </div>
+    @endif
 </div>
 @endif
 
