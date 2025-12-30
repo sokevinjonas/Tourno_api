@@ -24,7 +24,8 @@ class SingleTournamentSeeder extends Seeder
         if (!$organizer) {
             $organizer = User::factory()->create([
                 'role' => 'organizer',
-                'email' => 'sokevin7@gmail.com',
+                'name' => 'G4me Pro Africa',
+                // 'email' => 'sokevin7@gmail.com',
             ]);
 
             // Créer le profil organisateur avec badge certified

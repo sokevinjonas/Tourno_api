@@ -136,6 +136,23 @@ case "$1" in
         fi
         ;;
 
+    "purge")
+        echo "🗑️  Purging ALL Docker resources (containers, volumes, images)..."
+        read -p "⚠️  This will remove EVERYTHING including images. Continue? (y/n) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo "Stopping and removing containers and volumes..."
+            docker-compose down -v
+            echo "Removing Tourno images..."
+            docker rmi tourno-api:latest tourno-api:v1.0.0 2>/dev/null || true
+            echo "Cleaning up unused Docker resources..."
+            docker system prune -f
+            echo "✅ Complete purge completed!"
+        else
+            echo "❌ Purge cancelled"
+        fi
+        ;;
+
     "install")
         echo "📦 Installing Tourno..."
         echo "Step 1: Building app image..."
@@ -192,6 +209,7 @@ case "$1" in
         echo "  restore [file]    - Restore database from backup"
         echo "  status            - Show containers status"
         echo "  clean             - Remove containers and volumes"
+        echo "  purge             - Remove containers, volumes AND images"
         echo ""
         echo "Examples:"
         echo "  ./docker.sh install"
