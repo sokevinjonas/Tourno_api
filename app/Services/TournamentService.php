@@ -100,6 +100,7 @@ class TournamentService
     {
         $query = Tournament::with([
             'organizer:id,name,email',
+            'organizer.organizerProfile:user_id,badge',
             'registrations.gameAccount',
             'registrations.user:id,name,email'
         ]);
@@ -139,8 +140,14 @@ class TournamentService
      */
     public function getTournament(int $id): ?Tournament
     {
-        return Tournament::with(['organizer:id,name,email', 'registrations.gameAccount', 'registrations.user:id,name,email', 'rounds', 'matches'])
-            ->find($id);
+        return Tournament::with([
+            'organizer:id,name,email',
+            'organizer.organizerProfile:user_id,badge',
+            'registrations.gameAccount',
+            'registrations.user:id,name,email',
+            'rounds',
+            'matches'
+        ])->find($id);
     }
 
     /**
