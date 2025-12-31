@@ -55,6 +55,25 @@ class SingleTournamentSeeder extends Seeder
 
         $this->command->info("Création du tournoi: {$tournamentData['name']}");
 
+        // Déterminer le nombre de rondes selon le nombre de participants
+        $roundsText = match($tournamentData['max_participants']) {
+            8 => "Format Suisse : 3 rondes minimum garanties.",
+            16 => "Format Suisse : 4 rondes minimum garanties.",
+            32 => "Format Suisse : 5 rondes minimum garanties.",
+            default => "Format Suisse : " . ceil(log($tournamentData['max_participants'], 2)) . " rondes minimum garanties."
+        };
+
+        // Règles du tournoi
+        $rules = [
+            "Fair-play et respect mutuel exigés.",
+            $roundsText,
+            "Engagement : chaque joueur doit effectuer tous ses matchs.",
+            "Responsabilité technique : chaque joueur est garant de sa propre connexion internet.",
+            "Barème des points : Victoire = 3 pts, Nul = 1 pt, Défaite ou non-joué = 0 pt.",
+            "Validation : capture d'écran du score final obligatoire après chaque match.",
+            "Sécurité : enregistrement vidéo conseillé pour servir de preuve en cas de litige."
+        ];
+
         // Create tournament
         $tournament = Tournament::create([
             'organizer_id' => $organizer->id,
@@ -65,6 +84,7 @@ class SingleTournamentSeeder extends Seeder
             'max_participants' => $tournamentData['max_participants'],
             'entry_fee' => 4.00,
             'prize_distribution' => json_encode($tournamentData['prize_distribution']),
+            'rules' => json_encode($rules),
             'start_date' => now()->addMinutes(15), // Démarre dans 2 minutes
             'tournament_duration_days' => 1,
             'time_slot' => 'evening',

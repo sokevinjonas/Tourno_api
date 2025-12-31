@@ -23,6 +23,7 @@ return new class extends Migration
             $table->datetime('start_date');
             $table->enum('status', ['draft', 'open', 'in_progress', 'completed', 'cancelled'])->default('draft');
             $table->json('prize_distribution')->nullable();
+            $table->json('rules')->nullable();
             $table->integer('total_rounds')->nullable();
             $table->integer('current_round')->default(0);
 
