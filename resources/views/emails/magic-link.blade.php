@@ -1,14 +1,14 @@
 @extends('emails.layout')
 
 @section('content')
-    <h1 style="color: #333333; margin-bottom: 20px; font-size: 24px;">Connexion à votre compte MLM</h1>
+    <h1 style="color: #333333; margin-bottom: 20px; font-size: 24px;">Connexion à votre compte GPA</h1>
 
     <p style="margin-bottom: 20px; font-size: 16px; color: #555555;">
         Bonjour,
     </p>
 
     <p style="margin-bottom: 20px; font-size: 16px; color: #555555;">
-        Vous avez demandé à vous connecter à votre compte MLM. Cliquez sur le bouton ci-dessous pour accéder à votre compte :
+        Vous avez demandé à vous connecter à votre compte GPA. Cliquez sur le bouton ci-dessous pour accéder à votre compte :
     </p>
 
     <div style="text-align: center; margin: 30px 0;">

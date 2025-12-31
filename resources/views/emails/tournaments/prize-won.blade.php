@@ -15,7 +15,7 @@
         Votre récompense
     </p>
     <p style="color: white; font-size: 36px; margin: 0; font-weight: 600;">
-        {{ number_format($prizeAmount, 2) }} MLM
+        {{ number_format($prizeAmount, 2) }} GPA
     </p>
 </div>
 
@@ -43,7 +43,7 @@
                 <strong>Récompense :</strong>
             </td>
             <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: right; color: #4caf50; font-weight: bold;">
-                {{ number_format($prizeAmount, 2) }} MLM
+                {{ number_format($prizeAmount, 2) }} GPA
             </td>
         </tr>
     </table>

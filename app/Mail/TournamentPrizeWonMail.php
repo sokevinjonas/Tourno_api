@@ -37,7 +37,7 @@ class TournamentPrizeWonMail extends Mailable implements ShouldQueue
         };
 
         return new Envelope(
-            subject: "Félicitations ! Vous avez gagné {$this->prizeAmount} MLM - {$this->rank}{$rankSuffix} place",
+            subject: "Félicitations ! Vous avez gagné {$this->prizeAmount} GPA - {$this->rank}{$rankSuffix} place",
         );
     }
 

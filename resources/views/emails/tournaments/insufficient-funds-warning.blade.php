@@ -19,15 +19,15 @@
 <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background-color: white; border-radius: 6px; overflow: hidden; border: 1px solid #e5e7eb;">
     <tr>
         <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-weight: 600; font-size: 14px;">Total des prix à distribuer</td>
-        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 14px;">{{ number_format($totalRequired, 2) }} MLM</td>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 14px;">{{ number_format($totalRequired, 2) }} GPA</td>
     </tr>
     <tr>
         <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-weight: 600; font-size: 14px;">Fonds bloqués disponibles</td>
-        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 14px;">{{ number_format($availableFunds, 2) }} MLM</td>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 14px;">{{ number_format($availableFunds, 2) }} GPA</td>
     </tr>
     <tr style="background-color: #fef2f2;">
         <td style="padding: 12px; font-weight: 600; color: #dc2626; font-size: 14px;">Montant manquant</td>
-        <td style="padding: 12px; text-align: right; font-weight: 600; color: #dc2626; font-size: 16px;">{{ number_format($shortage, 2) }} MLM</td>
+        <td style="padding: 12px; text-align: right; font-weight: 600; color: #dc2626; font-size: 16px;">{{ number_format($shortage, 2) }} GPA</td>
     </tr>
 </table>
 
@@ -35,7 +35,7 @@
 
 <div class="info-box">
     <p style="margin: 0 0 12px 0; font-size: 14px; line-height: 1.6; color: #334155;">
-        Vous devez ajouter <strong style="color: #dc2626;">{{ number_format($shortage, 2) }} MLM</strong> à votre portefeuille dans les <strong>48 heures</strong>.
+        Vous devez ajouter <strong style="color: #dc2626;">{{ number_format($shortage, 2) }} GPA</strong> à votre portefeuille dans les <strong>48 heures</strong>.
     </p>
 
     <p style="margin: 12px 0 8px 0; font-size: 14px; color: #64748b; font-weight: 600;">

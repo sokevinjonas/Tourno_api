@@ -47,10 +47,10 @@ class SingleTournamentSeeder extends Seeder
             'max_participants' => 8,
             'registered_count' => 6, // 6/8 places prises (2 places restantes)
             'prize_distribution' => [
-                '1st' => 20,  // 1er: 20 MLM
-                '2nd' => 10,  // 2ème: 10 MLM
-                '3rd' => 2,   // 3ème: 2 MLM
-            ], // Total: 32 MLM (8 × 4)
+                '1st' => 20,  // 1er: 20 GPA
+                '2nd' => 10,  // 2ème: 10 GPA
+                '3rd' => 2,   // 3ème: 2 GPA
+            ], // Total: 32 GPA (8 × 4)
         ];
 
         $this->command->info("Création du tournoi: {$tournamentData['name']}");

@@ -15,7 +15,7 @@
         Le tournoi était complet mais n'a pas été démarré par l'organisateur dans les 48 heures suivant la date limite.
     </p>
     <p style="margin: 10px 0; font-size: 18px;">
-        <strong>Montant remboursé :</strong> {{ number_format($refundAmount, 2) }} MLM
+        <strong>Montant remboursé :</strong> {{ number_format($refundAmount, 2) }} GPA
     </p>
 </div>
 
@@ -27,7 +27,7 @@
 </div>
 
 <p style="margin-bottom: 20px;">
-    Le montant de <strong>{{ number_format($refundAmount, 2) }} MLM</strong> a été automatiquement crédité sur votre wallet.
+    Le montant de <strong>{{ number_format($refundAmount, 2) }} GPA</strong> a été automatiquement crédité sur votre wallet.
 </p>
 
 <p style="margin-bottom: 20px;">

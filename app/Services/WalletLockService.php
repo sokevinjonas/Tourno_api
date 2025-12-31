@@ -28,12 +28,12 @@ class WalletLockService
 
             // Vérifier que le locked_amount correspond au total attendu
             if ($lock->locked_amount != $totalEntryFees) {
-                throw new \Exception("Lock amount mismatch. Expected: {$totalEntryFees} MLM, Found: {$lock->locked_amount} MLM");
+                throw new \Exception("Lock amount mismatch. Expected: {$totalEntryFees} GPA, Found: {$lock->locked_amount} GPA");
             }
 
             // Vérifier que l'organisateur a bien les fonds bloqués
             if ($organizer->wallet->blocked_balance < $totalEntryFees) {
-                throw new \Exception("Insufficient blocked funds. Expected: {$totalEntryFees} MLM, Available: {$organizer->wallet->blocked_balance} MLM");
+                throw new \Exception("Insufficient blocked funds. Expected: {$totalEntryFees} GPA, Available: {$organizer->wallet->blocked_balance} GPA");
             }
 
             // NOTE: Le lock est déjà créé et le locked_amount est déjà incrémenté
@@ -78,16 +78,16 @@ class WalletLockService
                 );
 
                 // Logger l'événement
-                \Log::warning("Insufficient funds for tournament {$tournament->id}. Shortage: {$totalShortage} MLM");
+                \Log::warning("Insufficient funds for tournament {$tournament->id}. Shortage: {$totalShortage} GPA");
 
-                throw new \Exception("Fonds insuffisants. Un email a été envoyé à l'organisateur. Manque: {$totalShortage} MLM");
+                throw new \Exception("Fonds insuffisants. Un email a été envoyé à l'organisateur. Manque: {$totalShortage} GPA");
             }
 
             // On a assez avec balance + blocked_balance, débiter le manque depuis balance
             $organizer->wallet->balance -= $shortage;
             $organizer->wallet->save();
 
-            \Log::info("Deducted {$shortage} MLM from organizer's main balance for tournament {$tournament->id}");
+            \Log::info("Deducted {$shortage} GPA from organizer's main balance for tournament {$tournament->id}");
         }
 
         DB::transaction(function () use ($lock, $tournament, $winners) {

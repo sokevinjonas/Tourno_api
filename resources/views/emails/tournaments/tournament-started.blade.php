@@ -51,7 +51,7 @@
     <p style="margin: 6px 0; font-size: 14px;"><strong>Jeu :</strong> {{ ucfirst(str_replace('_', ' ', $tournament->game_type)) }}</p>
     <p style="margin: 6px 0; font-size: 14px;"><strong>Format :</strong> {{ ucfirst($tournament->format) }}</p>
     @if($tournament->prize_pool > 0)
-    <p style="margin: 6px 0; font-size: 14px;"><strong>Prize Pool :</strong> {{ number_format($tournament->prize_pool, 2) }} MLM</p>
+    <p style="margin: 6px 0; font-size: 14px;"><strong>Prize Pool :</strong> {{ number_format($tournament->prize_pool, 2) }} GPA</p>
     @endif
 </div>
 

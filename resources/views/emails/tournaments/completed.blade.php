@@ -16,7 +16,7 @@
         </p>
         @if($registration->prize_won > 0)
             <p style="color: #0f172a; font-size: 16px; margin: 12px 0 0 0; font-weight: 600;">
-                Récompense : <strong>{{ number_format($registration->prize_won, 2) }} MLM</strong>
+                Récompense : <strong>{{ number_format($registration->prize_won, 2) }} GPA</strong>
             </p>
         @endif
     </div>
@@ -100,7 +100,7 @@
             </div>
             @if($player->prize_won > 0)
                 <span style="color: #4caf50; font-weight: bold;">
-                    {{ number_format($player->prize_won, 2) }} MLM
+                    {{ number_format($player->prize_won, 2) }} GPA
                 </span>
             @endif
         </div>

@@ -63,7 +63,7 @@ class WalletLockServiceTest extends TestCase
     {
         Mail::fake();
 
-        // Register 2 players (20 MLM total)
+        // Register 2 players (20 GPA total)
         $this->registerPlayers(2);
 
         $this->organizer->wallet->refresh();
@@ -85,7 +85,7 @@ class WalletLockServiceTest extends TestCase
     {
         Mail::fake();
 
-        // Register 3 players (30 MLM total)
+        // Register 3 players (30 GPA total)
         $this->registerPlayers(3);
 
         $this->service->lockFundsForTournament($this->tournament);
