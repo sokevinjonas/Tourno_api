@@ -49,6 +49,7 @@ class TournamentService
                 'match_deadline_minutes' => $data['match_deadline_minutes'] ?? 60,
                 'total_rounds' => $totalRounds,
                 'current_round' => 0,
+                'rules' => $data['rules'],
             ]);
 
             return $tournament;

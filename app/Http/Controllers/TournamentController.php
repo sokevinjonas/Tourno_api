@@ -95,6 +95,7 @@ class TournamentController extends Controller
             'max_participants' => 'required|integer|in:8,16,32,64',
             'entry_fee' => 'required|numeric|min:0',
             'prize_distribution' => 'nullable|json',
+            'rules' => 'nullable|json',
             'visibility' => 'nullable|string|in:public,private',
             'auto_managed' => 'nullable|boolean',
             'start_date' => 'required|date',
@@ -171,11 +172,11 @@ class TournamentController extends Controller
             'entry_fee' => 'sometimes|required|numeric|min:0',
             'prize_pool' => 'nullable|numeric|min:0',
             'prize_distribution' => 'nullable|json',
+            'rules' => 'nullable|json',
             'registration_start' => 'sometimes|required|date',
             'registration_end' => 'sometimes|required|date|after:registration_start',
             'start_date' => 'sometimes|required|date|after:registration_end',
             'end_date' => 'nullable|date|after:start_date',
-            'rules' => 'nullable|string|max:2000',
         ]);
 
         if ($validator->fails()) {
