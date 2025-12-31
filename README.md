@@ -36,7 +36,7 @@
 
 # 📌 À propos du projet
 
-**Tourno API (Mobile League Manager - MLM)** est une API REST développée avec **Laravel** permettant aux joueurs de jeux mobiles de football (Dream League Soccer, E-football, FC Mobile…) d'organiser et gérer des compétitions automatiquement.
+**Tourno API (Mobile League Manager - GPA)** est une API REST développée avec **Laravel** permettant aux joueurs de jeux mobiles de football (Dream League Soccer, E-football, FC Mobile…) d'organiser et gérer des compétitions automatiquement.
 
 ---
 
@@ -475,7 +475,7 @@ Toutes les contributions sont les bienvenues !
 ## 📊 Phase 3 : Fonctionnalités Avancées
 
 * [ ] Système de litiges avec arbitrage
-* [ ] MLM Rank (ELO) - Classement global
+* [ ] GPA Rank (ELO) - Classement global
 * [ ] Statistiques joueur détaillées
 * [ ] Autres formats de tournois (K.O., Round Robin, Champions League)
 

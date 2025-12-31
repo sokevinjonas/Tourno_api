@@ -34,7 +34,7 @@ class OrganizerService
 
         // Check if user has sufficient balance
         if (!$user->wallet || $user->wallet->balance < self::CERTIFIED_BADGE_COST) {
-            throw new \Exception('Insufficient balance. You need 50 MLM pieces to become an organizer.');
+            throw new \Exception('Insufficient balance. You need 50 GPA pieces to become an organizer.');
         }
 
         DB::beginTransaction();
@@ -122,7 +122,7 @@ class OrganizerService
 
         // Check if user has sufficient balance
         if (!$user->wallet || $user->wallet->balance < self::VERIFICATION_COST) {
-            throw new \Exception('Insufficient balance. You need 200 MLM pieces to submit a verification request.');
+            throw new \Exception('Insufficient balance. You need 200 GPA pieces to submit a verification request.');
         }
 
         DB::beginTransaction();

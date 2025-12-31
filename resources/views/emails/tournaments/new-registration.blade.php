@@ -32,7 +32,7 @@
 </div>
 
 <p style="margin: 20px 0;">
-    <strong>Frais d'inscription reçus :</strong> {{ number_format($tournament->entry_fee, 2) }} MLM
+    <strong>Frais d'inscription reçus :</strong> {{ number_format($tournament->entry_fee, 2) }} GPA
 </p>
 
 <p style="margin-bottom: 20px;">

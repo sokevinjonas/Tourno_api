@@ -13,7 +13,7 @@
     <h3 style="margin-bottom: 10px; color: #667eea;">Détails du tournoi</h3>
     <p style="margin: 5px 0;"><strong>Nom :</strong> {{ $tournament->name }}</p>
     <p style="margin: 5px 0;"><strong>Jeu :</strong> {{ ucfirst(str_replace('_', ' ', $tournament->game)) }}</p>
-    <p style="margin: 5px 0;"><strong>Frais d'inscription :</strong> {{ number_format($entry_fee, 2) }} MLM</p>
+    <p style="margin: 5px 0;"><strong>Frais d'inscription :</strong> {{ number_format($entry_fee, 2) }} GPA</p>
     <p style="margin: 5px 0;"><strong>Date de début :</strong> {{ $tournament->start_date->format('d/m/Y à H:i') }}</p>
     <p style="margin: 5px 0;"><strong>Participants max :</strong> {{ $tournament->max_participants }}</p>
 </div>

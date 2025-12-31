@@ -30,7 +30,7 @@ class MagicLinkMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Votre lien de connexion MLM',
+            subject: 'Votre lien de connexion GPA',
         );
     }
 

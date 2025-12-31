@@ -120,10 +120,10 @@ class VerifyTournamentData extends Command
             ['Metric', 'Value'],
             [
                 ['Total Wallets', $totalWallets],
-                ['Total Balance', number_format($totalBalance, 2) . ' MLM'],
-                ['Average Balance', number_format($avgBalance, 2) . ' MLM'],
-                ['Max Balance', number_format($maxBalance, 2) . ' MLM'],
-                ['Min Balance', number_format($minBalance, 2) . ' MLM'],
+                ['Total Balance', number_format($totalBalance, 2) . ' GPA'],
+                ['Average Balance', number_format($avgBalance, 2) . ' GPA'],
+                ['Max Balance', number_format($maxBalance, 2) . ' GPA'],
+                ['Min Balance', number_format($minBalance, 2) . ' GPA'],
             ]
         );
     }
@@ -166,7 +166,7 @@ class VerifyTournamentData extends Command
                 $tournament->game,
                 "{$registrationsCount}/{$tournament->max_participants}",
                 $spotsLeft > 0 ? $spotsLeft : 'FULL',
-                $tournament->entry_fee . ' MLM',
+                $tournament->entry_fee . ' GPA',
                 $tournament->start_date,
             ];
         }

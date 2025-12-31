@@ -23,6 +23,35 @@ class TournamentService
         }
 
         return DB::transaction(function () use ($organizer, $data) {
+            // Vérifier si l'organisateur a le badge certified
+            $organizer->load(['organizerProfile', 'wallet']);
+            $creationFee = 0;
+
+            if ($organizer->organizerProfile && $organizer->organizerProfile->badge === 'certified') {
+                $creationFee = 2.00;
+
+                // Vérifier que l'organisateur a suffisamment de fonds
+                if (!$organizer->wallet) {
+                    throw new \Exception('Wallet not found for organizer');
+                }
+
+                // Calculer le solde disponible (balance - blocked_balance)
+                $walletService = new WalletService();
+                $availableBalance = $organizer->wallet->balance - $organizer->wallet->blocked_balance;
+
+                if ($availableBalance < $creationFee) {
+                    throw new \Exception('Insufficient available balance. You need at least 2 GPA (non-blocked) to create a tournament.');
+                }
+
+                // Débiter les frais de création
+                $walletService->debit(
+                    $organizer,
+                    $creationFee,
+                    'tournament_creation_fee',
+                    'Frais de création de tournoi'
+                );
+            }
+
             // Calculate total rounds based on format and participants
             $schedulingService = new TournamentSchedulingService();
             $totalRounds = $schedulingService->calculateTotalRounds(
@@ -42,6 +71,7 @@ class TournamentService
                 'prize_distribution' => $data['prize_distribution'] ?? null,
                 'status' => 'draft',
                 'visibility' => $data['visibility'] ?? 'public',
+                'creation_fee_paid' => $creationFee,
                 'auto_managed' => $data['auto_managed'] ?? false,
                 'start_date' => $data['start_date'],
                 'tournament_duration_days' => $data['tournament_duration_days'] ?? $schedulingService->calculateRecommendedDuration($data['format'], $data['max_participants']),
@@ -49,7 +79,7 @@ class TournamentService
                 'match_deadline_minutes' => $data['match_deadline_minutes'] ?? 60,
                 'total_rounds' => $totalRounds,
                 'current_round' => 0,
-                'rules' => $data['rules'],
+                'rules' => $data['rules'] ?? null,
             ]);
 
             return $tournament;

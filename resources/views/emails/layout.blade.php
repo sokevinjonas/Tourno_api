@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $subject ?? 'MLM' }}</title>
+    <title>{{ $subject ?? 'GPA' }}</title>
     <style>
         * {
             margin: 0;
@@ -81,7 +81,7 @@
 
         <div class="email-footer">
             <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
-            <p>&copy; {{ date('Y') }} MLM. Tous droits réservés.</p>
+            <p>&copy; {{ date('Y') }} GPA. Tous droits réservés.</p>
         </div>
     </div>
 </body>

@@ -125,7 +125,7 @@ class OAuthService
             'balance_before' => 0,
             'balance_after' => $initialBonus,
             'reason' => 'initial_bonus',
-            'description' => 'Bonus de bienvenue - 4 pièces MLM offertes',
+            'description' => 'Bonus de bienvenue - 4 pièces GPA offertes',
         ]);
     }
 

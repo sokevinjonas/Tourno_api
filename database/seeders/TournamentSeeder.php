@@ -44,10 +44,10 @@ class TournamentSeeder extends Seeder
                 'max_participants' => 8,
                 'registered_count' => 7, // Laisser 1 place
                 'prize_distribution' => [
-                    '1st' => 18,  // 1er: 18 MLM
-                    '2nd' => 10,  // 2ème: 10 MLM
-                    '3rd' => 0,   // 3ème: 0 MLM
-                ], // Total: 28 MLM (7 × 4)
+                    '1st' => 18,  // 1er: 18 GPA
+                    '2nd' => 10,  // 2ème: 10 GPA
+                    '3rd' => 0,   // 3ème: 0 GPA
+                ], // Total: 28 GPA (7 × 4)
             ],
             [
                 'name' => 'Tournoi Dream League Soccer Décembre 2025',
@@ -55,10 +55,10 @@ class TournamentSeeder extends Seeder
                 'max_participants' => 16,
                 'registered_count' => 15, // Laisser 1 place
                 'prize_distribution' => [
-                    '1st' => 35,  // 1er: 35 MLM
-                    '2nd' => 20,  // 2ème: 20 MLM
-                    '3rd' => 5,   // 3ème: 5 MLM
-                ], // Total: 60 MLM (15 × 4)
+                    '1st' => 35,  // 1er: 35 GPA
+                    '2nd' => 20,  // 2ème: 20 GPA
+                    '3rd' => 5,   // 3ème: 5 GPA
+                ], // Total: 60 GPA (15 × 4)
             ],
             [
                 'name' => 'Tournoi FC Mobile Décembre 2025',
@@ -66,10 +66,10 @@ class TournamentSeeder extends Seeder
                 'max_participants' => 32,
                 'registered_count' => 31, // Laisser 1 place
                 'prize_distribution' => [
-                    '1st' => 70,  // 1er: 70 MLM
-                    '2nd' => 40,  // 2ème: 40 MLM
-                    '3rd' => 14,  // 3ème: 14 MLM
-                ], // Total: 124 MLM (31 × 4)
+                    '1st' => 70,  // 1er: 70 GPA
+                    '2nd' => 40,  // 2ème: 40 GPA
+                    '3rd' => 14,  // 3ème: 14 GPA
+                ], // Total: 124 GPA (31 × 4)
             ],
         ];
 
