@@ -1,7 +1,7 @@
 
 ---
 
-# ⚽ Tourno API (Mobile League Manager)
+# ⚽ G4M Pro Africa API (Mobile League Manager)
 
 **La plateforme de référence pour l'organisation et la gestion de tournois de jeux de simulation de football mobile.**
 
@@ -36,7 +36,7 @@
 
 # 📌 À propos du projet
 
-**Tourno API (Mobile League Manager - GPA)** est une API REST développée avec **Laravel** permettant aux joueurs de jeux mobiles de football (Dream League Soccer, E-football, FC Mobile…) d'organiser et gérer des compétitions automatiquement.
+**G4M Pro Africa API (Mobile League Manager - GPA)** est une API REST développée avec **Laravel** permettant aux joueurs de jeux mobiles de football (Dream League Soccer, E-football, FC Mobile…) d'organiser et gérer des compétitions automatiquement.
 
 ---
 
@@ -149,7 +149,7 @@ cp .env.example .env
 Modifier le fichier `.env` avec vos paramètres :
 
 ```env
-APP_NAME="Tourno API"
+APP_NAME="G4M Pro Africa API"
 APP_ENV=local
 APP_DEBUG=true
 APP_TIMEZONE=UTC

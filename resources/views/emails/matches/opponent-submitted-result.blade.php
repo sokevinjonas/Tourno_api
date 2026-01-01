@@ -32,7 +32,7 @@
     <tr style="background-color: #f0f9ff;">
         <td style="padding: 12px; font-weight: 600; color: #0f172a; font-size: 14px;">Score Déclaré</td>
         <td style="padding: 12px; font-weight: 600; color: #0f172a; font-size: 16px; text-align: right;">
-            {{ $submitter->name }}: {{ $matchResult->own_score }} - Vous: {{ $matchResult->opponent_score }}
+            {{ $submitter->name }}: {{ $matchResult->own_score }} - {{ $opponent->name }}: {{ $matchResult->opponent_score }}
         </td>
     </tr>
 </table>

@@ -100,17 +100,36 @@ class MatchController extends Controller
 
     /**
      * Get pending matches for user
+     *
+     * Query params:
+     * - status: string or array (optional) - Filter by status. Default: ['scheduled', 'in_progress', 'pending_validation']
      */
     public function myPendingMatches(Request $request): JsonResponse
     {
         $userId = $request->user()->id;
 
-        $matches = TournamentMatch::whereIn('status', ['scheduled', 'in_progress'])
+        // Get status filter from request or use default
+        $statuses = $request->input('status', ['scheduled', 'in_progress', 'pending_validation']);
+
+        // Ensure statuses is an array
+        if (!is_array($statuses)) {
+            $statuses = [$statuses];
+        }
+
+        $matches = TournamentMatch::whereIn('status', $statuses)
             ->where(function ($query) use ($userId) {
                 $query->where('player1_id', $userId)
                       ->orWhere('player2_id', $userId);
             })
-            ->with(['tournament', 'round', 'player1:id,uuid,name,avatar_url', 'player2:id,uuid,name,avatar_url', 'matchResults'])
+            ->with([
+                'tournament',
+                'round',
+                'player1:id,uuid,name,avatar_url',
+                'player1.profile:user_id,whatsapp_number',
+                'player2:id,uuid,name,avatar_url',
+                'player2.profile:user_id,whatsapp_number',
+                'matchResults'
+            ])
             ->orderBy('scheduled_at', 'asc')
             ->get();
 
