@@ -134,7 +134,7 @@ class TournamentController extends Controller
     /**
      * Get tournament details
      */
-    public function show(int $id): JsonResponse
+    public function show(string $id): JsonResponse
     {
         $tournament = $this->tournamentService->getTournament($id);
 
@@ -155,9 +155,9 @@ class TournamentController extends Controller
     /**
      * Update a tournament
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(Request $request, string $id): JsonResponse
     {
-        $tournament = Tournament::find($id);
+        $tournament = Tournament::where('uuid', $id)->first();
 
         if (!$tournament) {
             return response()->json([
@@ -220,9 +220,9 @@ class TournamentController extends Controller
     /**
      * Delete a tournament
      */
-    public function destroy(Request $request, int $id): JsonResponse
+    public function destroy(Request $request, string $id): JsonResponse
     {
-        $tournament = Tournament::find($id);
+        $tournament = Tournament::where('uuid', $id)->first();
 
         if (!$tournament) {
             return response()->json([
@@ -247,9 +247,9 @@ class TournamentController extends Controller
     /**
      * Change tournament status
      */
-    public function changeStatus(Request $request, int $id): JsonResponse
+    public function changeStatus(Request $request, string $id): JsonResponse
     {
-        $tournament = Tournament::find($id);
+        $tournament = Tournament::where('uuid', $id)->first();
 
         if (!$tournament) {
             return response()->json([
@@ -338,7 +338,7 @@ class TournamentController extends Controller
     /**
      * Get all matches for a tournament
      */
-    public function getMatches(int $id): JsonResponse
+    public function getMatches(string $id): JsonResponse
     {
         $tournament = Tournament::with([
             'matches' => function ($query) {
@@ -346,7 +346,7 @@ class TournamentController extends Controller
                     ->orderBy('round_id', 'asc')
                     ->orderBy('created_at', 'asc');
             }
-        ])->find($id);
+        ])->where('uuid', $id)->first();
 
         if (!$tournament) {
             return response()->json([
@@ -363,9 +363,9 @@ class TournamentController extends Controller
     /**
      * Get tournament rounds information
      */
-    public function getRoundsInfo(int $id): JsonResponse
+    public function getRoundsInfo(string $id): JsonResponse
     {
-        $tournament = Tournament::with(['rounds'])->find($id);
+        $tournament = Tournament::with(['rounds'])->where('uuid', $id)->first();
 
         if (!$tournament) {
             return response()->json([

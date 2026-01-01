@@ -221,9 +221,9 @@ class LeaderboardController extends Controller
     /**
      * Get tournament rankings
      */
-    public function tournamentRankings(int $tournamentId): JsonResponse
+    public function tournamentRankings(string $tournamentId): JsonResponse
     {
-        $tournament = Tournament::find($tournamentId);
+        $tournament = Tournament::where('uuid', $tournamentId)->first();
 
         if (!$tournament) {
             return response()->json([
@@ -231,7 +231,7 @@ class LeaderboardController extends Controller
             ], 404);
         }
 
-        $rankings = TournamentRegistration::where('tournament_id', $tournamentId)
+        $rankings = TournamentRegistration::where('tournament_id', $tournament->id)
             ->where('status', 'registered')
             ->with('user:id,name,avatar_url')
             ->orderBy('final_rank', 'asc')

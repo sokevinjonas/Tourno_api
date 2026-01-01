@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('matches', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
             $table->foreignId('tournament_id')->constrained()->onDelete('cascade');
             $table->foreignId('round_id')->constrained()->onDelete('cascade');
             $table->foreignId('player1_id')->nullable()->constrained('users')->onDelete('cascade');
@@ -27,7 +28,8 @@ return new class extends Migration
             $table->foreignId('next_match_id')->nullable()->constrained('matches')->onDelete('set null'); // For knockout bracket
             $table->integer('bracket_position')->nullable(); // Visual position in bracket
             $table->boolean('deadline_extended')->default(false);
-            $table->timestamp('deadline_warning_sent_at')->nullable();
+            $table->timestamp('deadline_warning_30min_sent_at')->nullable();
+            $table->timestamp('deadline_warning_15min_sent_at')->nullable();
             $table->timestamps();
 
             // Indexes

@@ -139,6 +139,8 @@ class TournamentService
          // Exclure les tournois avec status == 'draft'
         $query->where('status', '!=', 'draft');
 
+        // Exclure les tournois avec visibility == 'private'
+        $query->where('visibility', '!=', 'private');
 
         // Filter by status
         if (isset($filters['status'])) {
@@ -167,9 +169,9 @@ class TournamentService
     }
 
     /**
-     * Get tournament by ID
+     * Get tournament by UUID
      */
-    public function getTournament(int $id): ?Tournament
+    public function getTournament(string $uuid): ?Tournament
     {
         return Tournament::with([
             'organizer:id,name,email',
@@ -178,7 +180,7 @@ class TournamentService
             'registrations.user:id,name,email',
             'rounds',
             'matches'
-        ])->find($id);
+        ])->where('uuid', $uuid)->first();
     }
 
     /**

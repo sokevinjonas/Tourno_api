@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('tournament_wallet_locks', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
             $table->foreignId('tournament_id')->constrained()->onDelete('cascade');
             $table->foreignId('organizer_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('wallet_id')->constrained()->onDelete('cascade');

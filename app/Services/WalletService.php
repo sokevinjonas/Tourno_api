@@ -339,6 +339,7 @@ class WalletService
                     'organizer_id' => $organizer->id,
                 ],
                 [
+                    'uuid' => \Illuminate\Support\Str::uuid(),
                     'wallet_id' => $organizer->wallet->id,
                     'locked_amount' => 0,
                     'status' => 'locked',

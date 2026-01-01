@@ -21,7 +21,7 @@ class TournamentRegistrationController extends Controller
     /**
      * Register to a tournament
      */
-    public function register(Request $request, int $tournamentId): JsonResponse
+    public function register(Request $request, string $tournamentId): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'game_account_id' => 'required|integer|exists:game_accounts,id',
@@ -34,7 +34,7 @@ class TournamentRegistrationController extends Controller
             ], 422);
         }
 
-        $tournament = Tournament::find($tournamentId);
+        $tournament = Tournament::where('uuid', $tournamentId)->first();
 
         if (!$tournament) {
             return response()->json([
@@ -64,9 +64,18 @@ class TournamentRegistrationController extends Controller
     /**
      * Withdraw from a tournament
      */
-    public function withdraw(Request $request, int $tournamentId): JsonResponse
+    public function withdraw(Request $request, string $tournamentId): JsonResponse
     {
-        $registration = TournamentRegistration::where('tournament_id', $tournamentId)
+        // Find tournament by UUID first
+        $tournament = Tournament::where('uuid', $tournamentId)->first();
+
+        if (!$tournament) {
+            return response()->json([
+                'message' => 'Tournament not found',
+            ], 404);
+        }
+
+        $registration = TournamentRegistration::where('tournament_id', $tournament->id)
             ->where('user_id', $request->user()->id)
             ->first();
 
@@ -109,9 +118,9 @@ class TournamentRegistrationController extends Controller
     /**
      * Get tournament participants
      */
-    public function participants(int $tournamentId): JsonResponse
+    public function participants(string $tournamentId): JsonResponse
     {
-        $tournament = Tournament::find($tournamentId);
+        $tournament = Tournament::where('uuid', $tournamentId)->first();
 
         if (!$tournament) {
             return response()->json([
@@ -130,9 +139,9 @@ class TournamentRegistrationController extends Controller
     /**
      * Get tournament leaderboard
      */
-    public function leaderboard(int $tournamentId): JsonResponse
+    public function leaderboard(string $tournamentId): JsonResponse
     {
-        $tournament = Tournament::find($tournamentId);
+        $tournament = Tournament::where('uuid', $tournamentId)->first();
 
         if (!$tournament) {
             return response()->json([
@@ -150,9 +159,9 @@ class TournamentRegistrationController extends Controller
     /**
      * Check if user is registered for a tournament
      */
-    public function checkRegistration(Request $request, int $tournamentId): JsonResponse
+    public function checkRegistration(Request $request, string $tournamentId): JsonResponse
     {
-        $tournament = Tournament::find($tournamentId);
+        $tournament = Tournament::where('uuid', $tournamentId)->first();
 
         if (!$tournament) {
             return response()->json([
