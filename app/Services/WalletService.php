@@ -55,6 +55,7 @@ class WalletService
 
             // Create transaction record
             $transaction = Transaction::create([
+                'uuid' => \Illuminate\Support\Str::uuid(),
                 'wallet_id' => $wallet->id,
                 'user_id' => $user->id,
                 'type' => 'credit',
@@ -104,6 +105,7 @@ class WalletService
 
             // Create transaction record
             $transaction = Transaction::create([
+                'uuid' => \Illuminate\Support\Str::uuid(),
                 'wallet_id' => $wallet->id,
                 'user_id' => $user->id,
                 'type' => 'debit',
@@ -354,6 +356,7 @@ class WalletService
 
             // Créer la transaction pour tracer ce mouvement
             Transaction::create([
+                'uuid' => \Illuminate\Support\Str::uuid(),
                 'wallet_id' => $organizer->wallet->id,
                 'user_id' => $organizer->id,
                 'type' => 'credit',

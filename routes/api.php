@@ -71,8 +71,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Profile validation routes (Moderators only)
     Route::prefix('profiles')->group(function () {
         Route::get('/pending', [ProfileController::class, 'pending']);
-        Route::post('/{id}/validate', [ProfileController::class, 'validate']);
-        Route::post('/{id}/reject', [ProfileController::class, 'reject']);
+        Route::post('/{profile}/validate', [ProfileController::class, 'validate']);
+        Route::post('/{profile}/reject', [ProfileController::class, 'reject']);
     });
 
     /*
@@ -103,10 +103,10 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('users')->group(function () {
-        Route::get('/', [UserController::class, 'index']);
+        Route::get('/', [UserController::class, 'index']); // Users Management routes (Moderators and Admins)
         Route::get('/statistics', [UserController::class, 'statistics']);
-        Route::get('/{id}', [UserController::class, 'show']);
-        Route::patch('/{id}/role', [UserController::class, 'updateRole']);
+        Route::get('/{user}', [UserController::class, 'show']); // Users Management routes (Moderators and Admins)
+        Route::patch('/{user}/role', [UserController::class, 'updateRole']);
     });
 
     /*
@@ -184,8 +184,8 @@ Route::middleware('auth:sanctum')->group(function () {
         // Verification requests
         Route::post('/verification/submit', [OrganizerController::class, 'submitVerificationRequest']);
         Route::get('/verification/pending', [OrganizerController::class, 'getPendingVerifications']);
-        Route::post('/verification/{id}/validate', [OrganizerController::class, 'validateVerificationRequest']);
-        Route::post('/verification/{id}/reject', [OrganizerController::class, 'rejectVerificationRequest']);
+        Route::post('/verification/{profile}/validate', [OrganizerController::class, 'validateVerificationRequest']);
+        Route::post('/verification/{profile}/reject', [OrganizerController::class, 'rejectVerificationRequest']);
     });
 });
 
@@ -211,7 +211,7 @@ Route::prefix('tournaments')->group(function () {
 */
 Route::prefix('organizers')->group(function () {
     Route::get('/', [OrganizerController::class, 'index']);
-    Route::get('/{id}', [OrganizerController::class, 'show']);
+    Route::get('/{organizer}', [OrganizerController::class, 'show']);
 });
 
 /*
@@ -225,7 +225,7 @@ Route::prefix('leaderboard')->group(function () {
 });
 
 Route::prefix('users')->group(function () {
-    Route::get('/{id}/stats', [LeaderboardController::class, 'userStats']);
+    Route::get('/{user}/stats', [LeaderboardController::class, 'userStats']);
 });
 
 Route::prefix('tournaments')->group(function () {

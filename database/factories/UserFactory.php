@@ -51,6 +51,7 @@ class UserFactory extends Factory
         return $this->afterCreating(function (\App\Models\User $user) {
             // Create profile
             \App\Models\Profile::create([
+                'uuid' => \Illuminate\Support\Str::uuid(),
                 'user_id' => $user->id,
                 'whatsapp_number' => '+237' . rand(600000000, 699999999),
                 'country' => 'Cameroon',
@@ -60,6 +61,7 @@ class UserFactory extends Factory
 
             // Create wallet
             \App\Models\Wallet::create([
+                'uuid' => \Illuminate\Support\Str::uuid(),
                 'user_id' => $user->id,
                 'balance' => 0.00,
                 'blocked_balance' => 0.00,

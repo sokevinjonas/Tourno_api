@@ -13,13 +13,6 @@ class UserController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        // Check if user is admin
-        if ($request->user()->role !== 'admin') {
-            return response()->json([
-                'message' => 'Unauthorized: Only admins can access this endpoint',
-            ], 403);
-        }
-
         $query = User::with(['profile', 'wallet']);
 
         // Filter by role
@@ -71,30 +64,17 @@ class UserController extends Controller
     }
 
     /**
-     * Get user details by ID (Admin only)
+     * Get user details by UUID (Admin and Moderator)
      */
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, User $user): JsonResponse
     {
-        // Check if user is admin
-        if ($request->user()->role !== 'admin') {
-            return response()->json([
-                'message' => 'Unauthorized: Only admins can access this endpoint',
-            ], 403);
-        }
-
-        $user = User::with([
+        $user->load([
             'profile',
             'wallet',
             'gameAccounts',
             'tournaments',
             'registrations.tournament',
-        ])->find($id);
-
-        if (!$user) {
-            return response()->json([
-                'message' => 'User not found',
-            ], 404);
-        }
+        ]);
 
         return response()->json([
             'user' => $user,
@@ -104,7 +84,7 @@ class UserController extends Controller
     /**
      * Update user role (Admin only)
      */
-    public function updateRole(Request $request, int $id): JsonResponse
+    public function updateRole(Request $request, User $user): JsonResponse
     {
         // Check if user is admin
         if ($request->user()->role !== 'admin') {
@@ -116,14 +96,6 @@ class UserController extends Controller
         $request->validate([
             'role' => 'required|string|in:admin,moderator,organizer,player',
         ]);
-
-        $user = User::find($id);
-
-        if (!$user) {
-            return response()->json([
-                'message' => 'User not found',
-            ], 404);
-        }
 
         // Prevent self-demotion
         if ($user->id === $request->user()->id && $request->role !== 'admin') {
@@ -145,12 +117,6 @@ class UserController extends Controller
      */
     public function statistics(Request $request): JsonResponse
     {
-        // Check if user is admin
-        if ($request->user()->role !== 'admin') {
-            return response()->json([
-                'message' => 'Unauthorized: Only admins can access statistics',
-            ], 403);
-        }
 
         $stats = [
             'total_users' => User::count(),

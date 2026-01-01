@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -13,11 +14,34 @@ class User extends Authenticatable
     use HasFactory, Notifiable, SoftDeletes, HasApiTokens;
 
     /**
+     * Boot function to generate UUID on creation
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            if (empty($user->uuid)) {
+                $user->uuid = (string) Str::uuid();
+            }
+        });
+    }
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
     protected $fillable = [
+        'uuid',
         'name',
         'email',
         'avatar_url',
@@ -33,6 +57,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
+        'id',
         'remember_token',
     ];
 

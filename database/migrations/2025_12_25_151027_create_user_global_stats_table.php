@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('user_global_stats', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
             $table->foreignId('user_id')->unique()->constrained()->onDelete('cascade');
 
             // Points de classement global (tous jeux confondus)

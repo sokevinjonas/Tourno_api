@@ -53,7 +53,7 @@ class OrganizerController extends Controller
             $tournamentsCount = Tournament::where('organizer_id', $organizer->id)->count();
 
             return [
-                'id' => $organizer->id,
+                'uuid' => $organizer->uuid,
                 'name' => $organizer->organizerProfile?->display_name ?? $organizer->name,
                 'badge' => $organizer->organizerProfile?->badge,
                 'tournaments' => $tournamentsCount,
@@ -74,18 +74,17 @@ class OrganizerController extends Controller
     /**
      * Get a single organizer with detailed information
      */
-    public function show(int $id): JsonResponse
+    public function show(User $organizer): JsonResponse
     {
-        $organizer = User::where('role', 'organizer')
-            ->with(['organizerProfile', 'followers'])
-            ->withCount('followers')
-            ->find($id);
-
-        if (!$organizer) {
+        // Verify user is an organizer
+        if ($organizer->role !== 'organizer') {
             return response()->json([
-                'message' => 'Organizer not found',
+                'message' => 'User is not an organizer',
             ], 404);
         }
+
+        $organizer->load(['organizerProfile', 'followers'])
+            ->loadCount('followers');
 
         $tournamentsCount = Tournament::where('organizer_id', $organizer->id)->count();
         $tournaments = Tournament::where('organizer_id', $organizer->id)
@@ -96,7 +95,7 @@ class OrganizerController extends Controller
 
         return response()->json([
             'organizer' => [
-                'id' => $organizer->id,
+                'uuid' => $organizer->uuid,
                 'name' => $organizer->organizerProfile?->display_name ?? $organizer->name,
                 'email' => $organizer->email,
                 'badge' => $organizer->organizerProfile?->badge,
@@ -114,23 +113,25 @@ class OrganizerController extends Controller
     /**
      * Follow/Unfollow an organizer
      */
-    public function toggleFollow(Request $request, int $organizerId): JsonResponse
+    public function toggleFollow(Request $request, string $organizerId): JsonResponse
     {
         $user = $request->user();
 
-        // Prevent user from following themselves
-        if ($user->id === $organizerId) {
-            return response()->json([
-                'message' => 'You cannot follow yourself',
-            ], 400);
-        }
-
-        $organizer = User::where('role', 'organizer')->find($organizerId);
+        $organizer = User::where('role', 'organizer')
+            ->where('uuid', $organizerId)
+            ->first();
 
         if (!$organizer) {
             return response()->json([
                 'message' => 'Organizer not found',
             ], 404);
+        }
+
+        // Prevent user from following themselves
+        if ($user->id === $organizer->id) {
+            return response()->json([
+                'message' => 'You cannot follow yourself',
+            ], 400);
         }
 
         // Check if already following
@@ -171,13 +172,23 @@ class OrganizerController extends Controller
     /**
      * Check if current user is following an organizer
      */
-    public function checkFollowing(Request $request, int $organizerId): JsonResponse
+    public function checkFollowing(Request $request, string $organizerId): JsonResponse
     {
         $user = $request->user();
 
+        $organizer = User::where('role', 'organizer')
+            ->where('uuid', $organizerId)
+            ->first();
+
+        if (!$organizer) {
+            return response()->json([
+                'message' => 'Organizer not found',
+            ], 404);
+        }
+
         $isFollowing = DB::table('organizer_followers')
             ->where('user_id', $user->id)
-            ->where('organizer_id', $organizerId)
+            ->where('organizer_id', $organizer->id)
             ->exists();
 
         return response()->json([
@@ -200,7 +211,7 @@ class OrganizerController extends Controller
                 $tournamentsCount = Tournament::where('organizer_id', $organizer->id)->count();
 
                 return [
-                    'id' => $organizer->id,
+                    'uuid' => $organizer->uuid,
                     'name' => $organizer->organizerProfile?->display_name ?? $organizer->name,
                     'badge' => $organizer->organizerProfile?->badge,
                     'tournaments' => $tournamentsCount,
@@ -251,13 +262,13 @@ class OrganizerController extends Controller
             return response()->json([
                 'message' => 'User upgraded to organizer successfully',
                 'user' => [
-                    'id' => $result['user']->id,
+                    'uuid' => $result['user']->uuid,
                     'name' => $result['user']->name,
                     'email' => $result['user']->email,
                     'role' => $result['user']->role,
                 ],
                 'organizer_profile' => [
-                    'id' => $result['organizer_profile']->id,
+                    'uuid' => $result['organizer_profile']->uuid,
                     'display_name' => $result['organizer_profile']->display_name,
                     'avatar_initial' => $result['organizer_profile']->avatar_initial,
                     'badge' => $result['organizer_profile']->badge,
@@ -340,15 +351,15 @@ class OrganizerController extends Controller
             ], 403);
         }
 
-        $pendingVerifications = OrganizerProfile::with(['user:id,name,email', 'processedBy:id,name,email'])
+        $pendingVerifications = OrganizerProfile::with(['user:id,uuid,name,email', 'processedBy:id,uuid,name,email'])
             ->where('status', 'attente')
             ->latest()
             ->get()
             ->map(function ($profile) {
                 return [
-                    'id' => $profile->id,
+                    'uuid' => $profile->uuid,
                     'organizer' => [
-                        'id' => $profile->user->id,
+                        'uuid' => $profile->user->uuid,
                         'name' => $profile->display_name ?? $profile->user->name,
                         'email' => $profile->user->email,
                     ],
@@ -359,7 +370,7 @@ class OrganizerController extends Controller
                     'status' => $profile->status,
                     'rejection_reason' => $profile->rejection_reason,
                     'processed_by' => $profile->processedBy ? [
-                        'id' => $profile->processedBy->id,
+                        'uuid' => $profile->processedBy->uuid,
                         'name' => $profile->processedBy->name,
                     ] : null,
                     'submitted_at' => $profile->updated_at,
@@ -375,7 +386,7 @@ class OrganizerController extends Controller
     /**
      * Validate verification request (Moderators only)
      */
-    public function validateVerificationRequest(Request $request, int $profileId): JsonResponse
+    public function validateVerificationRequest(Request $request, OrganizerProfile $profile): JsonResponse
     {
         $user = $request->user();
 
@@ -392,7 +403,7 @@ class OrganizerController extends Controller
 
         try {
             $result = $this->organizerService->validateVerificationRequest(
-                $profileId,
+                $profile->id,
                 $validated['badge'],
                 $user
             );
@@ -400,12 +411,12 @@ class OrganizerController extends Controller
             return response()->json([
                 'message' => 'Verification request validated successfully',
                 'organizer_profile' => [
-                    'id' => $result['organizer_profile']->id,
+                    'uuid' => $result['organizer_profile']->uuid,
                     'display_name' => $result['organizer_profile']->display_name,
                     'badge' => $result['organizer_profile']->badge,
                     'status' => $result['organizer_profile']->status,
                     'processed_by' => [
-                        'id' => $result['processed_by']->id,
+                        'uuid' => $result['processed_by']->uuid,
                         'name' => $result['processed_by']->name,
                     ],
                 ],
@@ -420,7 +431,7 @@ class OrganizerController extends Controller
     /**
      * Reject verification request (Moderators only)
      */
-    public function rejectVerificationRequest(Request $request, int $profileId): JsonResponse
+    public function rejectVerificationRequest(Request $request, OrganizerProfile $profile): JsonResponse
     {
         $user = $request->user();
 
@@ -437,7 +448,7 @@ class OrganizerController extends Controller
 
         try {
             $result = $this->organizerService->rejectVerificationRequest(
-                $profileId,
+                $profile->id,
                 $validated['rejection_reason'] ?? null,
                 $user
             );
@@ -450,7 +461,7 @@ class OrganizerController extends Controller
                     'new_balance' => $result['new_balance'],
                 ],
                 'processed_by' => [
-                    'id' => $result['processed_by']->id,
+                    'uuid' => $result['processed_by']->uuid,
                     'name' => $result['processed_by']->name,
                 ],
             ], 200);
