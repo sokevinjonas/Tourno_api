@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('match_messages', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
+            $table->uuid('uuid')->unique()->nullable();
             $table->foreignId('match_id')->constrained('matches')->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->text('message');

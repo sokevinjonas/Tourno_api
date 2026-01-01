@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('organizer_profiles', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
+            $table->uuid('uuid')->unique()->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('display_name')->nullable();
             $table->enum('badge', ['certified', 'verified', 'partner'])->nullable();

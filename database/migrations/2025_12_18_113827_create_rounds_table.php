@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('rounds', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
+            $table->uuid('uuid')->unique()->nullable();
             $table->foreignId('tournament_id')->constrained()->onDelete('cascade');
             $table->integer('round_number');
             $table->string('round_name')->nullable(); // "Quarter-finals", "Semi-finals", "Final"

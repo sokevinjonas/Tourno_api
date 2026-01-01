@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('tournament_registrations', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
+            $table->uuid('uuid')->unique()->nullable();
             $table->foreignId('tournament_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('game_account_id')->constrained()->onDelete('cascade');
