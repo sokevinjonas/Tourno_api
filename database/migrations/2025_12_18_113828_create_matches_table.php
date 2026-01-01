@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('matches', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
+            $table->uuid('uuid')->unique()->nullable();
             $table->foreignId('tournament_id')->constrained()->onDelete('cascade');
             $table->foreignId('round_id')->constrained()->onDelete('cascade');
             $table->foreignId('player1_id')->nullable()->constrained('users')->onDelete('cascade');

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('user_game_stats', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
+            $table->uuid('uuid')->unique()->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->enum('game', ['efootball', 'fc_mobile', 'dream_league_soccer']);
 
