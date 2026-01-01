@@ -180,7 +180,7 @@ class SwissFormatService
     protected function swissPairing(Tournament $tournament, Round $round, $participants): void
     {
         $paired = [];
-        $toBePaired = $participants->toArray();
+        $toBePaired = $participants->makeVisible(['user_id'])->toArray();
 
         while (count($toBePaired) > 0) {
             $player1 = array_shift($toBePaired);

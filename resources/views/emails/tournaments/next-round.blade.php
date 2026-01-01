@@ -86,7 +86,7 @@
 </div>
 
 <p style="margin: 28px 0; text-align: center;">
-    <a href="{{ env('FRONTEND_URL', 'http://localhost:4200') }}/tournaments/{{ $tournament->id }}"
+    <a href="{{ env('FRONTEND_URL', 'http://localhost:4200') }}/tournaments/{{ $tournament->uuid }}"
        style="display: inline-block; padding: 12px 28px; background-color: #0f172a; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;"
        target="_blank">
         Voir le tournoi

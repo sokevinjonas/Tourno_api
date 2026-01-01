@@ -33,7 +33,7 @@
 </p>
 
 <p style="margin-bottom: 20px;">
-    Merci de faire partie de la communauté Tourno !
+    Merci de faire partie de la communauté G4M Pro Africa !
 </p>
 
 <div style="margin-top: 30px; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">

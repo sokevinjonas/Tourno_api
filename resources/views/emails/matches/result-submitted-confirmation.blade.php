@@ -31,7 +31,9 @@
     </tr>
     <tr style="background-color: #f0fdf4;">
         <td style="padding: 12px; font-weight: 600; color: #065f46; font-size: 14px;">Score Soumis</td>
-        <td style="padding: 12px; font-weight: 600; color: #065f46; font-size: 16px; text-align: right;">{{ $matchResult->own_score }} - {{ $matchResult->opponent_score }}</td>
+        <td style="padding: 12px; font-weight: 600; color: #065f46; font-size: 16px; text-align: right;">
+            {{ $submitter->name }}: {{ $matchResult->own_score }} - {{ $opponent->name }}: {{ $matchResult->opponent_score }}
+        </td>
     </tr>
 </table>
 

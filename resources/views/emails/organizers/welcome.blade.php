@@ -9,7 +9,7 @@
 
 <div style="background: #667eea; padding: 30px; border-radius: 10px; text-align: center; margin: 30px 0;">
     <h2 style="color: white; font-size: 32px; margin: 0 0 10px 0;">
-        Bienvenue sur Tourno
+        Bienvenue sur G4M Pro Africa
     </h2>
     <p style="color: white; font-size: 20px; margin: 0;">
         Vous êtes maintenant <strong>Organisateur Certifié</strong>
@@ -17,7 +17,7 @@
 </div>
 
 <p style="margin-bottom: 20px;">
-    Félicitations pour être devenu organisateur certifié sur Tourno ! Vous faites désormais partie d'une communauté d'organisateurs passionnés qui créent des expériences de jeu exceptionnelles.
+    Félicitations pour être devenu organisateur certifié sur G4M Pro Africa ! Vous faites désormais partie d'une communauté d'organisateurs passionnés qui créent des expériences de jeu exceptionnelles.
 </p>
 
 <div class="info-box">

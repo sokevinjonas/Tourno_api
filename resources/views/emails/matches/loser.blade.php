@@ -43,7 +43,7 @@
 </p>
 
 <p style="margin: 30px 0 20px 0; text-align: center;">
-    <a href="{{ env('FRONTEND_URL', 'http://localhost:4200') }}/tournaments/{{ $match->round->tournament->id }}"
+    <a href="{{ env('FRONTEND_URL', 'http://localhost:4200') }}/tournaments/{{ $match->round->tournament->uuid }}"
        style="display: inline-block; padding: 12px 30px; background-color: #667eea; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
         Voir le tournoi
     </a>

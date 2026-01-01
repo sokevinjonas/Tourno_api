@@ -17,7 +17,7 @@
 </div>
 
 <p style="margin-bottom: 20px;">
-    Nous avons le plaisir de vous informer que votre compte a été vérifié avec succès ! Vous êtes maintenant un <strong>{{ $badgeLabel }}</strong> {{ $badgeEmoji }} sur Tourno.
+    Nous avons le plaisir de vous informer que votre compte a été vérifié avec succès ! Vous êtes maintenant un <strong>{{ $badgeLabel }}</strong> {{ $badgeEmoji }} sur G4M Pro Africa.
 </p>
 
 <div class="info-box">
@@ -35,7 +35,7 @@
     <ul style="margin: 10px 0; padding-left: 20px;">
         <li style="margin: 5px 0;">Badge "Partenaire Officiel" affiché sur votre profil</li>
         <li style="margin: 5px 0;">Mise en avant dans la section "Organisateurs Recommandés"</li>
-        <li style="margin: 5px 0;">Support prioritaire de l'équipe Tourno</li>
+        <li style="margin: 5px 0;">Support prioritaire de l'équipe G4M Pro Africa</li>
         <li style="margin: 5px 0;">Accès aux événements exclusifs partenaires</li>
         <li style="margin: 5px 0;">Commission réduite sur les tournois</li>
         <li style="margin: 5px 0;">Outils marketing et statistiques premium</li>
@@ -61,7 +61,7 @@
 </p>
 
 <p style="margin-bottom: 20px;">
-    Merci de faire partie de la communauté Tourno ! Nous sommes impatients de voir les tournois incroyables que vous allez créer.
+    Merci de faire partie de la communauté G4M Pro Africa ! Nous sommes impatients de voir les tournois incroyables que vous allez créer.
 </p>
 
 <p style="margin-bottom: 20px;">
