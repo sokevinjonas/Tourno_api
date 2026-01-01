@@ -24,7 +24,7 @@ class TournamentRegistrationController extends Controller
     public function register(Request $request, string $tournamentId): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'game_account_id' => 'required|integer|exists:game_accounts,id',
+            'game_account_uuid' => 'required|string|exists:game_accounts,uuid',
         ]);
 
         if ($validator->fails()) {
@@ -42,11 +42,20 @@ class TournamentRegistrationController extends Controller
             ], 404);
         }
 
+        // Find game account by UUID
+        $gameAccount = \App\Models\GameAccount::where('uuid', $request->game_account_uuid)->first();
+
+        if (!$gameAccount) {
+            return response()->json([
+                'message' => 'Game account not found',
+            ], 404);
+        }
+
         try {
             $registration = $this->registrationService->registerToTournament(
                 $request->user(),
                 $tournament,
-                $request->game_account_id
+                $gameAccount->id
             );
 
             return response()->json([

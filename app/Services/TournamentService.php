@@ -170,6 +170,19 @@ class TournamentService
 
     /**
      * Get tournament by UUID
+     *
+     * NOTE FRONTEND: Les matches sont maintenant imbriqués dans les rounds.
+     * Structure de réponse:
+     * {
+     *   rounds: [
+     *     {
+     *       matches: [
+     *         { player1: {...}, player2: {...}, winner: {...}, ... }
+     *       ]
+     *     }
+     *   ]
+     * }
+     * Au lieu de avoir rounds[] et matches[] séparément au même niveau.
      */
     public function getTournament(string $uuid): ?Tournament
     {
@@ -178,8 +191,9 @@ class TournamentService
             'organizer.organizerProfile:user_id,badge',
             'registrations.gameAccount',
             'registrations.user:id,name,email',
-            'rounds',
-            'matches'
+            'rounds.matches.player1:id,uuid,name,avatar_url',
+            'rounds.matches.player2:id,uuid,name,avatar_url',
+            'rounds.matches.winner:id,uuid,name,avatar_url'
         ])->where('uuid', $uuid)->first();
     }
 
