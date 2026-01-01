@@ -20,22 +20,16 @@ class MatchController extends Controller
     /**
      * Get match details
      */
-    public function show(int $matchId): JsonResponse
+    public function show(TournamentMatch $match): JsonResponse
     {
-        $match = TournamentMatch::with([
+        $match->load([
             'tournament',
             'round',
-            'player1:id,name,avatar_url',
-            'player2:id,name,avatar_url',
-            'winner:id,name',
-            'matchResults.submitter:id,name'
-        ])->find($matchId);
-
-        if (!$match) {
-            return response()->json([
-                'message' => 'Match not found',
-            ], 404);
-        }
+            'player1:id,uuid,name,avatar_url',
+            'player2:id,uuid,name,avatar_url',
+            'winner:id,uuid,name',
+            'matchResults.submitter:id,uuid,name'
+        ]);
 
         return response()->json([
             'match' => $match,
@@ -45,16 +39,8 @@ class MatchController extends Controller
     /**
      * Submit match result
      */
-    public function submitResult(Request $request, int $matchId): JsonResponse
+    public function submitResult(Request $request, TournamentMatch $match): JsonResponse
     {
-        $match = TournamentMatch::find($matchId);
-
-        if (!$match) {
-            return response()->json([
-                'message' => 'Match not found',
-            ], 404);
-        }
-
         $validator = Validator::make($request->all(), [
             'own_score' => 'required|integer|min:0',
             'opponent_score' => 'required|integer|min:0',
@@ -103,7 +89,7 @@ class MatchController extends Controller
             $query->where('player1_id', $userId)
                   ->orWhere('player2_id', $userId);
         })
-        ->with(['tournament', 'round', 'player1:id,name', 'player2:id,name'])
+        ->with(['tournament', 'round', 'player1:id,uuid,name,avatar_url', 'player2:id,uuid,name,avatar_url'])
         ->orderBy('created_at', 'desc')
         ->get();
 
@@ -124,7 +110,7 @@ class MatchController extends Controller
                 $query->where('player1_id', $userId)
                       ->orWhere('player2_id', $userId);
             })
-            ->with(['tournament', 'round', 'player1:id,name', 'player2:id,name', 'matchResults'])
+            ->with(['tournament', 'round', 'player1:id,uuid,name,avatar_url', 'player2:id,uuid,name,avatar_url', 'matchResults'])
             ->orderBy('scheduled_at', 'asc')
             ->get();
 
@@ -154,20 +140,12 @@ class MatchController extends Controller
     /**
      * Validate disputed match (Moderators only)
      */
-    public function validateResult(Request $request, int $matchId): JsonResponse
+    public function validateResult(Request $request, TournamentMatch $match): JsonResponse
     {
         if (!in_array($request->user()->role, ['admin', 'moderator'])) {
             return response()->json([
                 'message' => 'Unauthorized',
             ], 403);
-        }
-
-        $match = TournamentMatch::find($matchId);
-
-        if (!$match) {
-            return response()->json([
-                'message' => 'Match not found',
-            ], 404);
         }
 
         $validator = Validator::make($request->all(), [

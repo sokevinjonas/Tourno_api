@@ -34,14 +34,14 @@ class MatchChatController extends Controller
     /**
      * Send a message in match chat
      */
-    public function sendMessage(Request $request, int $matchId)
+    public function sendMessage(Request $request, TournamentMatch $match)
     {
         $request->validate([
             'message' => 'required|string|max:1000',
         ]);
 
         $user = Auth::user();
-        $match = TournamentMatch::with(['player1', 'player2', 'tournament'])->findOrFail($matchId);
+        $match->load(['player1', 'player2', 'tournament']);
 
         // Verify user is a participant in this match
         if ($match->player1_id !== $user->id && $match->player2_id !== $user->id) {
@@ -53,7 +53,7 @@ class MatchChatController extends Controller
 
         // Create message
         $matchMessage = MatchMessage::create([
-            'match_id' => $matchId,
+            'match_id' => $match->id,
             'user_id' => $user->id,
             'message' => $request->message,
         ]);
@@ -66,7 +66,7 @@ class MatchChatController extends Controller
             Mail::to($opponent)->send(
                 new MatchMessageNotification($matchMessage, $match, $user, $opponent)
             );
-            Log::info("Sent match message notification to user {$opponent->id} for match {$matchId}");
+            Log::info("Sent match message notification to user {$opponent->id} for match {$match->id}");
         }
 
         return response()->json([
@@ -79,10 +79,10 @@ class MatchChatController extends Controller
     /**
      * Get all messages for a match
      */
-    public function getMessages(int $matchId)
+    public function getMessages(TournamentMatch $match)
     {
         $user = Auth::user();
-        $match = TournamentMatch::findOrFail($matchId);
+        $match->load('tournament');
 
         // Verify user is a participant in this match or is the organizer
         $isParticipant = $match->player1_id === $user->id || $match->player2_id === $user->id;
@@ -97,14 +97,14 @@ class MatchChatController extends Controller
         }
 
         // Get all messages
-        $messages = MatchMessage::forMatch($matchId)
-            ->with('user:id,name,email')
+        $messages = MatchMessage::forMatch($match->id)
+            ->with('user:id,uuid,name,email')
             ->orderBy('created_at', 'asc')
             ->get();
 
         // Mark messages as read for current user
         if ($isParticipant) {
-            MatchMessage::forMatch($matchId)
+            MatchMessage::forMatch($match->id)
                 ->where('user_id', '!=', $user->id)
                 ->whereNull('read_at')
                 ->update(['read_at' => now()]);
@@ -119,7 +119,7 @@ class MatchChatController extends Controller
     /**
      * Upload evidence for a match
      */
-    public function uploadEvidence(Request $request, int $matchId)
+    public function uploadEvidence(Request $request, TournamentMatch $match)
     {
         $request->validate([
             'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
@@ -128,7 +128,6 @@ class MatchChatController extends Controller
         ]);
 
         $user = Auth::user();
-        $match = TournamentMatch::findOrFail($matchId);
 
         // Verify user is a participant in this match
         if ($match->player1_id !== $user->id && $match->player2_id !== $user->id) {
@@ -140,18 +139,18 @@ class MatchChatController extends Controller
 
         // Store the file
         $file = $request->file('file');
-        $path = $file->store('evidence/matches/' . $matchId, 'public');
+        $path = $file->store('evidence/matches/' . $match->id, 'public');
 
         // Create evidence record
         $evidence = MatchEvidence::create([
-            'match_id' => $matchId,
+            'match_id' => $match->id,
             'user_id' => $user->id,
             'file_path' => $path,
             'type' => $request->type,
             'description' => $request->description,
         ]);
 
-        Log::info("User {$user->id} uploaded evidence for match {$matchId}");
+        Log::info("User {$user->id} uploaded evidence for match {$match->id}");
 
         return response()->json([
             'success' => true,
@@ -163,10 +162,10 @@ class MatchChatController extends Controller
     /**
      * Get all evidence for a match
      */
-    public function getEvidence(int $matchId)
+    public function getEvidence(TournamentMatch $match)
     {
         $user = Auth::user();
-        $match = TournamentMatch::findOrFail($matchId);
+        $match->load('tournament');
 
         // Verify user is a participant, organizer, or admin
         $isParticipant = $match->player1_id === $user->id || $match->player2_id === $user->id;
@@ -180,8 +179,8 @@ class MatchChatController extends Controller
             ], 403);
         }
 
-        $evidence = MatchEvidence::forMatch($matchId)
-            ->with('user:id,name,email')
+        $evidence = MatchEvidence::forMatch($match->id)
+            ->with('user:id,uuid,name,email')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -194,7 +193,7 @@ class MatchChatController extends Controller
     /**
      * Enter match scores (organizer only)
      */
-    public function enterScore(Request $request, int $matchId)
+    public function enterScore(Request $request, TournamentMatch $match)
     {
         $request->validate([
             'player1_score' => 'required|integer|min:0',
@@ -202,7 +201,7 @@ class MatchChatController extends Controller
         ]);
 
         $user = Auth::user();
-        $match = TournamentMatch::with('tournament')->findOrFail($matchId);
+        $match->load('tournament');
 
         // Verify user is the organizer or admin
         $isOrganizer = $match->tournament->organizer_id === $user->id;

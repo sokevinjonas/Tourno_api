@@ -16,11 +16,11 @@ Artisan::command('inspire', function () {
 // Démarrage des tournois - chaque minute pour réactivité
 Schedule::job(new AutoStartTournamentsJob)->everyMinute();
 
-// Vérification des tournois complets - toutes les 5 minutes est OK
-Schedule::job(new CheckFullTournamentsJob)->everyFiveMinutes();
+// Vérification des tournois complets - toutes les 1 minutes est OK
+Schedule::job(new CheckFullTournamentsJob)->everyMinute();
 
 // Vérification des deadlines expirées - plus fréquent pour réactivité
-Schedule::job(new CheckMatchDeadlinesJob)->everyFiveMinutes();
+Schedule::job(new CheckMatchDeadlinesJob)->everyMinute();
 
-// Envoi des avertissements de deadline - toutes les 15 minutes et 30 minutes est suffisant
-Schedule::job(new SendMatchDeadlineWarningsJob)->everyFiveMinutes();
+// Envoi des avertissements de deadline - toutes les 1 minutes et 30 minutes est suffisant
+Schedule::job(new SendMatchDeadlineWarningsJob)->everyMinute();

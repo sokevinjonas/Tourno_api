@@ -148,25 +148,25 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('matches')->group(function () {
-        Route::get('/{id}', [MatchController::class, 'show']);
-        Route::post('/{id}/submit-result', [MatchController::class, 'submitResult']);
+        Route::get('/{match}', [MatchController::class, 'show']);
+        Route::post('/{match}/submit-result', [MatchController::class, 'submitResult']);
         Route::get('/my/matches', [MatchController::class, 'myMatches']);
         Route::get('/my/pending', [MatchController::class, 'myPendingMatches']);
 
         // Match chat
-        Route::post('/{id}/messages', [MatchChatController::class, 'sendMessage']);
-        Route::get('/{id}/messages', [MatchChatController::class, 'getMessages']);
+        Route::post('/{match}/messages', [MatchChatController::class, 'sendMessage']);
+        Route::get('/{match}/messages', [MatchChatController::class, 'getMessages']);
 
         // Match evidence
-        Route::post('/{id}/evidence', [MatchChatController::class, 'uploadEvidence']);
-        Route::get('/{id}/evidence', [MatchChatController::class, 'getEvidence']);
+        Route::post('/{match}/evidence', [MatchChatController::class, 'uploadEvidence']);
+        Route::get('/{match}/evidence', [MatchChatController::class, 'getEvidence']);
 
         // Enter scores (Organizer only)
-        Route::post('/{id}/enter-score', [MatchChatController::class, 'enterScore']);
+        Route::post('/{match}/enter-score', [MatchChatController::class, 'enterScore']);
 
         // Moderator only: disputed matches
         Route::get('/disputed/all', [MatchController::class, 'disputed']);
-        Route::post('/{id}/validate', [MatchController::class, 'validateResult']);
+        Route::post('/{match}/validate', [MatchController::class, 'validateResult']);
     });
 
     /*
