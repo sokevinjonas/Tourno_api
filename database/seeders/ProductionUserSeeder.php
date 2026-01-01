@@ -82,7 +82,7 @@ class ProductionUserSeeder extends Seeder
         $this->command->info('');
         $this->command->info('📧 SO Kevin Jonas: kjonasdevpro@gmail.com ');
         $this->command->info('📧 KONE Kader: koneakader1219@gmail.com ');
-        $this->command->info('📧 Moderator: moderator@tourno.com ');
+        $this->command->info('📧 Moderator: autrea218@gmail.com ');
         $this->command->info('');
     }
 }
