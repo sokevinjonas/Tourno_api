@@ -42,7 +42,7 @@
 
 <div style="margin-top: 30px; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">
     <p style="margin: 0; font-size: 14px; color: #555;">
-        <strong>Questions ?</strong> Contactez-nous à <a href="mailto:support@tourno.app">support@tourno.app</a>
+        <strong>Questions ?</strong> Contactez-nous à <a href="mailto:support@g4meproafrica">support@g4meproafrica</a>
     </p>
 </div>
 @endsection

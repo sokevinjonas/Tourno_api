@@ -43,17 +43,13 @@ class UserStatsService
         int $participants,
         float $entryFee
     ): int {
-        // Base points according to rank
+        // Base points according to rank (reduced by 20x)
         $rankPoints = match ($rank) {
-            1 => 100,  // Champion
-            2 => 75,   // 2nd place
-            3 => 50,   // 3rd place
-            4 => 40,
-            5 => 30,
-            6 => 25,
-            7 => 20,
-            8 => 15,
-            default => 10  // Participation
+            1 => 5,  // Champion
+            2 => 3,  // 2nd place
+            3 => 2,  // 3rd place
+            4 => 1,  // 4th place
+            default => 1  // Participation
         };
 
         // Bonus according to tournament size
@@ -93,7 +89,7 @@ class UserStatsService
                 'game' => $tournament->game,
             ],
             [
-                'rating_points' => 1000,
+                'rating_points' => 1,
                 'tournaments_played' => 0,
                 'tournaments_won' => 0,
                 'total_matches_played' => 0,
@@ -128,7 +124,7 @@ class UserStatsService
         $globalStat = UserGlobalStat::firstOrCreate(
             ['user_id' => $user->id],
             [
-                'global_rating' => 1000,
+                'global_rating' => 1,
                 'total_tournaments_played' => 0,
                 'total_tournaments_won' => 0,
                 'total_matches_played' => 0,
