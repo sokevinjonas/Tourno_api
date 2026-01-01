@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('profiles', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('whatsapp_number');
             $table->string('country');

@@ -70,14 +70,13 @@ class GameAccountController extends Controller
     /**
      * Get a specific game account
      */
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, \App\Models\GameAccount $gameAccount): JsonResponse
     {
-        $gameAccount = $this->gameAccountService->getGameAccount($id, $request->user());
-
-        if (!$gameAccount) {
+        // Check if game account belongs to the authenticated user
+        if ($gameAccount->user_id !== $request->user()->id) {
             return response()->json([
-                'message' => 'Game account not found',
-            ], 404);
+                'message' => 'Unauthorized',
+            ], 403);
         }
 
         return response()->json([
@@ -88,14 +87,13 @@ class GameAccountController extends Controller
     /**
      * Update a game account
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(Request $request, \App\Models\GameAccount $gameAccount): JsonResponse
     {
-        $gameAccount = $this->gameAccountService->getGameAccount($id, $request->user());
-
-        if (!$gameAccount) {
+        // Check if game account belongs to the authenticated user
+        if ($gameAccount->user_id !== $request->user()->id) {
             return response()->json([
-                'message' => 'Game account not found',
-            ], 404);
+                'message' => 'Unauthorized',
+            ], 403);
         }
 
         $validator = Validator::make($request->all(), [
@@ -136,14 +134,13 @@ class GameAccountController extends Controller
     /**
      * Delete a game account
      */
-    public function destroy(Request $request, int $id): JsonResponse
+    public function destroy(Request $request, \App\Models\GameAccount $gameAccount): JsonResponse
     {
-        $gameAccount = $this->gameAccountService->getGameAccount($id, $request->user());
-
-        if (!$gameAccount) {
+        // Check if game account belongs to the authenticated user
+        if ($gameAccount->user_id !== $request->user()->id) {
             return response()->json([
-                'message' => 'Game account not found',
-            ], 404);
+                'message' => 'Unauthorized',
+            ], 403);
         }
 
         try {

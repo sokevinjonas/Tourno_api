@@ -122,18 +122,10 @@ class LeaderboardController extends Controller
     /**
      * Get user stats (profile)
      */
-    public function userStats(int $userId): JsonResponse
+    public function userStats(User $user): JsonResponse
     {
-        $user = User::find($userId);
-
-        if (!$user) {
-            return response()->json([
-                'message' => 'User not found',
-            ], 404);
-        }
-
         // Global stats
-        $globalStat = UserGlobalStat::where('user_id', $userId)->first();
+        $globalStat = UserGlobalStat::where('user_id', $user->id)->first();
 
         $globalStats = null;
         $globalRank = null;

@@ -92,7 +92,7 @@ class ProfileController extends Controller
     /**
      * Validate a profile (Moderators only)
      */
-    public function validate(Request $request, int $profileId): JsonResponse
+    public function validate(Request $request, Profile $profile): JsonResponse
     {
         if (!in_array($request->user()->role, ['admin', 'moderator'])) {
             return response()->json([
@@ -101,7 +101,6 @@ class ProfileController extends Controller
         }
 
         try {
-            $profile = \App\Models\Profile::findOrFail($profileId);
             $validatedProfile = $this->profileService->validateProfile($profile, $request->user());
 
             return response()->json([
@@ -119,7 +118,7 @@ class ProfileController extends Controller
     /**
      * Reject a profile (Moderators only)
      */
-    public function reject(Request $request, int $profileId): JsonResponse
+    public function reject(Request $request, Profile $profile): JsonResponse
     {
         if (!in_array($request->user()->role, ['admin', 'moderator'])) {
             return response()->json([
@@ -139,7 +138,6 @@ class ProfileController extends Controller
         }
 
         try {
-            $profile = Profile::findOrFail($profileId);
             $rejectedProfile = $this->profileService->rejectProfile(
                 $profile,
                 $request->user(),

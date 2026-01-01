@@ -23,6 +23,7 @@ class SingleTournamentSeeder extends Seeder
         $organizer = User::where('role', 'organizer')->first();
         if (!$organizer) {
             $organizer = User::factory()->create([
+                'uuid' => \Illuminate\Support\Str::uuid(),
                 'role' => 'organizer',
                 'name' => 'G4me Pro Africa',
                 // 'email' => 'sokevin7@gmail.com',
@@ -30,6 +31,7 @@ class SingleTournamentSeeder extends Seeder
 
             // Créer le profil organisateur avec badge certified
             OrganizerProfile::create([
+                'uuid' => \Illuminate\Support\Str::uuid(),
                 'user_id' => $organizer->id,
                 'display_name' => 'G4me Pro Africa',
                 'badge' => 'certified',
@@ -45,7 +47,7 @@ class SingleTournamentSeeder extends Seeder
             'name' => 'Tournoi E-football Décembre 2025',
             'game' => 'efootball',
             'max_participants' => 8,
-            'registered_count' => 6, // 6/8 places prises (2 places restantes)
+            'registered_count' => 7, // 7/8 places prises (1 place restante)
             'prize_distribution' => [
                 '1st' => 20,  // 1er: 20 GPA
                 '2nd' => 10,  // 2ème: 10 GPA
@@ -115,6 +117,7 @@ class SingleTournamentSeeder extends Seeder
 
                 if (!$gameAccount) {
                     $gameAccount = GameAccount::create([
+                        'uuid' => \Illuminate\Support\Str::uuid(),
                         'user_id' => $player->id,
                         'game' => $tournamentData['game'],
                         'game_username' => $player->name . '_' . strtoupper(substr($tournamentData['game'], 0, 3)),

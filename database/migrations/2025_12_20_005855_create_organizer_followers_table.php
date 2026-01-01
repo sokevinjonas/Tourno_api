@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('organizer_followers', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Le follower (joueur)
             $table->foreignId('organizer_id')->constrained('users')->onDelete('cascade'); // L'organisateur suivi
             $table->timestamps();

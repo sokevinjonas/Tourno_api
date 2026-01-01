@@ -88,6 +88,7 @@ class UserSeeder extends Seeder
     {
         // Create user
         $user = User::create([
+            'uuid' => \Illuminate\Support\Str::uuid(),
             'name' => $name,
             'email' => $email,
             'role' => $role,
@@ -96,6 +97,7 @@ class UserSeeder extends Seeder
 
         // Create validated profile
         Profile::create([
+            'uuid' => \Illuminate\Support\Str::uuid(),
             'user_id' => $user->id,
             'whatsapp_number' => '+237' . rand(600000000, 699999999),
             'country' => $this->countries[array_rand($this->countries)],
@@ -107,6 +109,7 @@ class UserSeeder extends Seeder
 
         // Create wallet (only players get balance)
         Wallet::create([
+            'uuid' => \Illuminate\Support\Str::uuid(),
             'user_id' => $user->id,
             'balance' => $role === 'player' ? 4.00 : 0.00,
         ]);
@@ -116,6 +119,7 @@ class UserSeeder extends Seeder
             // Create account for each game
             foreach ($this->games as $game) {
                 GameAccount::create([
+                    'uuid' => \Illuminate\Support\Str::uuid(),
                     'user_id' => $user->id,
                     'game' => $game,
                     'game_username' => strtolower(str_replace(' ', '_', $name)) . '_' . $game,
