@@ -49,6 +49,7 @@ class TournamentRegistrationService
 
             // Create registration
             $registration = TournamentRegistration::create([
+                'uuid' => \Illuminate\Support\Str::uuid(),
                 'tournament_id' => $tournament->id,
                 'user_id' => $user->id,
                 'game_account_id' => $gameAccountId,

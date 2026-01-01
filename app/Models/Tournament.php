@@ -4,12 +4,44 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Tournament extends Model
 {
     use HasFactory;
 
+    /**
+     * Boot function to generate UUID on creation
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($tournament) {
+            if (empty($tournament->uuid)) {
+                $tournament->uuid = (string) Str::uuid();
+            }
+        });
+    }
+
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
+
+    /**
+     * The attributes that should be hidden for serialization.
+     */
+    protected $hidden = [
+        'id',
+        'organizer_id',
+    ];
+
     protected $fillable = [
+        'uuid',
         'organizer_id',
         'name',
         'description',

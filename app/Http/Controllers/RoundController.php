@@ -29,9 +29,9 @@ class RoundController extends Controller
     /**
      * Start tournament (generate first round)
      */
-    public function startTournament(Request $request, int $tournamentId): JsonResponse
+    public function startTournament(Request $request, string $tournamentId): JsonResponse
     {
-        $tournament = Tournament::find($tournamentId);
+        $tournament = Tournament::where('uuid', $tournamentId)->first();
 
         if (!$tournament) {
             return response()->json([
@@ -69,9 +69,9 @@ class RoundController extends Controller
     /**
      * Generate next round
      */
-    public function generateNextRound(Request $request, int $tournamentId): JsonResponse
+    public function generateNextRound(Request $request, string $tournamentId): JsonResponse
     {
-        $tournament = Tournament::find($tournamentId);
+        $tournament = Tournament::where('uuid', $tournamentId)->first();
 
         if (!$tournament) {
             return response()->json([
@@ -110,9 +110,9 @@ class RoundController extends Controller
     /**
      * Complete a round
      */
-    public function completeRound(Request $request, int $tournamentId, int $roundId): JsonResponse
+    public function completeRound(Request $request, string $tournamentId, int $roundId): JsonResponse
     {
-        $tournament = Tournament::find($tournamentId);
+        $tournament = Tournament::where('uuid', $tournamentId)->first();
 
         if (!$tournament) {
             return response()->json([
@@ -153,9 +153,9 @@ class RoundController extends Controller
     /**
      * Complete tournament
      */
-    public function completeTournament(Request $request, int $tournamentId): JsonResponse
+    public function completeTournament(Request $request, string $tournamentId): JsonResponse
     {
-        $tournament = Tournament::find($tournamentId);
+        $tournament = Tournament::where('uuid', $tournamentId)->first();
 
         if (!$tournament) {
             return response()->json([
@@ -193,9 +193,9 @@ class RoundController extends Controller
     /**
      * Get tournament rounds
      */
-    public function getRounds(int $tournamentId): JsonResponse
+    public function getRounds(string $tournamentId): JsonResponse
     {
-        $tournament = Tournament::find($tournamentId);
+        $tournament = Tournament::where('uuid', $tournamentId)->first();
 
         if (!$tournament) {
             return response()->json([

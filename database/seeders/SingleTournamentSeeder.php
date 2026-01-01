@@ -76,6 +76,7 @@ class SingleTournamentSeeder extends Seeder
 
         // Create tournament
         $tournament = Tournament::create([
+            'uuid' => \Illuminate\Support\Str::uuid(),
             'organizer_id' => $organizer->id,
             'name' => $tournamentData['name'],
             'description' => "Tournoi officiel {$tournamentData['game']} - Format Suisse",
