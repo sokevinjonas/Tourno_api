@@ -47,7 +47,7 @@ class SingleTournamentSeeder extends Seeder
             'name' => 'Tournoi E-football Décembre 2025',
             'game' => 'efootball',
             'max_participants' => 8,
-            'registered_count' => 7, // 7/8 places prises (1 place restante)
+            'registered_count' => 5, // 5/8 places prises (1 place restante)
             'prize_distribution' => [
                 '1st' => 20,  // 1er: 20 GPA
                 '2nd' => 10,  // 2ème: 10 GPA
