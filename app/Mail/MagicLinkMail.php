@@ -17,7 +17,7 @@ class MagicLinkMail extends Mailable
      * Create a new message instance.
      */
     public function __construct(
-        public string $magicLink,
+        public string $code,
         public string $email,
         public int $expiresInMinutes = 15
     ) {
@@ -30,7 +30,7 @@ class MagicLinkMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Votre lien de connexion GPA',
+            subject: 'Votre code de connexion GPA',
         );
     }
 

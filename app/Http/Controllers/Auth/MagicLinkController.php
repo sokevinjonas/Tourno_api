@@ -18,7 +18,7 @@ class MagicLinkController extends Controller
     }
 
     /**
-     * Send magic link to user's email
+     * Send authentication code to user's email
      */
     public function sendLink(Request $request): JsonResponse
     {
@@ -43,19 +43,19 @@ class MagicLinkController extends Controller
             return response()->json($result, 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Failed to send magic link',
+                'message' => 'Échec de l\'envoi du code',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
 
     /**
-     * Verify magic link token
+     * Verify authentication code
      */
     public function verifyLink(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'token' => 'required|string',
+            'code' => 'required|string|size:6',
         ]);
 
         if ($validator->fails()) {
@@ -66,16 +66,16 @@ class MagicLinkController extends Controller
         }
 
         try {
-            $result = $this->magicLinkService->verifyMagicLink($request->token);
+            $result = $this->magicLinkService->verifyMagicLink($request->code);
 
             return response()->json([
-                'message' => 'Authentication successful',
+                'message' => 'Authentification réussie',
                 'user' => $result['user'],
                 'token' => $result['token'],
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Authentication failed',
+                'message' => 'Échec de l\'authentification',
                 'error' => $e->getMessage(),
             ], 400);
         }

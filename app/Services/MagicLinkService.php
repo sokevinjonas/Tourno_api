@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 class MagicLinkService
 {
     /**
-     * Send magic link to user's email
+     * Send authentication code to user's email
      */
     public function sendMagicLink(string $email, string $ipAddress = null, string $userAgent = null): array
     {
@@ -23,41 +23,38 @@ class MagicLinkService
             ->expired()
             ->delete();
 
-        // Generate unique token
-        $token = Str::random(64);
+        // Generate 6-digit code
+        $code = $this->generateCode();
 
         // Create login token
         $loginToken = LoginToken::create([
             'email' => $email,
-            'token' => $token,
+            'code' => $code,
             'expires_at' => now()->addMinutes(15),
             'ip_address' => $ipAddress,
             'user_agent' => $userAgent,
         ]);
 
-        // Generate magic link URL
-        $magicLink = config('app.frontend_url') . '/auth/verify?token=' . $token;
-
-        // Send email with magic link
-        $this->sendEmail($email, $magicLink);
+        // Send email with code
+        $this->sendEmail($email, $code);
 
         return [
-            'message' => 'Magic link sent to your email',
+            'message' => 'Code de vérification envoyé à votre email',
             'expires_in' => '15 minutes',
         ];
     }
 
     /**
-     * Verify magic link token and authenticate user
+     * Verify authentication code and authenticate user
      */
-    public function verifyMagicLink(string $token): array
+    public function verifyMagicLink(string $code): array
     {
-        $loginToken = LoginToken::where('token', $token)
+        $loginToken = LoginToken::where('code', $code)
             ->valid()
             ->first();
 
         if (!$loginToken) {
-            throw new \Exception('Invalid or expired magic link');
+            throw new \Exception('Code invalide ou expiré');
         }
 
         return DB::transaction(function () use ($loginToken) {
@@ -122,11 +119,19 @@ class MagicLinkService
     }
 
     /**
-     * Send magic link email
+     * Generate a 6-digit code
      */
-    protected function sendEmail(string $email, string $magicLink): void
+    protected function generateCode(): string
     {
-        Mail::to($email)->send(new MagicLinkMail($magicLink, $email));
+        return str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Send authentication code email
+     */
+    protected function sendEmail(string $email, string $code): void
+    {
+        Mail::to($email)->send(new MagicLinkMail($code, $email));
     }
 
     /**

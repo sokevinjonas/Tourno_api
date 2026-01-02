@@ -60,7 +60,7 @@ class ProductionUserSeeder extends Seeder
         // Moderator
         $moderator = User::create([
             'name' => 'KOUATT',
-            'email' => 'autrea218@gmail.com',
+            'email' => 'ouattkoua55@gmail.com',
             'role' => 'moderator',
             'email_verified_at' => now(),
         ]);
@@ -82,7 +82,7 @@ class ProductionUserSeeder extends Seeder
         $this->command->info('');
         $this->command->info('📧 SO Kevin Jonas: kjonasdevpro@gmail.com ');
         $this->command->info('📧 KONE Kader: koneakader1219@gmail.com ');
-        $this->command->info('📧 Moderator: autrea218@gmail.com ');
+        $this->command->info('📧 Moderator: ouattkoua55@gmail.com ');
         $this->command->info('');
     }
 }
