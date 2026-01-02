@@ -9,18 +9,31 @@
     Le Round <strong>{{ $round->round_number }}</strong> du tournoi <strong>{{ $tournament->name }}</strong> vient d'être généré !
 </p>
 
+@php
+    $opponent = null;
+    if ($match) {
+        $opponent = $match->player1_id === $player->id ? $match->player2 : $match->player1;
+    }
+@endphp
+
 <div style="background: #0f172a; padding: 28px; border-radius: 8px; text-align: center; margin: 28px 0;">
     <p style="color: white; font-size: 22px; margin: 0 0 8px 0; font-weight: 600;">
         Round {{ $round->round_number }}
     </p>
     @if($match)
+        @if($opponent)
         <p style="color: #e2e8f0; font-size: 16px; margin: 0;">
-            Vous affronterez <strong style="color: white;">{{ $match->player1_id === $player->id ? $match->player2->name : $match->player1->name }}</strong>
+            Vous affronterez <strong style="color: white;">{{ $opponent->name }}</strong>
         </p>
+        @else
+        <p style="color: #e2e8f0; font-size: 16px; margin: 0;">
+            <strong style="color: white;">Bye - Vous passez automatiquement au prochain round</strong>
+        </p>
+        @endif
     @endif
 </div>
 
-@if($match)
+@if($match && $opponent)
 <div class="info-box">
     <h3 style="margin-bottom: 16px; color: #0f172a; font-size: 18px;">Détails du match</h3>
     <table style="width: 100%; border-collapse: collapse;">
@@ -35,12 +48,9 @@
         <tr>
             <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-size: 14px;"><strong>Adversaire</strong></td>
             <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 14px;">
-                {{ $match->player1_id === $player->id ? $match->player2->name : $match->player1->name }}
+                {{ $opponent->name }}
             </td>
         </tr>
-        @php
-            $opponent = $match->player1_id === $player->id ? $match->player2 : $match->player1;
-        @endphp
         @if($opponent && $opponent->profile && $opponent->profile->whatsapp_number)
         <tr>
             <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-size: 14px;"><strong>Numéro WhatsApp</strong></td>
