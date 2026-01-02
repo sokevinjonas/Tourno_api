@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Profile;
 use App\Models\Wallet;
+use App\Models\OrganizerProfile;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -78,11 +79,47 @@ class ProductionUserSeeder extends Seeder
             'balance' => 0,
         ]);
 
+        // Organisateur Principal - G4me Pro Africa
+        $organizer = User::create([
+            'name' => 'G4me Pro Africa',
+            'email' => 'academy@kgslab.com',
+            'role' => 'player',
+            'email_verified_at' => now(),
+        ]);
+
+        Profile::create([
+            'user_id' => $organizer->id,
+            'whatsapp_number' => '+22652645634',
+            'country' => 'Burkina Faso',
+            'city' => 'Ouagadougou',
+            'status' => 'validated',
+        ]);
+
+        Wallet::create([
+            'user_id' => $organizer->id,
+            'balance' => 100.00,
+        ]);
+
+        OrganizerProfile::create([
+            'user_id' => $organizer->id,
+            'display_name' => 'G4me Pro Africa',
+            'badge' => 'certified',
+            'bio' => 'Organisation officielle de tournois e-sport en Afrique de l\'Ouest. Plateforme professionnelle pour les compétitions de football mobile.',
+            'status' => 'valider',
+            'is_featured' => true,
+            'social_links' => [
+                'website' => 'https://g4meproafrica.com',
+                'facebook' => 'https://facebook.com/g4meproafrica',
+                'twitter' => 'https://twitter.com/g4meproafrica',
+            ],
+        ]);
+
         $this->command->info('✅ Production users created successfully!');
         $this->command->info('');
         $this->command->info('📧 SO Kevin Jonas: kjonasdevpro@gmail.com ');
         $this->command->info('📧 KONE Kader: koneakader1219@gmail.com ');
         $this->command->info('📧 Moderator: ouattkoua55@gmail.com ');
+        $this->command->info('🏢 Organisateur: contact@g4meproafrica.com (G4me Pro Africa) - Balance: 100 pièces');
         $this->command->info('');
     }
 }
