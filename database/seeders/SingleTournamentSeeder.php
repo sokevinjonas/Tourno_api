@@ -88,10 +88,10 @@ class SingleTournamentSeeder extends Seeder
             'entry_fee' => 4.00,
             'prize_distribution' => json_encode($tournamentData['prize_distribution']),
             'rules' => json_encode($rules),
-            'start_date' => now()->addMinutes(15), // Démarre dans 2 minutes
+            'start_date' => now()->addMinutes(3), // Démarre dans 3 minutes
             'tournament_duration_days' => 1,
             'time_slot' => 'evening',
-            'match_deadline_minutes' => 60,
+            'match_deadline_minutes' => 3,
             'status' => 'open',
             'auto_managed' => true,
         ]);
