@@ -11,7 +11,7 @@ class LoginToken extends Model
 
     protected $fillable = [
         'email',
-        'token',
+        'code',
         'is_used',
         'expires_at',
         'ip_address',

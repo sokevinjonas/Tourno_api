@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('login_tokens', function (Blueprint $table) {
             $table->id();
             $table->string('email');
-            $table->string('token', 64)->unique();
+            $table->string('code', 6);
             $table->boolean('is_used')->default(false);
             $table->timestamp('expires_at');
             $table->ipAddress('ip_address')->nullable();
@@ -24,6 +24,7 @@ return new class extends Migration
 
             // Indexes
             $table->index('email');
+            $table->index('code');
             $table->index('expires_at');
         });
     }
