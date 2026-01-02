@@ -83,7 +83,7 @@ class ProductionUserSeeder extends Seeder
         $organizer = User::create([
             'name' => 'G4me Pro Africa',
             'email' => 'academy@kgslab.com',
-            'role' => 'player',
+            'role' => 'organizer',
             'email_verified_at' => now(),
         ]);
 
