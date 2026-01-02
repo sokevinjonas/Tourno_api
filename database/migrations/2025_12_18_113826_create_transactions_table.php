@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->decimal('balance_before', 10, 2);
             $table->decimal('balance_after', 10, 2);
-            $table->enum('reason', ['initial_bonus', 'tournament_registration', 'tournament_prize', 'refund', 'admin_adjustment', 'tournament_entry_received', 'tournament_entry_refunded', 'tournament_profit']);
+            $table->enum('reason', ['initial_bonus', 'tournament_registration', 'tournament_prize', 'refund', 'admin_adjustment', 'tournament_entry_received', 'tournament_entry_refunded', 'tournament_profit', 'tournament_creation_fee']);
             $table->string('description')->nullable();
             $table->foreignId('tournament_id')->nullable()->constrained()->onDelete('set null');
             $table->timestamps();
