@@ -74,8 +74,8 @@ class GameAccountService
     public function deleteGameAccount(GameAccount $gameAccount): bool
     {
         // Delete screenshot if exists
-        if ($gameAccount->screenshot_path) {
-            Storage::disk('public')->delete($gameAccount->screenshot_path);
+        if ($gameAccount->team_screenshot_path) {
+            Storage::disk('public')->delete($gameAccount->team_screenshot_path);
         }
 
         return $gameAccount->delete();

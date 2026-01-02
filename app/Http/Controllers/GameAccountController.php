@@ -98,7 +98,7 @@ class GameAccountController extends Controller
 
         $validator = Validator::make($request->all(), [
             'in_game_name' => 'sometimes|required|string|max:100',
-            'screenshot' => 'sometimes|required|image|mimes:jpeg,png,jpg|max:2048',
+            'team_screenshot_path' => 'sometimes|required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if ($validator->fails()) {
