@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Mail\MatchResultSubmittedConfirmationMail;
+use App\Mail\MatchResultUpdatedConfirmationMail;
 use App\Mail\OpponentSubmittedResultMail;
+use App\Mail\OpponentUpdatedResultMail;
 use App\Models\MatchResult;
 use App\Models\TournamentMatch;
 use App\Models\User;
@@ -35,32 +37,68 @@ class MatchResultService
             throw new \Exception('Match is already completed');
         }
 
-        // Handle screenshot upload
-        $screenshotPath = null;
-        if (isset($data['screenshot'])) {
-            $screenshotPath = $this->uploadScreenshot($data['screenshot'], $match->id, $user->id);
+        // Check if user has already submitted a result for this match
+        $existingSubmission = MatchResult::where('match_id', $match->id)
+            ->where('submitted_by', $user->id)
+            ->first();
+
+        $isUpdate = $existingSubmission !== null;
+
+        if ($existingSubmission) {
+            // Update existing submission instead of creating a new one
+            $matchResult = DB::transaction(function () use ($match, $user, $data, $existingSubmission) {
+                // Update scores and comment
+                $existingSubmission->update([
+                    'own_score' => $data['own_score'],
+                    'opponent_score' => $data['opponent_score'],
+                    'comment' => $data['comment'] ?? null,
+                    'status' => 'pending', // Reset to pending if it was validated
+                ]);
+
+                // Handle screenshot update
+                if (isset($data['screenshot'])) {
+                    // Delete old screenshot if exists
+                    if ($existingSubmission->screenshot_path) {
+                        Storage::disk('public')->delete($existingSubmission->screenshot_path);
+                    }
+                    // Upload new screenshot
+                    $screenshotPath = $this->uploadScreenshot($data['screenshot'], $match->id, $user->id);
+                    $existingSubmission->update(['screenshot_path' => $screenshotPath]);
+                }
+
+                // Check if both players have submitted
+                $this->checkAndResolveMatch($match);
+
+                return $existingSubmission;
+            });
+        } else {
+            // Handle screenshot upload
+            $screenshotPath = null;
+            if (isset($data['screenshot'])) {
+                $screenshotPath = $this->uploadScreenshot($data['screenshot'], $match->id, $user->id);
+            }
+
+            $matchResult = DB::transaction(function () use ($match, $user, $data, $screenshotPath) {
+                // Create match result
+                $matchResult = MatchResult::create([
+                    'match_id' => $match->id,
+                    'submitted_by' => $user->id,
+                    'own_score' => $data['own_score'],
+                    'opponent_score' => $data['opponent_score'],
+                    'screenshot_path' => $screenshotPath,
+                    'comment' => $data['comment'] ?? null,
+                    'status' => 'pending',
+                ]);
+
+                // Check if both players have submitted
+                $this->checkAndResolveMatch($match);
+
+                return $matchResult;
+            });
         }
 
-        $matchResult = DB::transaction(function () use ($match, $user, $data, $screenshotPath) {
-            // Create match result
-            $matchResult = MatchResult::create([
-                'match_id' => $match->id,
-                'submitted_by' => $user->id,
-                'own_score' => $data['own_score'],
-                'opponent_score' => $data['opponent_score'],
-                'screenshot_path' => $screenshotPath,
-                'comment' => $data['comment'] ?? null,
-                'status' => 'pending',
-            ]);
-
-            // Check if both players have submitted
-            $this->checkAndResolveMatch($match);
-
-            return $matchResult;
-        });
-
-        // Send emails after transaction
-        $this->sendSubmissionEmails($match, $user, $matchResult);
+        // Send emails after transaction (different emails for new submission vs update)
+        $this->sendSubmissionEmails($match, $user, $matchResult, $isUpdate);
 
         return $matchResult;
     }
@@ -162,9 +200,9 @@ class MatchResultService
     /**
      * Send submission emails to submitter and opponent
      */
-    protected function sendSubmissionEmails(TournamentMatch $match, User $submitter, MatchResult $matchResult): void
+    protected function sendSubmissionEmails(TournamentMatch $match, User $submitter, MatchResult $matchResult, bool $isUpdate = false): void
     {
-        \Log::info("START sendSubmissionEmails for match {$match->id}, submitter: {$submitter->id}");
+        \Log::info("START sendSubmissionEmails for match {$match->id}, submitter: {$submitter->id}, isUpdate: " . ($isUpdate ? 'true' : 'false'));
 
         // Déterminer l'adversaire
         $opponentId = $match->player1_id === $submitter->id ? $match->player2_id : $match->player1_id;
@@ -183,19 +221,35 @@ class MatchResultService
         $match->load(['tournament.organizer', 'round']);
 
         try {
-            // Email de confirmation pour le joueur qui soumet
-            \Log::info("Sending confirmation email to submitter {$submitter->email}");
-            Mail::to($submitter)->send(
-                new MatchResultSubmittedConfirmationMail($match, $submitter, $opponent, $matchResult)
-            );
-            \Log::info("Confirmation email sent to submitter {$submitter->id}");
+            if ($isUpdate) {
+                // Emails de modification
+                \Log::info("Sending UPDATE confirmation email to submitter {$submitter->email}");
+                Mail::to($submitter)->send(
+                    new MatchResultUpdatedConfirmationMail($match, $submitter, $opponent, $matchResult)
+                );
+                \Log::info("Update confirmation email sent to submitter {$submitter->id}");
 
-            // Email de notification pour l'adversaire
-            \Log::info("Sending notification email to opponent {$opponent->email}");
-            Mail::to($opponent)->send(
-                new OpponentSubmittedResultMail($match, $opponent, $submitter, $matchResult)
-            );
-            \Log::info("Notification email sent to opponent {$opponent->id}");
+                // Email de notification de modification pour l'adversaire
+                \Log::info("Sending UPDATE notification email to opponent {$opponent->email}");
+                Mail::to($opponent)->send(
+                    new OpponentUpdatedResultMail($match, $opponent, $submitter, $matchResult)
+                );
+                \Log::info("Update notification email sent to opponent {$opponent->id}");
+            } else {
+                // Emails de première soumission
+                \Log::info("Sending NEW confirmation email to submitter {$submitter->email}");
+                Mail::to($submitter)->send(
+                    new MatchResultSubmittedConfirmationMail($match, $submitter, $opponent, $matchResult)
+                );
+                \Log::info("Confirmation email sent to submitter {$submitter->id}");
+
+                // Email de notification pour l'adversaire
+                \Log::info("Sending NEW notification email to opponent {$opponent->email}");
+                Mail::to($opponent)->send(
+                    new OpponentSubmittedResultMail($match, $opponent, $submitter, $matchResult)
+                );
+                \Log::info("Notification email sent to opponent {$opponent->id}");
+            }
 
             \Log::info("SUCCESS: Both submission emails sent for match {$match->id}");
         } catch (\Exception $e) {
