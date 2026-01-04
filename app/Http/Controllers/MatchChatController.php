@@ -191,6 +191,65 @@ class MatchChatController extends Controller
     }
 
     /**
+     * Update match scores (organizer only) - For completed matches
+     */
+    public function updateScore(Request $request, TournamentMatch $match)
+    {
+        $request->validate([
+            'player1_score' => 'required|integer|min:0',
+            'player2_score' => 'required|integer|min:0',
+        ]);
+
+        $user = Auth::user();
+        $match->load('tournament');
+
+        // Verify user is the organizer or admin
+        $isOrganizer = $match->tournament->organizer_id === $user->id;
+        $isAdmin = $user->role === 'admin';
+
+        if (!$isOrganizer && !$isAdmin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only the tournament organizer or admin can update scores'
+            ], 403);
+        }
+
+        // Verify match is completed (can only update completed matches)
+        if ($match->status !== 'completed') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Can only update scores for completed matches'
+            ], 400);
+        }
+
+        try {
+            $player1Score = $request->player1_score;
+            $player2Score = $request->player2_score;
+
+            // Use appropriate service based on tournament format
+            $updatedMatch = match($match->tournament->format) {
+                'swiss' => $this->swissService->updateMatchScore($match, $player1Score, $player2Score),
+                'single_elimination' => $this->knockoutService->updateMatchScore($match, $player1Score, $player2Score),
+                default => throw new \Exception('Unsupported tournament format: ' . $match->tournament->format),
+            };
+
+            Log::info("Organizer updated scores for match {$match->id}: P1={$player1Score}, P2={$player2Score}");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Scores updated successfully',
+                'data' => $updatedMatch->fresh(['player1', 'player2', 'winner', 'round.tournament'])
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update scores',
+                'error' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
      * Enter match scores (organizer only)
      */
     public function enterScore(Request $request, TournamentMatch $match)

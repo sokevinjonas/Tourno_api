@@ -323,6 +323,124 @@ class SwissFormatService
     }
 
     /**
+     * Update match scores (for already completed matches)
+     * This will revert old stats and apply new ones
+     */
+    public function updateMatchScore(TournamentMatch $match, int $player1Score, int $player2Score): TournamentMatch
+    {
+        return DB::transaction(function () use ($match, $player1Score, $player2Score) {
+            // Save old scores to revert stats
+            $oldPlayer1Score = $match->player1_score;
+            $oldPlayer2Score = $match->player2_score;
+            $oldWinnerId = $match->winner_id;
+
+            // Determine old result for player1
+            $oldResult = $this->determineResult($oldPlayer1Score, $oldPlayer2Score);
+
+            // Revert old stats for both players
+            $this->revertPlayerStats($match->player1_id, $match->tournament_id, $oldResult);
+            $oldPlayer2Result = $oldResult === 'win' ? 'loss' : ($oldResult === 'loss' ? 'win' : 'draw');
+            $this->revertPlayerStats($match->player2_id, $match->tournament_id, $oldPlayer2Result);
+
+            // Determine new winner and result
+            $newWinnerId = null;
+            $newResult = $this->determineResult($player1Score, $player2Score);
+
+            if ($player1Score > $player2Score) {
+                $newWinnerId = $match->player1_id;
+            } elseif ($player2Score > $player1Score) {
+                $newWinnerId = $match->player2_id;
+            }
+
+            // Update match with new scores
+            $match->update([
+                'player1_score' => $player1Score,
+                'player2_score' => $player2Score,
+                'winner_id' => $newWinnerId,
+            ]);
+
+            // Apply new stats for both players
+            $this->updatePlayerStats($match->player1_id, $match->tournament_id, $newResult);
+            $newPlayer2Result = $newResult === 'win' ? 'loss' : ($newResult === 'loss' ? 'win' : 'draw');
+            $this->updatePlayerStats($match->player2_id, $match->tournament_id, $newPlayer2Result);
+
+            // Send email notifications about score correction
+            $match = $match->fresh(['player1', 'player2', 'round.tournament']);
+
+            // Send correction email to player 1
+            $player1Result = $this->determineResult($player1Score, $player2Score);
+            Mail::to($match->player1)->send(
+                new \App\Mail\MatchScoreCorrectedMail(
+                    $match->player1,
+                    $match,
+                    $oldPlayer1Score,
+                    $oldPlayer2Score,
+                    $player1Score,
+                    $player2Score,
+                    $player1Result
+                )
+            );
+
+            // Send correction email to player 2
+            $player2Result = $player1Result === 'win' ? 'loss' : ($player1Result === 'loss' ? 'win' : 'draw');
+            Mail::to($match->player2)->send(
+                new \App\Mail\MatchScoreCorrectedMail(
+                    $match->player2,
+                    $match,
+                    $oldPlayer2Score,
+                    $oldPlayer1Score,
+                    $player2Score,
+                    $player1Score,
+                    $player2Result
+                )
+            );
+
+            return $match;
+        });
+    }
+
+    /**
+     * Determine match result (win/loss/draw) for player1
+     */
+    protected function determineResult(int $player1Score, int $player2Score): string
+    {
+        if ($player1Score > $player2Score) {
+            return 'win';
+        } elseif ($player2Score > $player1Score) {
+            return 'loss';
+        }
+        return 'draw';
+    }
+
+    /**
+     * Revert player statistics (subtract points when updating a match)
+     */
+    protected function revertPlayerStats(int $userId, int $tournamentId, string $result): void
+    {
+        $registration = TournamentRegistration::where('user_id', $userId)
+            ->where('tournament_id', $tournamentId)
+            ->first();
+
+        if (!$registration) {
+            return;
+        }
+
+        $updates = [];
+
+        if ($result === 'win') {
+            $updates['wins'] = max(0, $registration->wins - 1);
+            $updates['tournament_points'] = max(0, $registration->tournament_points - 3);
+        } elseif ($result === 'draw') {
+            $updates['draws'] = max(0, $registration->draws - 1);
+            $updates['tournament_points'] = max(0, $registration->tournament_points - 1);
+        } elseif ($result === 'loss') {
+            $updates['losses'] = max(0, $registration->losses - 1);
+        }
+
+        $registration->update($updates);
+    }
+
+    /**
      * Update player statistics
      */
     protected function updatePlayerStats(int $userId, int $tournamentId, string $result): void

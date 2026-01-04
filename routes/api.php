@@ -164,6 +164,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // Enter scores (Organizer only)
         Route::post('/{match}/enter-score', [MatchChatController::class, 'enterScore']);
 
+        // Update scores (Organizer only) - For completed matches
+        Route::patch('/{match}/update-score', [MatchChatController::class, 'updateScore']);
+
         // Moderator only: disputed matches
         Route::get('/disputed/all', [MatchController::class, 'disputed']);
         Route::post('/{match}/validate', [MatchController::class, 'validateResult']);
