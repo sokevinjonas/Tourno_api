@@ -221,6 +221,111 @@ class KnockoutFormatService
     }
 
     /**
+     * Update match scores (for already completed matches)
+     * WARNING: In knockout, changing the winner will affect the bracket!
+     */
+    public function updateMatchScore(TournamentMatch $match, int $player1Score, int $player2Score): TournamentMatch
+    {
+        return DB::transaction(function () use ($match, $player1Score, $player2Score) {
+            // In knockout, draws are not allowed
+            if ($player1Score === $player2Score) {
+                throw new \Exception('Draws are not allowed in single elimination format. There must be a winner.');
+            }
+
+            // Save old scores for email notification
+            $oldPlayer1Score = $match->player1_score;
+            $oldPlayer2Score = $match->player2_score;
+
+            $oldWinnerId = $match->winner_id;
+            $oldLoserId = $oldWinnerId === $match->player1_id ? $match->player2_id : $match->player1_id;
+
+            // Determine new winner
+            $newWinnerId = $player1Score > $player2Score ? $match->player1_id : $match->player2_id;
+            $newLoserId = $player1Score > $player2Score ? $match->player2_id : $match->player1_id;
+
+            // Check if winner changed
+            $winnerChanged = $oldWinnerId !== $newWinnerId;
+
+            if ($winnerChanged && $match->next_match_id) {
+                // Check if next match has been played
+                $nextMatch = TournamentMatch::find($match->next_match_id);
+                if ($nextMatch && $nextMatch->status === 'completed') {
+                    throw new \Exception(
+                        'Cannot change the winner because the next round match has already been played. ' .
+                        'This would invalidate the tournament bracket.'
+                    );
+                }
+
+                // Remove old winner from next match
+                if ($nextMatch) {
+                    if ($nextMatch->player1_id === $oldWinnerId) {
+                        $nextMatch->update(['player1_id' => null]);
+                    } elseif ($nextMatch->player2_id === $oldWinnerId) {
+                        $nextMatch->update(['player2_id' => null]);
+                    }
+                }
+            }
+
+            // Revert old elimination
+            TournamentRegistration::where('user_id', $oldLoserId)
+                ->where('tournament_id', $match->tournament_id)
+                ->update([
+                    'eliminated' => false,
+                    'eliminated_round' => null,
+                    'eliminated_at' => null,
+                ]);
+
+            // Update match with new scores
+            $match->update([
+                'player1_score' => $player1Score,
+                'player2_score' => $player2Score,
+                'winner_id' => $newWinnerId,
+            ]);
+
+            // Mark new loser as eliminated
+            $this->eliminatePlayer($newLoserId, $match->tournament_id, $match->round->round_number);
+
+            // Advance new winner to next match (if winner changed)
+            if ($winnerChanged && $match->next_match_id) {
+                $this->advanceWinner($newWinnerId, $match->next_match_id);
+            }
+
+            // Send email notifications about score correction
+            $match = $match->fresh(['player1', 'player2', 'round.tournament']);
+
+            // Send correction email to player 1
+            $player1Result = $player1Score > $player2Score ? 'win' : 'loss';
+            Mail::to($match->player1)->send(
+                new \App\Mail\MatchScoreCorrectedMail(
+                    $match->player1,
+                    $match,
+                    $oldPlayer1Score,
+                    $oldPlayer2Score,
+                    $player1Score,
+                    $player2Score,
+                    $player1Result
+                )
+            );
+
+            // Send correction email to player 2
+            $player2Result = $player1Result === 'win' ? 'loss' : 'win';
+            Mail::to($match->player2)->send(
+                new \App\Mail\MatchScoreCorrectedMail(
+                    $match->player2,
+                    $match,
+                    $oldPlayer2Score,
+                    $oldPlayer1Score,
+                    $player2Score,
+                    $player1Score,
+                    $player2Result
+                )
+            );
+
+            return $match;
+        });
+    }
+
+    /**
      * Eliminate a player from the tournament
      */
     protected function eliminatePlayer(int $userId, int $tournamentId, int $roundNumber): void
