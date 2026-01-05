@@ -2,6 +2,7 @@
 
 ## 📋 Table des Matières
 - [Vue d'ensemble](#vue-densemble)
+- [Configuration Backend](#configuration-backend)
 - [Informations générales](#informations-générales)
 - [Endpoints Utilisateur](#endpoints-utilisateur)
 - [Endpoints Admin/Moderator](#endpoints-adminmoderator)
@@ -29,6 +30,58 @@ User → Initier dépôt → FusionPay → Payer → Webhook → Pièces crédit
 ```
 User → Demander retrait → Admin approuve → Mobile Money → Pièces débitées ✅
 ```
+
+---
+
+## Configuration Backend
+
+### Variables d'environnement requises
+
+Le système nécessite la configuration de FusionPay dans le fichier `.env`:
+
+```bash
+# FusionPay Payment Gateway Configuration
+FUSIONPAY_API_URL=https://api.fusionpay.com
+FUSIONPAY_API_KEY=your_fusionpay_api_key_here
+```
+
+**Étapes de configuration:**
+
+1. **Obtenir les credentials FusionPay**
+   - Créer un compte marchand sur FusionPay
+   - Récupérer l'API Key depuis le dashboard
+
+2. **Configurer les webhooks FusionPay**
+   - URL du webhook: `https://votre-domaine.com/api/webhooks/fusionpay`
+   - Événements à activer:
+     - `payin.session.pending`
+     - `payin.session.completed`
+     - `payin.session.cancelled`
+
+3. **Configurer les URLs de retour**
+   - URL de retour: `https://votre-domaine.com/api/wallet/deposit/callback`
+   - Cette page redirigera l'utilisateur après le paiement
+
+4. **Tester la configuration**
+   ```bash
+   php artisan tinker
+   >>> config('services.fusionpay.api_key')
+   // Doit retourner votre clé API
+   ```
+
+### Migration de la base de données
+
+La table `coin_transactions` sera créée automatiquement lors de l'exécution des migrations:
+
+```bash
+php artisan migrate
+```
+
+**Structure de la table:**
+- Transactions de dépôt (automatiques via FusionPay)
+- Transactions de retrait (manuelles avec validation admin)
+- Historique complet avec statuts et montants
+- Intégration FusionPay (token, transaction number, event)
 
 ---
 
