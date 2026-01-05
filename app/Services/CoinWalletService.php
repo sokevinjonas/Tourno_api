@@ -24,14 +24,17 @@ class CoinWalletService
     const MIN_WITHDRAWAL_COINS = 5; // Minimum 5 pièces pour retrait
     const CURRENCY = 'XOF';
 
-    // URLs FusionPay (à configurer dans .env)
-    protected string $fusionpayApiUrl;
-    protected string $fusionpayApiKey;
+    // FusionPay configuration
+    protected ?string $apiUrl;
+    protected string $webhookUrl;
+    protected string $returnUrl;
 
     public function __construct()
     {
-        $this->fusionpayApiUrl = config('services.fusionpay.api_url', 'https://api.fusionpay.com');
-        $this->fusionpayApiKey = config('services.fusionpay.api_key');
+        // YOUR_API_URL doit être obtenu depuis le tableau de bord FusionPay
+        $this->apiUrl = config('services.fusionpay.api_url');
+        $this->webhookUrl = config('app.url') . '/api/webhooks/fusionpay';
+        $this->returnUrl = config('services.fusionpay.return_url', config('app.url'));
     }
 
     /**
@@ -100,7 +103,7 @@ class CoinWalletService
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-            ])->post($this->fusionpayApiUrl, [
+            ])->post($this->apiUrl, [
                 'totalPrice' => (int) $amounts['amount_money'],
                 'article' => [
                     ['Dépôt de pièces' => (int) $amounts['amount_money']]
@@ -114,8 +117,8 @@ class CoinWalletService
                         'amountCoins' => $amounts['amount_coins'],
                     ]
                 ],
-                'return_url' => route('wallet.deposit.callback'),
-                'webhook_url' => route('webhooks.fusionpay'),
+                'apiReturnUrl' => $this->returnUrl,
+                'webhook_url' => $this->webhookUrl,
             ]);
 
             if ($response->successful()) {

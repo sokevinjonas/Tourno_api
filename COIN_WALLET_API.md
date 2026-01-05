@@ -41,25 +41,26 @@ Le système nécessite la configuration de FusionPay dans le fichier `.env`:
 
 ```bash
 # FusionPay Payment Gateway Configuration
-FUSIONPAY_API_URL=https://api.fusionpay.com
+# API endpoint: https://paygateglobal.com/api/v2/pay (fixed, not configurable)
 FUSIONPAY_API_KEY=your_fusionpay_api_key_here
+FUSIONPAY_API_RETURN_URL="${APP_URL}/api/wallet/deposit/callback"
 ```
 
 **Étapes de configuration:**
 
 1. **Obtenir les credentials FusionPay**
-   - Créer un compte marchand sur FusionPay
+   - Créer un compte marchand sur FusionPay/PayGateGlobal
    - Récupérer l'API Key depuis le dashboard
+   - L'endpoint API est fixe: `https://paygateglobal.com/api/v2/pay`
 
 2. **Configurer les webhooks FusionPay**
    - URL du webhook: `https://votre-domaine.com/api/webhooks/fusionpay`
-   - Événements à activer:
-     - `payin.session.pending`
-     - `payin.session.completed`
-     - `payin.session.cancelled`
+   - Configurer dans le dashboard FusionPay
+   - Événements reçus: `pending`, `completed`, `cancelled`
 
-3. **Configurer les URLs de retour**
-   - URL de retour: `https://votre-domaine.com/api/wallet/deposit/callback`
+3. **Configurer l'URL de retour**
+   - L'URL de retour est configurée dans `.env`: `FUSIONPAY_API_RETURN_URL`
+   - Par défaut: `${APP_URL}/api/wallet/deposit/callback`
    - Cette page redirigera l'utilisateur après le paiement
 
 4. **Tester la configuration**
@@ -67,6 +68,9 @@ FUSIONPAY_API_KEY=your_fusionpay_api_key_here
    php artisan tinker
    >>> config('services.fusionpay.api_key')
    // Doit retourner votre clé API
+
+   >>> config('services.fusionpay.api_return_url')
+   // Doit retourner l'URL de retour configurée
    ```
 
 ### Migration de la base de données
