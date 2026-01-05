@@ -147,4 +147,25 @@ class WalletController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Callback après paiement FusionPay (return_url)
+     * Rediriger l'utilisateur vers le frontend
+     */
+    public function depositCallback(Request $request)
+    {
+        // Récupérer le token depuis les paramètres de la requête
+        $token = $request->query('token') ?? $request->query('tokenPay');
+
+        // URL du frontend pour rediriger l'utilisateur
+        $frontendUrl = config('app.frontend_url', 'http://localhost:3000');
+
+        if ($token) {
+            // Rediriger vers la page de succès avec le token pour que le frontend puisse vérifier
+            return redirect($frontendUrl . '/wallet/deposit/success?token=' . $token);
+        } else {
+            // Rediriger vers la page de wallet sans paramètres
+            return redirect($frontendUrl . '/wallet');
+        }
+    }
 }

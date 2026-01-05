@@ -118,6 +118,11 @@ class User extends Authenticatable
         return $this->hasMany(Transaction::class);
     }
 
+    public function coinTransactions()
+    {
+        return $this->hasMany(CoinTransaction::class);
+    }
+
     public function player1Matches()
     {
         return $this->hasMany(TournamentMatch::class, 'player1_id');

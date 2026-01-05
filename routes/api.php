@@ -99,6 +99,39 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | Coin Wallet (Dépôt/Retrait de pièces)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('coin-wallet')->group(function () {
+        // User endpoints
+        Route::get('/balance', [\App\Http\Controllers\CoinWalletController::class, 'getBalance']);
+        Route::post('/deposit/initiate', [\App\Http\Controllers\CoinWalletController::class, 'initiateDeposit']);
+        Route::post('/withdrawal/request', [\App\Http\Controllers\CoinWalletController::class, 'requestWithdrawal']);
+        Route::get('/transactions', [\App\Http\Controllers\CoinWalletController::class, 'getTransactions']);
+        Route::get('/transactions/{uuid}', [\App\Http\Controllers\CoinWalletController::class, 'getTransaction']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin/Moderator - Coin Wallet Management
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('admin/coin-wallet')->group(function () {
+        // Withdrawals management
+        Route::get('/withdrawals/pending', [\App\Http\Controllers\CoinWalletController::class, 'getPendingWithdrawals']);
+        Route::get('/withdrawals', [\App\Http\Controllers\CoinWalletController::class, 'getAllWithdrawals']);
+        Route::post('/withdrawals/{uuid}/approve', [\App\Http\Controllers\CoinWalletController::class, 'approveWithdrawal']);
+        Route::post('/withdrawals/{uuid}/reject', [\App\Http\Controllers\CoinWalletController::class, 'rejectWithdrawal']);
+
+        // Deposits monitoring
+        Route::get('/deposits', [\App\Http\Controllers\CoinWalletController::class, 'getAllDeposits']);
+
+        // All transactions
+        Route::get('/transactions', [\App\Http\Controllers\CoinWalletController::class, 'getAllTransactions']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
     | Users Management (Admin only)
     |--------------------------------------------------------------------------
     */
@@ -234,3 +267,11 @@ Route::prefix('users')->group(function () {
 Route::prefix('tournaments')->group(function () {
     Route::get('/{id}/rankings', [LeaderboardController::class, 'tournamentRankings']);
 });
+
+/*
+|--------------------------------------------------------------------------
+| Webhooks & Callbacks (Public - NO Authentication)
+|--------------------------------------------------------------------------
+*/
+Route::post('/webhooks/fusionpay', [\App\Http\Controllers\WebhookController::class, 'fusionpay'])->name('webhooks.fusionpay');
+Route::get('/wallet/deposit/callback', [\App\Http\Controllers\WalletController::class, 'depositCallback'])->name('wallet.deposit.callback');
