@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\Tournament;
 use App\Models\TournamentMatch;
 use App\Models\TournamentRegistration;
-use App\Services\UserStatsService;
 use App\Services\WalletService;
 use Illuminate\Console\Command;
 
@@ -82,13 +81,12 @@ class FixKnockoutTournamentStats extends Command
         $this->info('=== ÉTAPE 2: DISTRIBUTION DES PRIX ===');
         $this->distributePrizes($tournament);
 
-        // Étape 3: Mettre à jour les stats globales
-        $this->info('');
-        $this->info('=== ÉTAPE 3: STATS GLOBALES ===');
-        $this->updateGlobalStats($tournament);
-
         $this->info('');
         $this->info('✅ CORRECTION TERMINÉE');
+        $this->warn('');
+        $this->warn('⚠️  NOTE: Les stats globales (UserGameStat/UserGlobalStat) ne sont PAS mises à jour');
+        $this->warn('   car elles ont déjà été traitées lors de la completion initiale du tournoi.');
+        $this->warn('   Si vous devez recalculer TOUTES les stats globales, créez une commande dédiée.');
 
         return 0;
     }
@@ -188,27 +186,6 @@ class FixKnockoutTournamentStats extends Command
                         $this->error("    ❌ Erreur: " . $e->getMessage());
                     }
                 }
-            }
-        }
-    }
-
-    protected function updateGlobalStats(Tournament $tournament)
-    {
-        $registrations = TournamentRegistration::where('tournament_id', $tournament->id)->get();
-        $userStatsService = app(UserStatsService::class);
-
-        foreach ($registrations as $reg) {
-            $reg->refresh();
-
-            try {
-                $userStatsService->updateStatsAfterTournament(
-                    $reg->user,
-                    $tournament,
-                    $reg
-                );
-                $this->line("  ✅ {$reg->user->name}");
-            } catch (\Exception $e) {
-                $this->error("  ❌ {$reg->user->name}: " . $e->getMessage());
             }
         }
     }
