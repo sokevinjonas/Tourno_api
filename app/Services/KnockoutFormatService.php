@@ -190,6 +190,10 @@ class KnockoutFormatService
                 'completed_at' => now(),
             ]);
 
+            // Update tournament registration stats for both players
+            $this->updatePlayerStats($winnerId, $match->tournament_id, 'win');
+            $this->updatePlayerStats($loserId, $match->tournament_id, 'loss');
+
             // Mark loser as eliminated
             $this->eliminatePlayer($loserId, $match->tournament_id, $match->round->round_number);
 
@@ -275,6 +279,14 @@ class KnockoutFormatService
                     'eliminated_at' => null,
                 ]);
 
+            // Revert old stats and apply new ones if winner changed
+            if ($winnerChanged) {
+                $this->revertPlayerStats($oldWinnerId, $match->tournament_id, 'win');
+                $this->revertPlayerStats($oldLoserId, $match->tournament_id, 'loss');
+                $this->updatePlayerStats($newWinnerId, $match->tournament_id, 'win');
+                $this->updatePlayerStats($newLoserId, $match->tournament_id, 'loss');
+            }
+
             // Update match with new scores
             $match->update([
                 'player1_score' => $player1Score,
@@ -337,6 +349,58 @@ class KnockoutFormatService
                 'eliminated_round' => $roundNumber,
                 'eliminated_at' => now(),
             ]);
+    }
+
+    /**
+     * Update player stats (wins/losses/points) in tournament registration
+     */
+    protected function updatePlayerStats(int $userId, int $tournamentId, string $result): void
+    {
+        $registration = TournamentRegistration::where('user_id', $userId)
+            ->where('tournament_id', $tournamentId)
+            ->first();
+
+        if (!$registration) {
+            \Log::warning("Registration not found for user {$userId} in tournament {$tournamentId}");
+            return;
+        }
+
+        $updates = [];
+
+        if ($result === 'win') {
+            $updates['wins'] = $registration->wins + 1;
+            $updates['tournament_points'] = $registration->tournament_points + 3;
+        } elseif ($result === 'loss') {
+            $updates['losses'] = $registration->losses + 1;
+        }
+
+        $registration->update($updates);
+    }
+
+    /**
+     * Revert player stats (for score corrections)
+     */
+    protected function revertPlayerStats(int $userId, int $tournamentId, string $result): void
+    {
+        $registration = TournamentRegistration::where('user_id', $userId)
+            ->where('tournament_id', $tournamentId)
+            ->first();
+
+        if (!$registration) {
+            \Log::warning("Registration not found for user {$userId} in tournament {$tournamentId}");
+            return;
+        }
+
+        $updates = [];
+
+        if ($result === 'win') {
+            $updates['wins'] = max(0, $registration->wins - 1);
+            $updates['tournament_points'] = max(0, $registration->tournament_points - 3);
+        } elseif ($result === 'loss') {
+            $updates['losses'] = max(0, $registration->losses - 1);
+        }
+
+        $registration->update($updates);
     }
 
     /**
