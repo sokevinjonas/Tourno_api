@@ -69,13 +69,14 @@ return [
     |--------------------------------------------------------------------------
     |
     | Configuration for FusionPay payment gateway used for coin deposits.
-    | API URL and API key are required for payment processing.
+    | API URL must be obtained from FusionPay dashboard.
+    | Return URL is where user will be redirected after payment.
     |
     */
 
     'fusionpay' => [
-        'api_url' => env('FUSIONPAY_API_URL', 'https://api.fusionpay.com'),
-        'api_key' => env('FUSIONPAY_API_KEY'),
+        'api_url' => env('FUSIONPAY_API_URL'),
+        'return_url' => env('FUSIONPAY_RETURN_URL', env('APP_URL')),
     ],
 
 ];
