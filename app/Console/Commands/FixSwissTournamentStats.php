@@ -7,23 +7,24 @@ use App\Models\TournamentMatch;
 use App\Models\TournamentRegistration;
 use App\Services\UserStatsService;
 use App\Services\WalletService;
+use App\Services\WalletLockService;
 use Illuminate\Console\Command;
 
-class FixKnockoutTournamentStats extends Command
+class FixSwissTournamentStats extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'tournament:fix-knockout-stats {tournament_id?}';
+    protected $signature = 'tournament:fix-swiss-stats {tournament_id?}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Fix knockout tournament stats and redistribute prizes';
+    protected $description = 'Fix swiss tournament stats and redistribute prizes';
 
     /**
      * Execute the console command.
@@ -32,20 +33,17 @@ class FixKnockoutTournamentStats extends Command
     {
         $tournamentId = $this->argument('tournament_id');
 
-        // Si pas d'ID fourni, chercher le dernier tournoi eFootball complété
+        // Si pas d'ID fourni, chercher le dernier tournoi Swiss complété
         if (!$tournamentId) {
-            $this->info('Recherche du dernier tournoi eFootball avec 16 participants...');
+            $this->info('Recherche du dernier tournoi Swiss complété...');
 
-            $tournament = Tournament::where('game', 'efootball')
+            $tournament = Tournament::where('format', 'swiss')
                 ->where('status', 'completed')
-                ->where('format', 'single_elimination')
-                ->withCount('registrations')
-                ->having('registrations_count', 16)
                 ->latest('updated_at')
                 ->first();
 
             if (!$tournament) {
-                $this->error('Aucun tournoi trouvé correspondant aux critères.');
+                $this->error('Aucun tournoi Swiss complété trouvé.');
                 return 1;
             }
 
@@ -62,6 +60,12 @@ class FixKnockoutTournamentStats extends Command
                 $this->error("Tournoi #{$tournamentId} introuvable.");
                 return 1;
             }
+        }
+
+        // Validation du format
+        if ($tournament->format !== 'swiss') {
+            $this->error("Cette commande ne fonctionne que pour les tournois Swiss (format actuel: {$tournament->format}).");
+            return 1;
         }
 
         $this->info('');
@@ -98,30 +102,49 @@ class FixKnockoutTournamentStats extends Command
         $registrations = TournamentRegistration::where('tournament_id', $tournament->id)->get();
 
         foreach ($registrations as $reg) {
+            // Compter les victoires
             $wins = TournamentMatch::where('tournament_id', $tournament->id)
                 ->where('winner_id', $reg->user_id)
                 ->where('status', 'completed')
                 ->count();
 
+            // Compter les défaites (joueur présent mais pas gagnant)
             $losses = TournamentMatch::where('tournament_id', $tournament->id)
                 ->where(function($q) use ($reg) {
                     $q->where('player1_id', $reg->user_id)
                       ->orWhere('player2_id', $reg->user_id);
                 })
                 ->where('winner_id', '!=', $reg->user_id)
+                ->whereNotNull('winner_id') // Exclure les matchs nuls
+                ->where('status', 'completed')
+                ->count();
+
+            // Compter les matchs nuls (aucun gagnant)
+            $draws = TournamentMatch::where('tournament_id', $tournament->id)
+                ->where(function($q) use ($reg) {
+                    $q->where('player1_id', $reg->user_id)
+                      ->orWhere('player2_id', $reg->user_id);
+                })
+                ->whereNull('winner_id')
                 ->where('status', 'completed')
                 ->count();
 
             $oldWins = $reg->wins;
+            $oldLosses = $reg->losses;
+            $oldDraws = $reg->draws;
             $oldPoints = $reg->tournament_points;
+
+            // Calculer les points : 3 par victoire + 1 par match nul
+            $newPoints = ($wins * 3) + ($draws * 1);
 
             $reg->update([
                 'wins' => $wins,
                 'losses' => $losses,
-                'tournament_points' => $wins * 3
+                'draws' => $draws,
+                'tournament_points' => $newPoints
             ]);
 
-            $this->line("{$reg->user->name}: {$oldWins}→{$wins}W, {$oldPoints}→" . ($wins*3) . "pts");
+            $this->line("{$reg->user->name}: {$oldWins}→{$wins}W, {$oldLosses}→{$losses}L, {$oldDraws}→{$draws}D, {$oldPoints}→{$newPoints}pts");
         }
     }
 
@@ -135,6 +158,7 @@ class FixKnockoutTournamentStats extends Command
         $prizeDistribution = json_decode($tournament->prize_distribution, true);
         $this->info("Distribution: " . json_encode($prizeDistribution));
 
+        // Récupérer les gagnants selon le classement final
         $winners = TournamentRegistration::where('tournament_id', $tournament->id)
             ->whereNotNull('final_rank')
             ->where('final_rank', '<=', 3)
@@ -144,7 +168,21 @@ class FixKnockoutTournamentStats extends Command
 
         if ($winners->isEmpty()) {
             $this->warn('Aucun gagnant trouvé (final_rank non défini).');
-            return;
+
+            // Proposer de recalculer les ranks
+            if ($this->confirm('Voulez-vous recalculer les classements finaux?')) {
+                $this->recalculateFinalRanks($tournament);
+
+                // Récupérer à nouveau les gagnants
+                $winners = TournamentRegistration::where('tournament_id', $tournament->id)
+                    ->whereNotNull('final_rank')
+                    ->where('final_rank', '<=', 3)
+                    ->orderBy('final_rank')
+                    ->with('user.wallet')
+                    ->get();
+            } else {
+                return;
+            }
         }
 
         $walletService = app(WalletService::class);
@@ -190,6 +228,27 @@ class FixKnockoutTournamentStats extends Command
                 }
             }
         }
+    }
+
+    protected function recalculateFinalRanks(Tournament $tournament)
+    {
+        $this->info('Recalcul des classements finaux...');
+
+        // Récupérer tous les participants triés par points, victoires, puis matchs nuls
+        $rankings = TournamentRegistration::where('tournament_id', $tournament->id)
+            ->where('status', 'registered')
+            ->orderBy('tournament_points', 'desc')
+            ->orderBy('wins', 'desc')
+            ->orderBy('draws', 'desc')
+            ->get();
+
+        foreach ($rankings as $index => $registration) {
+            $rank = $index + 1;
+            $registration->update(['final_rank' => $rank]);
+            $this->line("  {$registration->user->name}: Rang {$rank} ({$registration->tournament_points}pts, {$registration->wins}W)");
+        }
+
+        $this->info('✅ Classements finaux recalculés');
     }
 
     protected function updateGlobalStats(Tournament $tournament)

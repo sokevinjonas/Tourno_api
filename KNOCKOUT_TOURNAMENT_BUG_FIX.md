@@ -1,6 +1,14 @@
-# Bug Fix: Knockout Tournament Stats & Prize Distribution
+# Bug Fix: Tournament Stats & Prize Distribution
 
-## 🐛 Problème Identifié
+## 📋 Table des matières
+
+1. [Knockout Tournaments](#knockout-tournaments)
+2. [Swiss Tournaments](#swiss-tournaments)
+3. [Commandes de correction](#commandes-de-correction)
+
+---
+
+## Knockout Tournaments
 
 ### Bug #1: Stats non comptabilisées (RÉSOLU ✅)
 
@@ -437,6 +445,132 @@ ORDER BY wt.created_at;
 
 ---
 
+## Swiss Tournaments
+
+### Statut: FONCTIONNEL ✅
+
+Le `SwissFormatService` dispose déjà des méthodes `updatePlayerStats()` et `revertPlayerStats()` qui gèrent correctement:
+- Victoires: +3 points
+- Matchs nuls: +1 point
+- Défaites: 0 point
+
+**Code existant dans SwissFormatService.php (lignes 446-469):**
+```php
+protected function updatePlayerStats(int $userId, int $tournamentId, string $result): void
+{
+    $registration = TournamentRegistration::where('user_id', $userId)
+        ->where('tournament_id', $tournamentId)
+        ->first();
+
+    if (!$registration) {
+        return;
+    }
+
+    $updates = [];
+
+    if ($result === 'win') {
+        $updates['wins'] = $registration->wins + 1;
+        $updates['tournament_points'] = $registration->tournament_points + 3;
+    } elseif ($result === 'draw') {
+        $updates['draws'] = $registration->draws + 1;
+        $updates['tournament_points'] = $registration->tournament_points + 1;
+    } elseif ($result === 'loss') {
+        $updates['losses'] = $registration->losses + 1;
+    }
+
+    $registration->update($updates);
+}
+```
+
+Ces méthodes sont appelées dans:
+- `updateMatchResult()` (ligne 285-289)
+- `updateMatchScore()` (ligne 341-365) avec revert des anciennes stats
+- `assignBye()` (ligne 254) pour les byes automatiques
+
+### Correction des tournois Swiss anciens
+
+Si un tournoi Swiss a été complété avant l'ajout de ces méthodes, utilisez:
+
+```bash
+php artisan tournament:fix-swiss-stats [tournament_id]
+```
+
+Sans ID, la commande trouve automatiquement le dernier tournoi Swiss complété.
+
+---
+
+## Commandes de correction
+
+### Pour les tournois Knockout
+
+```bash
+# Avec ID spécifique
+php artisan tournament:fix-knockout-stats 5
+
+# Sans ID (trouve le dernier eFootball knockout avec 16 participants)
+php artisan tournament:fix-knockout-stats
+```
+
+**Ce que fait la commande:**
+1. Recalcule wins/losses/tournament_points depuis les matchs réels
+2. Redistribue les prix si prize_won = 0
+3. Met à jour les stats globales des joueurs (UserGameStat + UserGlobalStat)
+
+**Validations:**
+- Format doit être `single_elimination`
+- Statut doit être `completed`
+- Refuse les tournois Swiss ou Round Robin
+
+### Pour les tournois Swiss
+
+```bash
+# Avec ID spécifique
+php artisan tournament:fix-swiss-stats 1
+
+# Sans ID (trouve le dernier Swiss complété)
+php artisan tournament:fix-swiss-stats
+```
+
+**Ce que fait la commande:**
+1. Recalcule wins/losses/draws/tournament_points depuis les matchs réels
+2. Propose de recalculer les final_rank si non définis
+3. Redistribue les prix si prize_won = 0
+4. Met à jour les stats globales des joueurs
+
+**Validations:**
+- Format doit être `swiss`
+- Refuse les tournois knockout ou Round Robin
+
+### Exemple de sortie
+
+```
+=== TOURNOI ===
+Nom: Tournoi E-football Décembre 2025
+ID: 1
+Format: swiss
+Statut: completed
+
+=== ÉTAPE 1: RECALCUL DES STATS ===
+Player 1: 1→1W, 2→2L, 0→0D, 3→3pts
+Player 4: 3→3W, 0→0L, 0→0D, 9→9pts
+...
+
+=== ÉTAPE 2: DISTRIBUTION DES PRIX ===
+Distribution: {"1st":20,"2nd":10,"3rd":2}
+  Player 4 (Rang 1): Déjà reçu 20.00 pièces - IGNORÉ
+  Player 7 (Rang 2): Déjà reçu 10.00 pièces - IGNORÉ
+...
+
+=== ÉTAPE 3: STATS GLOBALES ===
+  ✅ Player 1
+  ✅ Player 4
+...
+
+✅ CORRECTION TERMINÉE
+```
+
+---
+
 ## 📝 Notes pour les futurs tournois
 
 1. **TOUJOURS vérifier que tous les matchs sont completed avant de clôturer**
@@ -446,9 +580,25 @@ ORDER BY wt.created_at;
 
 ---
 
+## 📦 Résumé des modifications
+
 **Date du fix:** 2026-01-05
-**Fichiers modifiés:** `app/Services/KnockoutFormatService.php`
-**Lignes modifiées:**
-- Ligne 193-195: Ajout de `updatePlayerStats()` dans `updateMatchResult()`
-- Ligne 282-288: Ajout de revert/update stats dans `updateMatchScore()`
-- Ligne 354-404: Nouvelles méthodes `updatePlayerStats()` et `revertPlayerStats()`
+
+**Fichiers modifiés:**
+
+1. `app/Services/KnockoutFormatService.php`
+   - Ligne 193-195: Ajout de `updatePlayerStats()` dans `updateMatchResult()`
+   - Ligne 282-288: Ajout de revert/update stats dans `updateMatchScore()`
+   - Ligne 354-404: Nouvelles méthodes `updatePlayerStats()` et `revertPlayerStats()`
+
+2. `app/Services/SwissFormatService.php`
+   - Déjà fonctionnel (méthodes existantes lignes 446-469 et 418-441)
+
+3. `app/Services/UserStatsService.php`
+   - Ligne 41-49: Support des `final_rank` null pour tournois annulés
+
+4. `app/Console/Commands/FixKnockoutTournamentStats.php`
+   - Nouvelle commande de correction pour tournois knockout
+
+5. `app/Console/Commands/FixSwissTournamentStats.php`
+   - Nouvelle commande de correction pour tournois Swiss
