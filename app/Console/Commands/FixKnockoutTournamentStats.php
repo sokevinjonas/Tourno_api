@@ -176,7 +176,7 @@ class FixKnockoutTournamentStats extends Command
                         $walletService->credit(
                             $winner->user,
                             $prizeAmount,
-                            'prize_won',
+                            'tournament_prize',
                             "Prix du tournoi {$tournament->name} - Rang {$rank} (correction manuelle)"
                         );
 
