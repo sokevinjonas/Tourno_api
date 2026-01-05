@@ -63,4 +63,19 @@ return [
         'redirect' => env('APP_URL') . '/auth/oauth/facebook/callback',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | FusionPay Payment Gateway Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for FusionPay payment gateway used for coin deposits.
+    | API URL and API key are required for payment processing.
+    |
+    */
+
+    'fusionpay' => [
+        'api_url' => env('FUSIONPAY_API_URL', 'https://api.fusionpay.com'),
+        'api_key' => env('FUSIONPAY_API_KEY'),
+    ],
+
 ];
