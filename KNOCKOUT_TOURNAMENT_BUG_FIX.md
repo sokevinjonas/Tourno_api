@@ -445,6 +445,42 @@ ORDER BY wt.created_at;
 
 ---
 
+### Bug #2: Prix non distribués (RÉSOLU ✅)
+
+**Symptôme:**
+Les joueurs ne reçoivent pas leurs récompenses même si le tournoi est complété avec succès.
+
+**Cause racine:**
+Dans `completeTournament()` (ligne 531), le code n'essayait qu'un seul format de clé:
+
+```php
+$rankKey = $this->getRankKey($rank);  // Retourne "1st", "2nd", "3rd"
+$prizeAmount = $prizeDistribution[$rankKey] ?? null;  // ❌ Pas de fallback
+```
+
+Si le `prize_distribution` est au format numérique `{"1":20,"2":10,"3":5}`, le code cherche `"1st"` qui n'existe pas, trouve `null`, et ne distribue aucun prix.
+
+**Solution implémentée:**
+```php
+$prizeAmount = $prizeDistribution[$rankKey] ?? $prizeDistribution[(string)$rank] ?? null;
+```
+
+Maintenant le code essaie:
+1. Le format texte: `"1st"`, `"2nd"`, `"3rd"`
+2. Le format numérique: `"1"`, `"2"`, `"3"` (fallback)
+3. `null` si aucun des deux n'existe
+
+**Impact:**
+- Affecte **tous les tournois** (Knockout ET Swiss)
+- Les prix n'étaient pas distribués si le format de clé ne correspondait pas
+- Les `tournament_registrations.prize_won` restaient à 0
+
+**Fichiers modifiés:**
+- `app/Services/KnockoutFormatService.php` (ligne 475)
+- `app/Services/SwissFormatService.php` (ligne 531)
+
+---
+
 ## Swiss Tournaments
 
 ### Statut: FONCTIONNEL ✅

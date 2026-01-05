@@ -472,7 +472,7 @@ class KnockoutFormatService
 
                     // Support both "1st", "2nd", "3rd" AND "1", "2", "3" formats
                     $rankKey = $this->getRankKey($rank);
-                    $prizeAmount = $prizeDistribution[$rankKey] ?? null;
+                    $prizeAmount = $prizeDistribution[$rankKey] ?? $prizeDistribution[(string)$rank] ?? null;
 
                     if ($prizeAmount !== null && $prizeAmount > 0) {
                         $winners[] = [
